@@ -22,6 +22,10 @@ namespace DragonflyTracker.Domain
         [Column(TypeName = "Date")]
         public DateTime CreatedAt { get; set; }
 
+        public Guid CompanyId { get; set; }
+        [ForeignKey(nameof(CompanyId))]
+        public Project ParentCompany { get; set; }
+
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public IdentityUser Creator { get; set; }
