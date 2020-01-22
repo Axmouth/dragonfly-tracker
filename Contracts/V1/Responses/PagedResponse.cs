@@ -15,6 +15,8 @@ namespace DragonflyTracker.Contracts.V1.Responses
 
         public int? PageNumber { get; set; }
 
+        public int? Total { get; set; }
+
         public int? PageSize { get; set; }
 
         public string NextPage { get; set; }

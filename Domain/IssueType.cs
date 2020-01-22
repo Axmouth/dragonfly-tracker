@@ -17,5 +17,7 @@ namespace DragonflyTracker.Domain
         public Guid ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
         public Project ParentProject { get; set; }
+
+        public virtual List<IssueIssueType> Issues { get; set; }
     }
 }

@@ -22,6 +22,6 @@ namespace DragonflyTracker.Domain
 
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
-        public IdentityUser Receiver { get; set; }
+        public DragonflyUser Receiver { get; set; }
     }
 }

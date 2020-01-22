@@ -1,0 +1,69 @@
+<nb-layout>
+
+  <nb-layout-header fixed>
+    <nb-actions size="medium">
+      <nb-action icon="home-outline" routerLink=""></nb-action>
+      <nb-action class="custom-action">
+          <a href="/counter" routerLink="/counter">
+            <nb-icon icon="plus"></nb-icon>
+          </a>
+          <a href="/counter" routerLink="/counter">
+            Counter
+          </a>
+      </nb-action>
+      <nb-action class="custom-action" link="/fetch-data">
+        <a href="/fetch-data" routerLink="/fetch-data">
+          Weather Forecast
+        </a>
+      </nb-action>
+      <nb-action *ngIf="isLoggedIn" class="custom-action">
+        <a href="/my-projects" routerLink="/my-projects">
+          <nb-icon icon="list-outline"></nb-icon>
+        </a>
+        <a href="/my-projects" routerLink="/my-projects">
+          My Projects
+        </a>
+      </nb-action>
+    </nb-actions>
+    <nb-actions size="medium" class="left-actions">
+      <nb-action icon="search-outline"></nb-action>
+      <nb-action *ngIf="isLoggedIn" icon="bell-outline" badgeText="99+" badgeStatus="warning" badgePosition="top right"></nb-action>
+      <nb-action *ngIf="!isLoggedIn" class="custom-action">
+        <a href="/auth" routerLink="/auth">
+          <nb-icon icon="log-in-outline"></nb-icon>
+        </a>
+        <a href="/auth" routerLink="/auth">
+          Login
+        </a>
+      </nb-action>
+      <nb-action *ngIf="!isLoggedIn" class="custom-action">
+        <a href="/auth/register" routerLink="/auth/register">
+          <nb-icon icon="person-add-outline"></nb-icon>
+        </a>
+        <a href="/auth/register" routerLink="/auth/register">
+          Register
+        </a>
+      </nb-action>
+    </nb-actions>
+    <nb-user *ngIf="isLoggedIn" name="George Nicolson"
+             title="Full-Stack Developer and Site Owner"
+             [nbContextMenu]="items"
+             nbContextMenuTag="nav-user-context-menu"
+             nbContextMenuTrigger="click">
+    </nb-user>
+  </nb-layout-header>
+
+  <!--nb-sidebar>Sidebar Content</!--nb-sidebar-->
+  <nb-layout-column>
+    <div class="container">
+      <ng-content></ng-content>
+    </div>
+
+  </nb-layout-column>
+
+  <nb-layout-footer fixed>
+
+    <!-- Insert footer here -->
+  </nb-layout-footer>
+
+</nb-layout>

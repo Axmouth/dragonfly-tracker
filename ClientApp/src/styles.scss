@@ -1,14 +1,16 @@
 @import 'themes';
 
 @import '~@nebular/theme/styles/globals';
-@import '~@nebular/theme/styles/theming';
-@import '~@nebular/theme/styles/themes/default';
-@import '~@nebular/theme/styles/themes/dark';
-@import '~@nebular/theme/styles/themes/cosmic';
-@import '~@nebular/theme/styles/themes/corporate';
+//@import '~@nebular/theme/styles/theming';
+//@import '~@nebular/theme/styles/themes/default';
+//@import '~@nebular/theme/styles/themes/dark';
+//@import '~@nebular/theme/styles/themes/cosmic';
+//@import '~@nebular/theme/styles/themes/corporate';
+@import '~@nebular/auth/styles/globals';
 
 @include nb-install() {
   @include nb-theme-global();
+  @include nb-auth-global();
 };
 /* You can add global styles to this file, and also import other style files */
 
@@ -25,4 +27,17 @@ code {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+.left-actions {
+  margin-left: auto;
+}
+
+.custom-action {
+  cursor: pointer;
 }

@@ -34,6 +34,9 @@ namespace DragonflyTracker.Installers
                     options.EnableEndpointRouting = false;
                     options.Filters.Add<ValidationFilter>();
                 })
+                 .AddJsonOptions(options => {
+                     options.JsonSerializerOptions.IgnoreNullValues = true;
+                 })
                 .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 

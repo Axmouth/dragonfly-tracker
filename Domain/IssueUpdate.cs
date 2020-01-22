@@ -28,7 +28,7 @@ namespace DragonflyTracker.Domain
         [ForeignKey(nameof(IssueId))]
         public Project ParentIssue { get; set; }
 
-        [Column(TypeName = "Date")]
+        [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
         public Guid OldStageId { get; set; }

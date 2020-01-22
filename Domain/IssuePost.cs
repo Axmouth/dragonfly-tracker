@@ -13,19 +13,21 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
-        public string Content;
+        public string Content { get; set; }
 
-        [Column(TypeName = "Date")]
+        public int Number { get; set; }
+
+        [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
-        public Guid AuthorId { get; set; }
+        public string AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
-        public IdentityUser Author { get; set; }
+        public DragonflyUser Author { get; set; }
 
         public Guid IssueId { get; set; }
         [ForeignKey(nameof(IssueId))]
         public Issue ParentIssue { get; set; }
 
-        public virtual List<IssuePostReactions> Reactions { get; set; }
+        public virtual List<IssuePostReaction> Reactions { get; set; }
     }
 }

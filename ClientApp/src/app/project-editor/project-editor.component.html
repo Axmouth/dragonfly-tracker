@@ -1,0 +1,12 @@
+
+<form>
+  <h5>Project Name</h5>
+  <input nbInput>
+  <h5>Project Description</h5>
+  <textarea nbInput></textarea>
+  <h5>Advanced</h5>
+  <nb-checkbox (checkedChange)="onProjectPublicChange($event)">Make Project Members Only</nb-checkbox>
+  <br />
+  <br />
+  <button nbButton>Create<nb-icon icon="plus"></nb-icon></button>
+</form>

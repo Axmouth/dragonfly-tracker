@@ -16,13 +16,13 @@ namespace DragonflyTracker.Services
 {
     public class IdentityService : IIdentityService
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<DragonflyUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JwtSettings _jwtSettings;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly DataContext _context;
         
-        public IdentityService(UserManager<IdentityUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, DataContext context, RoleManager<IdentityRole> roleManager)
+        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, DataContext context, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
@@ -44,7 +44,7 @@ namespace DragonflyTracker.Services
             }
 
             var newUserId = Guid.NewGuid();
-            var newUser = new IdentityUser
+            var newUser = new DragonflyUser
             {
                 Id = newUserId.ToString(),
                 Email = email,
@@ -175,7 +175,7 @@ namespace DragonflyTracker.Services
                        StringComparison.InvariantCultureIgnoreCase);
         }
 
-        private async Task<AuthenticationResult> GenerateAuthenticationResultForUserAsync(IdentityUser user)
+        private async Task<AuthenticationResult> GenerateAuthenticationResultForUserAsync(DragonflyUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);

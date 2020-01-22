@@ -19,61 +19,62 @@ namespace DragonflyTracker.Migrations
                 .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("DragonflyTracker.Domain.Company", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("Date");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Companies");
-                });
-
             modelBuilder.Entity("DragonflyTracker.Domain.Issue", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CompanyId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("Date");
+                        .HasColumnType("timestamp");
 
                     b.Property<int>("Number")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Open")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("StageId")
+                    b.Property<Guid?>("StageId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("ProjectId");
 
                     b.HasIndex("StageId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Issues");
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.IssueIssueType", b =>
+                {
+                    b.Property<Guid>("IssueId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("IssueTypeId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("IssueId", "IssueTypeId");
+
+                    b.HasIndex("IssueTypeId");
+
+                    b.ToTable("IssueIssueTypes");
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.IssuePost", b =>
@@ -82,20 +83,31 @@ namespace DragonflyTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("Date");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid>("IssueId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
 
                     b.HasIndex("IssueId");
 
                     b.ToTable("IssuePosts");
                 });
 
-            modelBuilder.Entity("DragonflyTracker.Domain.IssuePostReactions", b =>
+            modelBuilder.Entity("DragonflyTracker.Domain.IssuePostReaction", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -107,9 +119,14 @@ namespace DragonflyTracker.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IssuePostId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("IssuePostReactions");
                 });
@@ -139,9 +156,6 @@ namespace DragonflyTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("IssueId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -149,8 +163,6 @@ namespace DragonflyTracker.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("IssueId");
 
                     b.HasIndex("ProjectId");
 
@@ -167,7 +179,7 @@ namespace DragonflyTracker.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("Date");
+                        .HasColumnType("timestamp");
 
                     b.Property<Guid>("IssueId")
                         .HasColumnType("uuid");
@@ -222,6 +234,23 @@ namespace DragonflyTracker.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("DragonflyTracker.Domain.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Organizations");
+                });
+
             modelBuilder.Entity("DragonflyTracker.Domain.Post", b =>
                 {
                     b.Property<Guid>("Id")
@@ -262,17 +291,17 @@ namespace DragonflyTracker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("CompanyId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("Date");
+                        .HasColumnType("timestamp");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("Public")
                         .HasColumnType("boolean");
@@ -282,11 +311,41 @@ namespace DragonflyTracker.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.ProjectAdmin", b =>
+                {
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AdminId")
+                        .HasColumnType("text");
+
+                    b.HasKey("ProjectId", "AdminId");
+
+                    b.HasIndex("AdminId");
+
+                    b.ToTable("ProjectAdmins");
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.ProjectMaintainer", b =>
+                {
+                    b.Property<Guid>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MaintainerId")
+                        .HasColumnType("text");
+
+                    b.HasKey("ProjectId", "MaintainerId");
+
+                    b.HasIndex("MaintainerId");
+
+                    b.ToTable("ProjectMaintainers");
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.RefreshToken", b =>
@@ -400,6 +459,10 @@ namespace DragonflyTracker.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasColumnType("character varying(256)")
                         .HasMaxLength(256);
@@ -430,12 +493,6 @@ namespace DragonflyTracker.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid?>("ProjectId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("ProjectId1")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -455,11 +512,9 @@ namespace DragonflyTracker.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex");
 
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("ProjectId1");
-
                     b.ToTable("AspNetUsers");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -546,11 +601,25 @@ namespace DragonflyTracker.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("DragonflyTracker.Domain.DragonflyUser", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.HasDiscriminator().HasValue("DragonflyUser");
+                });
+
             modelBuilder.Entity("DragonflyTracker.Domain.Issue", b =>
                 {
-                    b.HasOne("DragonflyTracker.Domain.Company", null)
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Author")
                         .WithMany("Issues")
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("AuthorId");
+
+                    b.HasOne("DragonflyTracker.Domain.Organization", "ParentOrganization")
+                        .WithMany("Issues")
+                        .HasForeignKey("OrganizationId");
 
                     b.HasOne("DragonflyTracker.Domain.Project", "ParentProject")
                         .WithMany("Issues")
@@ -560,17 +629,30 @@ namespace DragonflyTracker.Migrations
 
                     b.HasOne("DragonflyTracker.Domain.IssueStage", "CurrentStage")
                         .WithMany()
-                        .HasForeignKey("StageId")
+                        .HasForeignKey("StageId");
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.IssueIssueType", b =>
+                {
+                    b.HasOne("DragonflyTracker.Domain.Issue", "Issue")
+                        .WithMany("Types")
+                        .HasForeignKey("IssueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                    b.HasOne("DragonflyTracker.Domain.IssueType", "IssueType")
+                        .WithMany("Issues")
+                        .HasForeignKey("IssueTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.IssuePost", b =>
                 {
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Author")
+                        .WithMany("IssuePosts")
+                        .HasForeignKey("AuthorId");
+
                     b.HasOne("DragonflyTracker.Domain.Issue", "ParentIssue")
                         .WithMany("Posts")
                         .HasForeignKey("IssueId")
@@ -578,11 +660,15 @@ namespace DragonflyTracker.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DragonflyTracker.Domain.IssuePostReactions", b =>
+            modelBuilder.Entity("DragonflyTracker.Domain.IssuePostReaction", b =>
                 {
                     b.HasOne("DragonflyTracker.Domain.IssuePost", null)
                         .WithMany("Reactions")
                         .HasForeignKey("IssuePostId");
+
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Creator")
+                        .WithMany("Reactions")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.IssueStage", b =>
@@ -596,10 +682,6 @@ namespace DragonflyTracker.Migrations
 
             modelBuilder.Entity("DragonflyTracker.Domain.IssueType", b =>
                 {
-                    b.HasOne("DragonflyTracker.Domain.Issue", null)
-                        .WithMany("Types")
-                        .HasForeignKey("IssueId");
-
                     b.HasOne("DragonflyTracker.Domain.Project", "ParentProject")
                         .WithMany("Types")
                         .HasForeignKey("ProjectId")
@@ -636,14 +718,14 @@ namespace DragonflyTracker.Migrations
 
             modelBuilder.Entity("DragonflyTracker.Domain.Notification", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Receiver")
-                        .WithMany()
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Receiver")
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.Post", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
                 });
@@ -665,13 +747,43 @@ namespace DragonflyTracker.Migrations
 
             modelBuilder.Entity("DragonflyTracker.Domain.Project", b =>
                 {
-                    b.HasOne("DragonflyTracker.Domain.Company", null)
+                    b.HasOne("DragonflyTracker.Domain.Organization", "ParentOrganization")
                         .WithMany("Projects")
-                        .HasForeignKey("CompanyId");
+                        .HasForeignKey("OrganizationId");
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Creator")
-                        .WithMany()
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Creator")
+                        .WithMany("CreatedProjects")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.ProjectAdmin", b =>
+                {
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Admin")
+                        .WithMany("AdminedProjects")
+                        .HasForeignKey("AdminId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DragonflyTracker.Domain.Project", "Project")
+                        .WithMany("Admins")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DragonflyTracker.Domain.ProjectMaintainer", b =>
+                {
+                    b.HasOne("DragonflyTracker.Domain.DragonflyUser", "Maintainer")
+                        .WithMany("MaintainedProjects")
+                        .HasForeignKey("MaintainerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DragonflyTracker.Domain.Project", "Project")
+                        .WithMany("Maintainers")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DragonflyTracker.Domain.RefreshToken", b =>
@@ -695,17 +807,6 @@ namespace DragonflyTracker.Migrations
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.HasOne("DragonflyTracker.Domain.Project", null)
-                        .WithMany("Admins")
-                        .HasForeignKey("ProjectId");
-
-                    b.HasOne("DragonflyTracker.Domain.Project", null)
-                        .WithMany("Maintainers")
-                        .HasForeignKey("ProjectId1");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>

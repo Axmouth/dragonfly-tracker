@@ -7,13 +7,13 @@ namespace DragonflyTracker.Contracts.V1.Requests.Queries
         public PaginationQuery()
         {
             PageNumber = 1;
-            PageSize = 100;
+            PageSize = 50;
         }
 
         public PaginationQuery(int pageNumber, int pageSize)
         {
             PageNumber = pageNumber;
-            PageSize = pageSize;
+            PageSize = pageSize % 50;
         }
 
         public int PageNumber { get; set; }

@@ -1,0 +1,11 @@
+<app-nav>
+  <p>view-my-projects works!</p>
+  <a nbButton href="/my-projects/create" routerLink="/my-projects/create">Create Project <nb-icon icon="plus"></nb-icon></a>
+
+  <h3>Your Own Projects</h3>
+    <nb-list>
+      <nb-list-item *ngFor="let project of projectsList">
+            <a href="/user/{{project.Creator.Username}}/{{project.Name}}" routerLink="/user/{{project.Creator.Username}}/{{project.Name}}"><h5>{{project.Name}}</h5></a>
+      </nb-list-item>
+    </nb-list>
+</app-nav>

@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Domain
 {
-    public class Company
+    public class Organization
     {
         [Key]
         public Guid Id { get; set; }
 
         public string Name { get; set; }
 
-        [Column(TypeName = "Date")]
+        [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
         public virtual List<Project> Projects { get; set; }

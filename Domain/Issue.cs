@@ -11,8 +11,8 @@ namespace DragonflyTracker.Domain
 {
     public class Issue
     {
-        public List<string> defaultIssuesTypes = new List<string>(new string[] { "Question", "Bug", "Feature Request" });
-        public List<string> defaultIssuesStages = new List<string>(new string[] { "Open", "Being Worked On", "Closed" });
+        List<string> defaultIssuesTypes = new List<string>(new string[] { "Question", "Bug", "Feature Request" });
+        List<string> defaultIssuesStages = new List<string>(new string[] { "Open", "Being Worked On", "Closed" });
 
         [Key]
         public Guid Id { get; set; }
@@ -21,26 +21,28 @@ namespace DragonflyTracker.Domain
 
         public int Number { get; set; }
 
-        [Column(TypeName = "Date")]
+        public bool Open { get; set; }
+
+        [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
-        public Guid AuthorId { get; set; }
+        public string AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
-        public IdentityUser Author { get; set; }
+        public DragonflyUser Author { get; set; }
 
         public Guid ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
         public Project ParentProject { get; set; }
 
-        public Guid CompanyId { get; set; }
-        [ForeignKey(nameof(CompanyId))]
-        public Project ParentCompany { get; set; }
+        public Guid? OrganizationId { get; set; }
+        [ForeignKey(nameof(OrganizationId))]
+        public Organization ParentOrganization { get; set; }
 
-        public Guid StageId { get; set; }
+        public Guid? StageId { get; set; }
         [ForeignKey(nameof(StageId))]
         public IssueStage CurrentStage { get; set; }
 
-        public virtual List<IssueType> Types { get; set; }
+        public virtual List<IssueIssueType> Types { get; set; }
 
         public virtual List<IssuePost> Posts { get; set; }
 

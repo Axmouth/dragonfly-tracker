@@ -28,7 +28,7 @@ namespace DragonflyTracker.Controllers.V1
                 });
             }
             
-            var authResponse = await _identityService.RegisterAsync(request.Email, request.Password);
+            var authResponse = await _identityService.RegisterAsync(request.Email, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
@@ -48,7 +48,7 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Login)]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
-            var authResponse = await _identityService.LoginAsync(request.Email, request.Password);
+            var authResponse = await _identityService.LoginAsync(request.Email, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
@@ -68,7 +68,7 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Refresh)]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken);
+            var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {

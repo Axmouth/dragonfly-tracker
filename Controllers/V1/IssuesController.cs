@@ -7,87 +7,181 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DragonflyTracker.Data;
 using DragonflyTracker.Domain;
+using DragonflyTracker.Services;
+using AutoMapper;
+using DragonflyTracker.Contracts.V1.Requests.Queries;
+using DragonflyTracker.Contracts.V1.Responses;
+using DragonflyTracker.Helpers;
+using DragonflyTracker.Contracts.V1;
+using DragonflyTracker.Cache;
+using DragonflyTracker.Contracts.V1.Requests;
+using DragonflyTracker.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace DragonflyTracker.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    public class IssuesController : ControllerBase
+    public class IssuesController : Controller
     {
         private readonly DataContext _context;
+        private readonly IMapper _mapper;
+        private readonly IUriService _uriService;
+        private readonly IssueService _issueService;
 
-        public IssuesController(DataContext context)
+        public IssuesController(DataContext context, IssueService issueService, IMapper mapper, IUriService uriService)
         {
             _context = context;
+            _mapper = mapper;
+            _uriService = uriService;
+            _issueService = issueService;
         }
 
         // GET: api/Issues
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Issue>>> GetIssues()
+        [AllowAnonymous]
+        [HttpGet(ApiRoutes.Issues.GetAllByUser)]
+        [Cached(600)]
+        public async Task<ActionResult> GetAllIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
-            return await _context.Issues.ToListAsync();
+            var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
+            var filter = _mapper.Map<GetAllIssuesFilter>(query);
+            filter.ProjectName = projectName;
+            filter.AuthorUsername = username;
+            var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues);
+
+            if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
+            {
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse));
+            }
+
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse);
+            return Ok(paginationResponse);
+        }
+
+        [AllowAnonymous]
+        [HttpGet(ApiRoutes.Issues.GetAllByOrg)]
+        [Cached(600)]
+        public async Task<ActionResult> GetAllIssuesByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
+        {
+            var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
+            var filter = _mapper.Map<GetAllIssuesFilter>(query);
+            filter.ProjectName = projectName;
+            filter.OrganizationName = organizationName;
+            var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues);
+
+            if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
+            {
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse));
+            }
+
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse);
+            return Ok(paginationResponse);
         }
 
         // GET: api/Issues/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Issue>> GetIssue(Guid id)
+        [AllowAnonymous]
+        [HttpGet(ApiRoutes.Issues.GetByUser)]
+        [Cached(600)]
+        public async Task<ActionResult<Issue>> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
-            var issue = await _context.Issues.FindAsync(id);
+            var issue = await _issueService.GetIssueByUserAsync( username, projectName,issueNumber).ConfigureAwait(false);
 
             if (issue == null)
             {
                 return NotFound();
             }
 
-            return issue;
+            return Ok(new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
-        // PUT: api/Issues/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
-        // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutIssue(Guid id, Issue issue)
+        // GET: api/Issues/5
+        [AllowAnonymous]
+        [HttpGet(ApiRoutes.Issues.GetByOrg)]
+        [Cached(600)]
+        public async Task<ActionResult<Issue>> GetIssueByOrgr([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
-            if (id != issue.Id)
+            var issue = await _issueService.GetIssueByOrgAsync(organizationName, projectName, issueNumber).ConfigureAwait(false);
+
+            if (issue == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(issue).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!IssueExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
         // POST: api/Issues
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost]
+        [HttpPost(ApiRoutes.Issues.CreateByUser)]
+        [Cached(600)]
+        public async Task<IActionResult> CreateByUser([FromRoute]string username, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
+        {
+            if (issueRequest == null)
+            {
+                return new BadRequestResult();
+            }
+
+            var newIssueId = Guid.NewGuid();
+            var issue = new Issue
+            {
+                Id = newIssueId,
+                Title = issueRequest.Title,
+                AuthorId = HttpContext.GetUserId(),
+                CreatedAt = DateTime.UtcNow
+                // Types = issueRequest.Types
+            };
+
+            await _issueService.CreateIssueByUserAsync(issue, issueRequest.PostContent, issueRequest.Types, username, projectName).ConfigureAwait(false);
+
+            var locationUri = _uriService.GetPostUri(issue.Id.ToString());
+            return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
+        }
+
+        [HttpPost(ApiRoutes.Issues.CreateByOrg)]
+        [Cached(600)]
+        public async Task<IActionResult> CreateByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
+        {
+            if (issueRequest == null)
+            {
+                return new BadRequestResult();
+            }
+
+            var newIssueId = Guid.NewGuid();
+            var issue = new Issue
+            {
+                Id = newIssueId,
+                Title = issueRequest.Title,
+                AuthorId = HttpContext.GetUserId(),
+                CreatedAt = DateTime.UtcNow
+                // Types = issueRequest.Types.Select(x => new IssueType { ParentProject.Name = projectName, TagName = x).ToList()
+            };
+
+            await _issueService.CreateIssueByOrgAsync(issue, issueRequest.PostContent, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
+
+            var locationUri = _uriService.GetPostUri(issue.Id.ToString());
+            return Created(locationUri, new Response<PostResponse>(_mapper.Map<PostResponse>(issue)));
+        }
+
+        // PUT: api/Issues/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for
+        // more details see https://aka.ms/RazorPagesCRUD.
+        [HttpPut(ApiRoutes.Issues.UpdateByUser)]
+        [Cached(600)]
         public async Task<ActionResult<Issue>> PostIssue(Issue issue)
         {
             _context.Issues.Add(issue);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetIssue", new { id = issue.Id }, issue);
         }
 
         // DELETE: api/Issues/5
-        [HttpDelete("{id}")]
+        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
+        [Cached(600)]
         public async Task<ActionResult<Issue>> DeleteIssue(Guid id)
         {
             var issue = await _context.Issues.FindAsync(id);
@@ -97,7 +191,7 @@ namespace DragonflyTracker.Controllers.V1
             }
 
             _context.Issues.Remove(issue);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync().ConfigureAwait(false);
 
             return issue;
         }

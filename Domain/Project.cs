@@ -19,20 +19,20 @@ namespace DragonflyTracker.Domain
 
         public bool Public { get; set; }
 
-        [Column(TypeName = "Date")]
+        [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
-        public Guid CompanyId { get; set; }
-        [ForeignKey(nameof(CompanyId))]
-        public Project ParentCompany { get; set; }
+        public Guid? OrganizationId { get; set; }
+        [ForeignKey(nameof(OrganizationId))]
+        public Organization ParentOrganization { get; set; }
 
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
-        public IdentityUser Creator { get; set; }
+        public DragonflyUser Creator { get; set; }
 
-        public virtual List<IdentityUser> Admins { get; set; }
+        public virtual List<ProjectAdmin> Admins { get; set; }
 
-        public virtual List<IdentityUser> Maintainers { get; set; }
+        public virtual List<ProjectMaintainer> Maintainers { get; set; }
 
         public virtual List<Issue> Issues { get; set; }
 
