@@ -10,5 +10,6 @@ namespace DragonflyTracker.Services
         Task<AuthenticationResult> LoginAsync(string email, string password);
         
         Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken);
+        Task<AuthenticationResult> LogoutAsync(string refreshToken);
     }
 }

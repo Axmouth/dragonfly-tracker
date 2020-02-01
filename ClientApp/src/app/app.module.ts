@@ -3,10 +3,10 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-import { RoutingModule } from './routing.module';
+import { RoutingModule } from './app-routing.module';
+import { JwtModule } from '@auth0/angular-jwt';
 
 import { AppComponent } from './app.component';
-import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
@@ -17,7 +17,7 @@ import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { ViewProfileComponent } from './view-profile/view-profile.component';
 import { ViewProjectIssuesComponent } from './view-project-issues/view-project-issues.component';
 import { NavComponent } from './nav/nav.component';
-import { myNbPasswordAuthStrategyOptions } from './constants';
+import { myNbPasswordAuthStrategyOptions, tokenGetter, myRefreshNbPasswordAuthStrategyOptions } from './constants';
 import { NbMenuInternalService } from '@nebular/theme/components/menu/menu.service';
 import { ViewMyProjectsComponent } from './view-my-projects/view-my-projects.component';
 import { ViewUserProjectComponent } from './view-user-project/view-user-project.component';
@@ -28,11 +28,19 @@ import { ViewUserProjectIssuesComponent } from './view-user-project-issues/view-
 import { ProjectEditorComponent } from './project-editor/project-editor.component';
 import { IssueEditorComponent } from './issue-editor/issue-editor.component';
 import { IssuePostEditorComponent } from './issue-post-editor/issue-post-editor.component';
+import { ClarityModule } from '@clr/angular';
+import { LoginPageComponent } from './login-page/login-page.component';
+import { RegisterPageComponent } from './register-page/register-page.component';
+import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
+import { LogoutPageComponent } from './logout-page/logout-page.component';
+import { CreateIssueComponent } from './create-issue/create-issue.component';
+import { CreateIssuePostComponent } from './create-issue-post/create-issue-post.component';
+import { ViewUserProjectIssueComponent } from './view-user-project-issue/view-user-project-issue.component';
+import { ViewOrgProjectIssueComponent } from './view-org-project-issue/view-org-project-issue.component';
 
 @NgModule({
     declarations: [
         AppComponent,
-        NavMenuComponent,
         HomeComponent,
         CounterComponent,
         FetchDataComponent,
@@ -47,45 +55,41 @@ import { IssuePostEditorComponent } from './issue-post-editor/issue-post-editor.
         ViewUserProjectIssuesComponent,
         ProjectEditorComponent,
         IssueEditorComponent,
-        IssuePostEditorComponent
+        IssuePostEditorComponent,
+        LoginPageComponent,
+        RegisterPageComponent,
+        NotFoundPageComponent,
+        LogoutPageComponent,
+        CreateIssueComponent,
+        CreateIssuePostComponent,
+        ViewUserProjectIssueComponent,
+        ViewOrgProjectIssueComponent
     ],
     imports: [
         BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
         HttpClientModule,
-      FormsModule, /*
-        RouterModule.forRoot([
-            { path: '', component: HomeComponent, pathMatch: 'full' },
-            { path: 'counter', component: CounterComponent },
-            { path: 'fetch-data', component: FetchDataComponent },
-        ]),*/
+        FormsModule,
         RoutingModule,
         BrowserAnimationsModule,
-        NbThemeModule.forRoot({ name: 'dragonfly' }),
-        NbLayoutModule,
-        NbEvaIconsModule,
-        NbSidebarModule,
-        NbActionsModule,
-        NbButtonModule,
-        NbTableModule,
-        NbListModule,
-        NbContextMenuModule,
-        NbUserModule,
-        NbSearchModule,
-        NbBadgeModule,
-        NbButtonModule,
-        NbIconModule,
-        NbInputModule,
-      NbCheckboxModule,
-      NbCardModule,
-        NbMenuModule.forRoot(),
+        // NbThemeModule.forRoot({ name: 'dragonfly' }),
         NbAuthModule.forRoot({
           strategies: [
-            NbPasswordAuthStrategy.setup(myNbPasswordAuthStrategyOptions),
+            NbPasswordAuthStrategy.setup(myRefreshNbPasswordAuthStrategyOptions),
           ],
           forms: {},
-        }), 
+        }),
+      JwtModule.forRoot({
+        config: {
+          tokenGetter: tokenGetter,
+          whitelistedDomains: ['localhost:5001', 'localhost:4200', 'localhost:3000', 'localhost', 'knowledgebase.network', 'giorgosnikolopoulos.ddns.net',
+            'giorgosnikolopoulos.ddns.net:4200', 'giorgosnikolopoulos.ddns.net:3000'],
+          blacklistedRoutes: [],
+          // authScheme: ""
+        },
+      }),
+      ClarityModule,
     ],
-    providers: [NbSidebarService],
+    providers: [],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

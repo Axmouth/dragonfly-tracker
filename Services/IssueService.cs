@@ -304,6 +304,28 @@ namespace DragonflyTracker.Services
         {
             var queryable = _dataContext.Issues.AsQueryable();
 
+            if (filter == null)
+            {
+                return new List<Issue>(){ };
+            }
+
+            if (filter.ProjectId.HasValue)
+            {
+                queryable = queryable.Where(x => x.ProjectId == filter.ProjectId);
+            }
+
+            if (!string.IsNullOrEmpty(filter?.ProjectName))
+            {
+                queryable = queryable
+                    .Where(x => x.ParentProject.Name == filter.ProjectName);
+            }
+
+            if (!string.IsNullOrEmpty(filter?.ProjectName))
+            {
+                queryable = queryable
+                    .Where(x => x.ParentProject.Name == filter.ProjectName);
+            }
+
             if (!string.IsNullOrEmpty(filter?.ProjectName) && !string.IsNullOrEmpty(filter?.OrganizationName))
             {
                 queryable = queryable

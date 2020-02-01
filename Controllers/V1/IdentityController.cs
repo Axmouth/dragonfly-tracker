@@ -5,6 +5,9 @@ using DragonflyTracker.Contracts.V1;
 using DragonflyTracker.Contracts.V1.Requests;
 using DragonflyTracker.Contracts.V1.Responses;
 using DragonflyTracker.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 
 namespace DragonflyTracker.Controllers.V1
 {
@@ -57,7 +60,15 @@ namespace DragonflyTracker.Controllers.V1
                     Errors = authResponse.Errors
                 });
             }
-            
+
+            HttpContext.Response.Cookies.Append(
+             "authRefreshToken",
+             authResponse.RefreshToken,
+             new CookieOptions
+             {
+                 HttpOnly = true
+             });
+
             return Ok(new AuthSuccessResponse
             {
                 Token = authResponse.Token,
@@ -68,7 +79,10 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Refresh)]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken).ConfigureAwait(false);
+            var RefreshToken = Request.Cookies["authRefreshToken"];
+
+            // var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken).ConfigureAwait(false);
+            var authResponse = await _identityService.RefreshTokenAsync(request.Token, RefreshToken).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
@@ -77,12 +91,47 @@ namespace DragonflyTracker.Controllers.V1
                     Errors = authResponse.Errors
                 });
             }
-            
+
+            HttpContext.Response.Cookies.Append(
+             "authRefreshToken",
+             authResponse.RefreshToken,
+             new CookieOptions
+             {
+                 HttpOnly = true
+             });
+
             return Ok(new AuthSuccessResponse
             {
                 Token = authResponse.Token,
                 RefreshToken = authResponse.RefreshToken
             });
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpDelete(ApiRoutes.Identity.Logout)]
+        public async Task<IActionResult> Logout()
+        {
+            var RefreshToken = Request.Cookies["authRefreshToken"];
+
+            var authResponse = await _identityService.LogoutAsync(RefreshToken).ConfigureAwait(false);
+
+            if (!authResponse.Success)
+            {
+                return BadRequest(new AuthFailedResponse
+                {
+                    Errors = authResponse.Errors
+                });
+            }
+
+            HttpContext.Response.Cookies.Append(
+             "authRefreshToken",
+             "derp",
+             new CookieOptions
+             {
+                 HttpOnly = true
+             });
+
+            return NoContent();
         }
     }
 }

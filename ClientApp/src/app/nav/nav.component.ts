@@ -1,51 +1,49 @@
-import { Component, OnInit } from '@angular/core';
-import { NbAuthService } from '@nebular/auth';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { NbAuthService, NbTokenService } from '@nebular/auth';
 import { NbMenuService } from '@nebular/theme';
 import { filter, map } from 'rxjs/operators';
+import { Observable, Subscribable, Subscription } from 'rxjs';
+import { tokenGetter, myRefreshNbPasswordAuthStrategyOptions } from '../constants';
+import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.scss']
 })
-export class NavComponent implements OnInit {
+export class NavComponent implements OnInit, OnDestroy {
+  isAuthenticatedOrRefresh$: Subscription;
+  onAuthenticationChange$: Subscription;
+  routeChange$: Subscription;
   isLoggedIn = false;
-  items = [
-    {
-      title: 'Profile',
-      link: '/profile',
-      icon: "person-outline"
-    },
-    {
-      title: 'Settings',
-      link: '/settings',
-      icon: "settings-outline"
-    },
-    {
-      title: 'Logout',
-      link: '/auth/logout',
-      icon: "log-out-outline"
-    },
-  ];
+  username = 'username';
 
-  constructor(protected authService: NbAuthService, protected menuService: NbMenuService) { }
+  constructor(protected authService: NbAuthService, private router: Router, private tokenService: NbTokenService) { }
 
   async ngOnInit() {
-    // console.log(await this.authService.isAuthenticatedOrRefresh().toPromise());
-    this.authService.isAuthenticatedOrRefresh().subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-    });
-    this.authService.onAuthenticationChange().subscribe(loggedIn => {
-      this.isLoggedIn = loggedIn;
-    });
-    this.menuService.onItemClick()
-      .pipe(
-        filter(({ tag }) => tag === "nav-user-context-menu"),
-        map(({ item: { title } }) => title),
-      )
-      .subscribe(title => {
-        console.log(title)
+
+      this.onAuthenticationChange$ = this.authService.onAuthenticationChange().subscribe(async loggedIn => {
+          if (!loggedIn) {
+              // const refresh$ = this.authService.refreshToken(myRefreshNbPasswordAuthStrategyOptions.name, { token: tokenGetter() }).subscribe(async (loggedIn) => { this.isLoggedIn = loggedIn.isSuccess() });
+              // refresh$.unsubscribe();
+              this.isLoggedIn = loggedIn;
+          } else {
+            this.isLoggedIn = loggedIn;
+          }
       });
-  }
+
+      this.routeChange$ = this.router.events.subscribe(async val => {
+          if (val instanceof NavigationStart) {
+              const refresh$ = this.authService.isAuthenticatedOrRefresh().subscribe(async (loggedIn) => { this.isLoggedIn = loggedIn });
+          }
+      });
+
+      this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+    }
+
+    ngOnDestroy(): void {
+       this.isAuthenticatedOrRefresh$.unsubscribe();
+       this.onAuthenticationChange$.unsubscribe();
+    }
 
 }

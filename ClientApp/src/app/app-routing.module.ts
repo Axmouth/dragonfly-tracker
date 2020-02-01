@@ -12,9 +12,17 @@ import { ViewUserProjectComponent } from './view-user-project/view-user-project.
 import { ViewOrgProjectComponent } from './view-org-project/view-org-project.component';
 import { ViewUserProjectIssuesComponent } from './view-user-project-issues/view-user-project-issues.component';
 import { ViewOrgProjectIssuesComponent } from './view-org-project-issues/view-org-project-issues.component';
+import { LoginPageComponent } from './login-page/login-page.component';
+import { RegisterPageComponent } from './register-page/register-page.component';
+import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
+import { LogoutPageComponent } from './logout-page/logout-page.component';
+import { CreateIssueComponent } from './create-issue/create-issue.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
+  { path: 'login', component: LoginPageComponent },
+  { path: 'logout', component: LogoutPageComponent },
+  { path: 'register', component: RegisterPageComponent },
   { path: 'profile', component: ViewProfileComponent },
   { path: 'settings', component: ViewProfileComponent },
   { path: 'counter', component: CounterComponent },
@@ -24,8 +32,12 @@ const routes: Routes = [
   { path: 'user/:username', component: ViewProfileComponent },
   { path: 'user/:username/:projectname', component: ViewUserProjectComponent },
   { path: 'org/:orgname/:projectname', component: ViewOrgProjectComponent },
-  { path: 'user/:username/:projectname/issues', component: ViewUserProjectIssuesComponent },
-  { path: 'org/:orgname/:projectname/issues', component: ViewOrgProjectIssuesComponent },
+  { path: 'user/:username/:projectname?tab=issues', component: ViewUserProjectComponent },
+  { path: 'org/:orgname/:projectname?tab=issues', component: ViewOrgProjectComponent },
+  { path: 'user/:username/:projectname/create-issue', component: CreateIssueComponent },
+  { path: 'org/:orgname/:projectname/create-issue', component: CreateIssueComponent },
+  { path: 'user/:username/:projectname/issues/:issueNumber', component: ViewUserProjectIssuesComponent },
+  { path: 'org/:orgname/:projectname/issues/:issueNumber', component: ViewOrgProjectIssuesComponent },
   {
     path: 'auth',
     component: NbAuthComponent,
@@ -56,6 +68,7 @@ const routes: Routes = [
       },
     ]
   },
+  { path: '**', component: NotFoundPageComponent, pathMatch: 'full' },
 ];
 
 @NgModule({

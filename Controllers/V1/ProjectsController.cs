@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using DragonflyTracker.Cache;
@@ -47,18 +48,25 @@ namespace DragonflyTracker.Controllers.V1
         [Cached(600)]
         public async Task<ActionResult> GetAllProjectsByUser([FromRoute]string username, [FromQuery] GetAllProjectsQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
+            var user = await _userManager.FindByNameAsync(username).ConfigureAwait(false);
+
+            if (user == null)
+            {
+                return new NotFoundResult();
+            }
+
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllProjectsFilter>(query);
             filter.CreatorUsername = username;
             var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
-            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects);
+            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.Item1);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<ProjectResponse>(projectsResponse));
+                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.Item2));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.Item2);
             return Ok(paginationResponse);
         }
 
@@ -146,7 +154,7 @@ namespace DragonflyTracker.Controllers.V1
         [Cached(600)]
         public async Task<IActionResult> Delete([FromRoute] string username, [FromRoute]string projectName)
         {
-            var project = await _projectService.GetProjectByUserAsync(username, projectName);
+            var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
             var userOwnsProject = await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
 

@@ -1,69 +1,63 @@
-<nb-layout>
-
-  <nb-layout-header fixed>
-    <nb-actions size="medium">
-      <nb-action icon="home-outline" routerLink=""></nb-action>
-      <nb-action class="custom-action">
-          <a href="/counter" routerLink="/counter">
-            <nb-icon icon="plus"></nb-icon>
-          </a>
-          <a href="/counter" routerLink="/counter">
-            Counter
-          </a>
-      </nb-action>
-      <nb-action class="custom-action" link="/fetch-data">
-        <a href="/fetch-data" routerLink="/fetch-data">
-          Weather Forecast
-        </a>
-      </nb-action>
-      <nb-action *ngIf="isLoggedIn" class="custom-action">
-        <a href="/my-projects" routerLink="/my-projects">
-          <nb-icon icon="list-outline"></nb-icon>
-        </a>
-        <a href="/my-projects" routerLink="/my-projects">
-          My Projects
-        </a>
-      </nb-action>
-    </nb-actions>
-    <nb-actions size="medium" class="left-actions">
-      <nb-action icon="search-outline"></nb-action>
-      <nb-action *ngIf="isLoggedIn" icon="bell-outline" badgeText="99+" badgeStatus="warning" badgePosition="top right"></nb-action>
-      <nb-action *ngIf="!isLoggedIn" class="custom-action">
-        <a href="/auth" routerLink="/auth">
-          <nb-icon icon="log-in-outline"></nb-icon>
-        </a>
-        <a href="/auth" routerLink="/auth">
-          Login
-        </a>
-      </nb-action>
-      <nb-action *ngIf="!isLoggedIn" class="custom-action">
-        <a href="/auth/register" routerLink="/auth/register">
-          <nb-icon icon="person-add-outline"></nb-icon>
-        </a>
-        <a href="/auth/register" routerLink="/auth/register">
-          Register
-        </a>
-      </nb-action>
-    </nb-actions>
-    <nb-user *ngIf="isLoggedIn" name="George Nicolson"
-             title="Full-Stack Developer and Site Owner"
-             [nbContextMenu]="items"
-             nbContextMenuTag="nav-user-context-menu"
-             nbContextMenuTrigger="click">
-    </nb-user>
-  </nb-layout-header>
-
-  <!--nb-sidebar>Sidebar Content</!--nb-sidebar-->
-  <nb-layout-column>
-    <div class="container">
-      <ng-content></ng-content>
+<clr-main-container>
+  <div class="alert alert-app-level">
+  </div>
+  <clr-header class="header header-7">
+    <div class="branding">
+      <a href="" routerLink="" class="nav-link">
+        <clr-icon shape="vm-bug"></clr-icon>
+        <span class="title">Dragonfly</span>
+      </a>
     </div>
+    <div class="header-nav" [clr-nav-level]="1">
+      <a class="nav-link nav-icon-text" href="/counter" routerLink="/counter" routerLinkActive="active">
+        <clr-icon shape="plus"></clr-icon>
+        Counter
+      </a>
+      <a class="nav-link nav-icon-text" href="/fetch-data" routerLink="/fetch-data" routerLinkActive="active">
+        Weather Forecast
+      </a>
+      <a class="nav-link nav-icon-text" *ngIf="isLoggedIn" href="/my-projects" routerLink="/my-projects" routerLinkActive="active">
+        <clr-icon shape="view-list"></clr-icon>
+        My Projects
+      </a>
+    </div>
+    <div class="header-actions">
+      <a *ngIf="!isLoggedIn" class="nav-link nav-icon-text" href="/login" routerLink="/login" routerLinkActive="active">
+        <clr-icon shape="login"></clr-icon>
+        Login
+      </a>
+      <a class="nav-link nav-icon-text" *ngIf="!isLoggedIn" href="/register" routerLink="/register" routerLinkActive="active">
+        <clr-icon shape="user"></clr-icon>
+        Register
+      </a>
+      <a *ngIf="isLoggedIn" href="/notifications" routerLink="/notifications" class="nav-link nav-icon-text" routerLinkActive="active">
+        <clr-icon shape="bell"></clr-icon>
+        <span class="badge badge-info">99+</span>
+      </a>
+      <clr-dropdown *ngIf="isLoggedIn">
+        <button class="nav-icon-text" clrDropdownTrigger aria-label="toggle settings menu">
+          <clr-icon shape="user"></clr-icon>
+          <span class="nav-text">{{username}}</span>
+          <clr-icon shape="caret down"></clr-icon>
+        </button>
+        <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
+          <label class="dropdown-header" aria-hidden="true">Profile Links</label>
+          <a href="..." routerLink="/..." clrDropdownItem>About</a>
+          <a href="..." routerLink="/..." clrDropdownItem>Preferences</a>
+          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <a href="/logout" routerLink="/logout" clrDropdownItem>Log out</a>
+        </clr-dropdown-menu>
+      </clr-dropdown>
+    </div>
+  </clr-header>
 
-  </nb-layout-column>
+  <div class="content-container">
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+    <nav class="sidenav" [clr-nav-level]="2">
 
-  <nb-layout-footer fixed>
+    </nav>
+  </div>
 
-    <!-- Insert footer here -->
-  </nb-layout-footer>
-
-</nb-layout>
+</clr-main-container>

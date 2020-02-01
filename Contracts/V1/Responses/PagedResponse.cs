@@ -11,6 +11,12 @@ namespace DragonflyTracker.Contracts.V1.Responses
             Data = data;
         }
 
+        public PagedResponse(IEnumerable<T> data, int total)
+        {
+            Data = data;
+            Total = total;
+        }
+
         public IEnumerable<T> Data { get; set; }
 
         public int? PageNumber { get; set; }

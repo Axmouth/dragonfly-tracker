@@ -29,13 +29,15 @@ namespace DragonflyTracker.Controllers.V1
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
         private readonly IssueService _issueService;
+        private readonly ProjectService _projectService;
 
-        public IssuesController(DataContext context, IssueService issueService, IMapper mapper, IUriService uriService)
+        public IssuesController(DataContext context, IssueService issueService, ProjectService projectService, IMapper mapper, IUriService uriService)
         {
             _context = context;
             _mapper = mapper;
             _uriService = uriService;
             _issueService = issueService;
+            _projectService = projectService;
         }
 
         // GET: api/Issues
@@ -46,8 +48,10 @@ namespace DragonflyTracker.Controllers.V1
         {
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllIssuesFilter>(query);
-            filter.ProjectName = projectName;
-            filter.AuthorUsername = username;
+            var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
+            // filter.ProjectName = projectName;
+            // filter.AuthorUsername = username;
+            filter.ProjectId = project.Id;
             var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
             var issuesResponse = _mapper.Map<List<IssueResponse>>(issues);
 

@@ -11,10 +11,12 @@ namespace DragonflyTracker.Services
     public class ProjectService
     {
         private readonly DataContext _dataContext;
+        private readonly IssueService _issueService;
 
-        public ProjectService(DataContext dataContext)
+        public ProjectService(DataContext dataContext, IssueService issueService)
         {
             _dataContext = dataContext;
+            _issueService = issueService;
         }
 
         public async Task<Project> GetProjectByIdAsync(Guid Id)
@@ -38,7 +40,7 @@ namespace DragonflyTracker.Services
                 .SingleOrDefaultAsync(x => x.Name == projectName && x.ParentOrganization.Name == organizationName).ConfigureAwait(false);
         }
 
-        public async Task<List<Project>> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Project>, int>> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
         {
             var queryable = _dataContext.Projects.AsQueryable();
 
@@ -56,23 +58,28 @@ namespace DragonflyTracker.Services
                     .Where(i => i.Creator.UserName == filter.CreatorUsername);
             }
 
+            List<Project> projects;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
+
             if (paginationFilter == null)
             {
-                return await queryable
+                projects = await queryable
                     .Include(x => x.ParentOrganization)
                     .Include(x => x.Creator)
                     .ToListAsync()
                     .ConfigureAwait(false);
+                return Tuple.Create(projects, count);
             }
 
             var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
+            projects = await queryable
                     .Include(x => x.ParentOrganization)
                     .Include(x => x.Creator)
                     .Skip(skip)
                     .Take(paginationFilter.PageSize)
                     .ToListAsync()
                     .ConfigureAwait(false);
+            return Tuple.Create(projects, count);
         }
 
         public async Task<bool> CreateProjectAsync(Project project, List<IssueType> types)
@@ -122,6 +129,21 @@ namespace DragonflyTracker.Services
             }
 
             return true;
+        }
+
+        private async Task AddIssueStages(Issue issue)
+        {/*
+            foreach (var type in issue.Types)
+            {
+                var existingIssueType =
+                    await _dataContext.IssueTypes.SingleOrDefaultAsync(x =>
+                        x.Name == type.Name && x.ProjectId == type.ProjectId).ConfigureAwait(false);
+                if (existingIssueType != null)
+                    continue;
+
+                await _dataContext.IssueTypes.AddAsync(new IssueType
+                { Name = type.Name, ProjectId = issue.ProjectId });
+            }*/
         }
     }
 }

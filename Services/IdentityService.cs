@@ -89,6 +89,27 @@ namespace DragonflyTracker.Services
             return await GenerateAuthenticationResultForUserAsync(user);
         }
 
+        public async Task<AuthenticationResult> LogoutAsync(string RefreshToken)
+        {
+            var refreshToken = _context.RefreshTokens.SingleOrDefault(rt => rt.Token == RefreshToken);
+
+            if (refreshToken == null)
+            {
+                return new AuthenticationResult { Errors = new[] { "Invalid Token" } };
+            }
+
+            refreshToken.Invalidated = true;
+            _context.RefreshTokens.Update(refreshToken);
+            var updated = await _context.SaveChangesAsync().ConfigureAwait(false);
+
+            // var refreshToken = new RefreshToken { Token = RefreshToken };
+            // _context.RefreshTokens.Attach(refreshToken);
+            // _context.RefreshTokens.Remove(refreshToken);
+            //var deleted = await _context.SaveChangesAsync().ConfigureAwait(false);
+
+            return new AuthenticationResult { Success = true };
+        }
+
         public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
         {
             var validatedToken = GetPrincipalFromToken(token);
