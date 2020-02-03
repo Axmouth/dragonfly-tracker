@@ -259,6 +259,8 @@ export interface Issue {
   isPublic?: boolean;
   parentProject?: Project;
   author?: User;
+  stages?: string[];
+  types?: string[];
 }
 
 export interface IssuePost {

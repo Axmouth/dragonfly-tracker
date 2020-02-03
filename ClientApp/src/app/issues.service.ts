@@ -48,7 +48,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/${projectName}/issues`;
+    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues`;
     return this.http.post(url, newIssue, { headers });
   }
 

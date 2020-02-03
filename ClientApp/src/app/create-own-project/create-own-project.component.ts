@@ -18,12 +18,12 @@ export class CreateOwnProjectComponent implements OnInit, OnDestroy {
   ngOnInit() {
   }
 
-  async onProjectCreateClick(event) {
+  async onProjectCreateClick(project) {
     const username = (await(await this.tokenService.get().toPromise()).getPayload()).sub;
-    console.log(event);
-    this.projectsService.createUsersProject(username, event).pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
+    console.log(project);
+    this.projectsService.createUsersProject(username, project).pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
       console.log(result);
-      this.router.navigateByUrl(`/user/${username}/${event["Name"]}`);
+      this.router.navigateByUrl(`/user/${username}/${result['data']['name']}`);
     });
   }
 

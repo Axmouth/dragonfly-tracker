@@ -336,6 +336,7 @@ namespace DragonflyTracker.Services
             {
                 queryable = queryable
                     .Where(i => EF.Functions.ToTsVector("english", i.Title).Matches(filter.SearchText));
+                    // .Where(i => EF.Functions.FuzzyStringMatchLevenshteinLessEqual(i.Title, filter.SearchText, 5) <= 5);
             }
 
             if (!string.IsNullOrEmpty(filter?.AuthorUsername))

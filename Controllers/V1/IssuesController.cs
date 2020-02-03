@@ -43,7 +43,7 @@ namespace DragonflyTracker.Controllers.V1
         // GET: api/Issues
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetAllByUser)]
-        [Cached(600)]
+        // [Cached(600)]
         public async Task<ActionResult> GetAllIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
@@ -66,7 +66,7 @@ namespace DragonflyTracker.Controllers.V1
 
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetAllByOrg)]
-        [Cached(600)]
+        // [Cached(600)]
         public async Task<ActionResult> GetAllIssuesByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
@@ -88,7 +88,7 @@ namespace DragonflyTracker.Controllers.V1
         // GET: api/Issues/5
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetByUser)]
-        [Cached(600)]
+        // [Cached(600)]
         public async Task<ActionResult<Issue>> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByUserAsync( username, projectName,issueNumber).ConfigureAwait(false);
@@ -104,7 +104,7 @@ namespace DragonflyTracker.Controllers.V1
         // GET: api/Issues/5
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetByOrg)]
-        [Cached(600)]
+        // [Cached(600)]
         public async Task<ActionResult<Issue>> GetIssueByOrgr([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByOrgAsync(organizationName, projectName, issueNumber).ConfigureAwait(false);
@@ -121,7 +121,6 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost(ApiRoutes.Issues.CreateByUser)]
-        [Cached(600)]
         public async Task<IActionResult> CreateByUser([FromRoute]string username, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
         {
             if (issueRequest == null)
@@ -146,7 +145,6 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         [HttpPost(ApiRoutes.Issues.CreateByOrg)]
-        [Cached(600)]
         public async Task<IActionResult> CreateByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
         {
             if (issueRequest == null)
@@ -174,7 +172,6 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Issues.UpdateByUser)]
-        [Cached(600)]
         public async Task<ActionResult<Issue>> PostIssue(Issue issue)
         {
             _context.Issues.Add(issue);
@@ -184,8 +181,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         // DELETE: api/Issues/5
-        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
-        [Cached(600)]
+        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]\
         public async Task<ActionResult<Issue>> DeleteIssue(Guid id)
         {
             var issue = await _context.Issues.FindAsync(id);

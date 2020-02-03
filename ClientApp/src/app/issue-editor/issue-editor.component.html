@@ -1,1 +1,15 @@
 <p>issue-editor works!</p>
+
+<form clrForm>
+  <clr-input-container>
+    <label>Issue Title</label>
+    <input clrInput type="text" [(ngModel)]="issueTitle" name="issueTitle" />
+  </clr-input-container>
+  <clr-textarea-container>
+    <label>Issue Description</label>
+    <textarea clrTextarea [(ngModel)]="issueContent" name="issueContent"></textarea>
+  </clr-textarea-container>
+  <br />
+  <br />
+  <button type="button" class="btn btn-icon btn-success" aria-label="success" (click)="onProjectSubmitClick()">Submit<clr-icon shape="plus"></clr-icon></button>
+</form>
