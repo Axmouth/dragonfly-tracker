@@ -2,7 +2,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { RouterModule } from '@angular/router';
 import { RoutingModule } from './app-routing.module';
 import { JwtModule } from '@auth0/angular-jwt';
 
@@ -11,14 +10,9 @@ import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NbThemeModule, NbLayoutModule, NbSidebarModule, NbSidebarService, NbActionsModule, NbButtonModule, NbTableModule, NbListModule, NbContextMenuModule, NbMenuService, NbMenuModule, NbUserModule, NbSearchModule, NbBadgeModule, NbIconModule, NbInputModule, NbCheckboxModule, NbCardModule } from '@nebular/theme';
-import { NbPasswordAuthStrategy, NbAuthModule, NbOAuth2AuthStrategy } from '@nebular/auth';
-import { NbEvaIconsModule } from '@nebular/eva-icons';
 import { ViewProfileComponent } from './view-profile/view-profile.component';
 import { ViewProjectIssuesComponent } from './view-project-issues/view-project-issues.component';
 import { NavComponent } from './nav/nav.component';
-import { myNbPasswordAuthStrategyOptions, tokenGetter, myRefreshNbPasswordAuthStrategyOptions } from './constants';
-import { NbMenuInternalService } from '@nebular/theme/components/menu/menu.service';
 import { ViewMyProjectsComponent } from './view-my-projects/view-my-projects.component';
 import { ViewUserProjectComponent } from './view-user-project/view-user-project.component';
 import { ViewOrgProjectComponent } from './view-org-project/view-org-project.component';
@@ -37,6 +31,7 @@ import { CreateIssueComponent } from './create-issue/create-issue.component';
 import { CreateIssuePostComponent } from './create-issue-post/create-issue-post.component';
 import { ViewUserProjectIssueComponent } from './view-user-project-issue/view-user-project-issue.component';
 import { ViewOrgProjectIssueComponent } from './view-org-project-issue/view-org-project-issue.component';
+import { tokenGetter } from './constants';
 
 @NgModule({
     declarations: [
@@ -70,14 +65,7 @@ import { ViewOrgProjectIssueComponent } from './view-org-project-issue/view-org-
         HttpClientModule,
         FormsModule,
         RoutingModule,
-        BrowserAnimationsModule,
-        // NbThemeModule.forRoot({ name: 'dragonfly' }),
-        NbAuthModule.forRoot({
-          strategies: [
-            NbPasswordAuthStrategy.setup(myRefreshNbPasswordAuthStrategyOptions),
-          ],
-          forms: {},
-        }),
+      BrowserAnimationsModule,
       JwtModule.forRoot({
         config: {
           tokenGetter: tokenGetter,

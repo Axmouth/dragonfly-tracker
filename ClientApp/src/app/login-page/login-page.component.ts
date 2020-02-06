@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { NbAuthService } from '@nebular/auth';
 import { Router } from '@angular/router';
-import { myRefreshNbPasswordAuthStrategyOptions } from '../constants';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login-page',
@@ -19,14 +18,14 @@ export class LoginPageComponent implements OnInit {
   isSuccess = false;
   isFailure = false;
 
-  constructor(private authService: NbAuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
   }
 
   onLoginClick() {
     console.log({ email: this.form.username, password: this.form.password });
-    this.authService.authenticate(myRefreshNbPasswordAuthStrategyOptions.name, { email: this.form.username, password: this.form.password }).subscribe(result => {
+    this.authService.authenticate({ email: this.form.username, password: this.form.password }).subscribe(result => {
       console.log(result);
       if (result.isSuccess) {
         this.isFailure = false;

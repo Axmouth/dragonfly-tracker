@@ -113,7 +113,6 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost(ApiRoutes.Projects.CreateByUser)]
-        // [Cached(600)]
         public async Task<IActionResult> CreateByUser([FromRoute]string username, [FromBody] CreateProjectRequest projectRequest)
         {
             if (projectRequest == null)
@@ -151,7 +150,6 @@ namespace DragonflyTracker.Controllers.V1
 
         // DELETE: api/Issues/5
         [HttpDelete(ApiRoutes.Projects.DeleteByUser)]
-        // [Cached(600)]
         public async Task<IActionResult> Delete([FromRoute] string username, [FromRoute]string projectName)
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
@@ -178,7 +176,6 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Projects.UpdateByUser)]
-        // [Cached(600)]
         public async Task<IActionResult> Update([FromRoute] string username, [FromRoute]string projectName, [FromBody] UpdatePostRequest request)
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName);

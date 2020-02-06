@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsService } from '../projects.service';
-import { NbAuthService, NbTokenService } from '@nebular/auth';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Router } from '@angular/router';
+import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 
 @Component({
   selector: 'app-create-own-project',
@@ -13,7 +14,7 @@ import { Router } from '@angular/router';
 export class CreateOwnProjectComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
 
-  constructor(private projectsService: ProjectsService, private authService: NbAuthService, private tokenService: NbTokenService, private router: Router) { }
+  constructor(private projectsService: ProjectsService, private authService: AuthService, private tokenService: TokenService, private router: Router) { }
 
   ngOnInit() {
   }

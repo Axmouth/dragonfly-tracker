@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { ProjectsService } from '../projects.service';
-import { NbAuthService, NbTokenService } from '@nebular/auth';
 import { Router, ActivatedRoute } from '@angular/router';
 import { IssuesService } from '../issues.service';
 import { takeUntil } from 'rxjs/operators';
+import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 
 @Component({
   selector: 'app-create-issue',
@@ -15,8 +16,8 @@ export class CreateIssueComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
   targetProjectName: string;
 
-  constructor(private projectsService: ProjectsService, private authService: NbAuthService,
-    private tokenService: NbTokenService, private router: Router, private issuesService: IssuesService,
+  constructor(private projectsService: ProjectsService, private authService: AuthService,
+    private tokenService: TokenService, private router: Router, private issuesService: IssuesService,
     private route: ActivatedRoute) { }
 
   ngOnInit() {

@@ -1,10 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { NbAuthService, NbTokenService } from '@nebular/auth';
-import { NbMenuService } from '@nebular/theme';
-import { filter, map } from 'rxjs/operators';
-import { Observable, Subscribable, Subscription } from 'rxjs';
-import { tokenGetter, myRefreshNbPasswordAuthStrategyOptions } from '../constants';
+import { Subscription } from 'rxjs';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
+import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 
 @Component({
   selector: 'app-nav',
@@ -18,10 +16,9 @@ export class NavComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   username = 'username';
 
-  constructor(protected authService: NbAuthService, private router: Router, private tokenService: NbTokenService) { }
+  constructor(protected authService: AuthService, private router: Router, private tokenService: TokenService) { }
 
   async ngOnInit() {
-
       this.onAuthenticationChange$ = this.authService.onAuthenticationChange().subscribe(async loggedIn => {
           if (!loggedIn) {
               // const refresh$ = this.authService.refreshToken(myRefreshNbPasswordAuthStrategyOptions.name, { token: tokenGetter() }).subscribe(async (loggedIn) => { this.isLoggedIn = loggedIn.isSuccess() });
@@ -38,7 +35,10 @@ export class NavComponent implements OnInit, OnDestroy {
           }
       });
 
-      this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+    if ((await (await this.tokenService.get().toPromise()).getPayload())) {
+        this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+
+    }
     }
 
     ngOnDestroy(): void {

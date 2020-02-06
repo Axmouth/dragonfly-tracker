@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsService } from '../projects.service';
-import { NbTokenService, NbAuthService } from '@nebular/auth';
 import { tokenGetter, Project } from '../constants';
 import { Subscription, pipe, Subject } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
+import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 
 @Component({
   selector: 'app-view-my-projects',
@@ -19,7 +20,7 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   username: string;
   ngUnsubscribe = new Subject<void>();
 
-  constructor(private projectsService: ProjectsService, private authService: NbAuthService, private tokenService: NbTokenService) { }
+  constructor(private projectsService: ProjectsService, private authService: AuthService, private tokenService: TokenService) { }
 
   async ngOnInit() {
     this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;

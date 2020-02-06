@@ -6,7 +6,6 @@ import { Project, Issue } from '../constants';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
 import { IssuesService } from '../issues.service';
-import { NbTokenService } from '@nebular/auth';
 
 const openStatusMap = {
   "open": true,
@@ -35,7 +34,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   openStatus: string = "open";
   state: ClrDatagridStateInterface;
 
-  constructor(private projectsService: ProjectsService, private route: ActivatedRoute, private issuesService: IssuesService, private tokenService: NbTokenService) { }
+  constructor(private projectsService: ProjectsService, private route: ActivatedRoute, private issuesService: IssuesService) { }
 
   async ngOnInit() {
     const params = this.route.snapshot.paramMap;

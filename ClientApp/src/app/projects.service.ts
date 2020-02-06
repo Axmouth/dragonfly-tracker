@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NbAuthService } from '@nebular/auth';
 import { pageSizeConst, apiRoute } from './constants';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ import { pageSizeConst, apiRoute } from './constants';
 export class ProjectsService {
 
 
-  constructor(private http: HttpClient, private authService: NbAuthService) { }
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
 
   getUsersProjects(username: string, page: number = 1, myPageSize = pageSizeConst) {

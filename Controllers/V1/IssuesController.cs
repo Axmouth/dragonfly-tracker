@@ -181,7 +181,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         // DELETE: api/Issues/5
-        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]\
+        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
         public async Task<ActionResult<Issue>> DeleteIssue(Guid id)
         {
             var issue = await _context.Issues.FindAsync(id);

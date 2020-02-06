@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { NbAuthService } from '@nebular/auth';
 import { Router } from '@angular/router';
-import { myRefreshNbPasswordAuthStrategyOptions } from '../constants';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-logout-page',
@@ -12,10 +11,10 @@ export class LogoutPageComponent implements OnInit {
   isSuccess = false;
   isFailure = false;
 
-  constructor(private authService: NbAuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) { }
 
   ngOnInit() {
-    this.authService.logout(myRefreshNbPasswordAuthStrategyOptions.name).subscribe(result => {
+    this.authService.logout().subscribe(result => {
       console.log(result);
       if (result.isSuccess) {
         this.isFailure = false;
