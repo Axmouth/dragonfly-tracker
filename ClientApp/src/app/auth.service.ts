@@ -15,13 +15,12 @@ export class AuthService {
   constructor(private tokenService: TokenService, private http: HttpClient, private route: ActivatedRoute) { }
 
   /**
-    * Authenticates with the selected strategy
+    * Authenticates
     * Stores received token in the token storage
     *
     * Example:
     * authenticate('email', {email: 'email@example.com', password: 'test'})
     *
-    * @param strategyName
     * @param data
     * @returns {Observable<AuthResult>}
     */
@@ -50,13 +49,12 @@ export class AuthService {
   }
 
   /**
-   * Sign outs with the selected strategy
+   * Sign outs
    * Removes token from the token storage
    *
    * Example:
    * logout('email')
    *
-   * @param strategyName
    * @returns {Observable<AuthResult>}
    */
   logout() {
@@ -94,13 +92,12 @@ export class AuthService {
   }
 
   /**
-    * Registers with the selected strategy
+    * Registers
     * Stores received token in the token storage
     *
     * Example:
     * register('email', {email: 'email@example.com', name: 'Some Name', password: 'test'})
     *
-    * @param strategyName
     * @param data
     * @returns {Observable<AuthResult>}
     */
@@ -141,7 +138,7 @@ export class AuthService {
 
   /**
     * Returns true if valid auth token is present in the token storage.
-    * If not, calls the strategy refreshToken, and returns isAuthenticated() if success, false otherwise
+    * If not, calls refreshToken, and returns isAuthenticated() if success, false otherwise
     * @returns {Observable<boolean>}
     */
   isAuthenticatedOrRefresh() {
@@ -181,7 +178,6 @@ export class AuthService {
    * Example:
    * refreshToken('email', {token: token})
    *
-   * @param {string} strategyName
    * @param data
    * @returns {Observable<AuthResult>}
    */
@@ -239,12 +235,11 @@ export class AuthService {
   }
 
   /**
-   * Sends forgot password request to the selected strategy
+   * Sends forgot password request
    *
    * Example:
    * requestPassword('email', {email: 'email@example.com'})
    *
-   * @param strategyName
    * @param data
    * @returns {Observable<AuthResult>}
    */
@@ -268,12 +263,11 @@ export class AuthService {
   }
 
   /**
-   * Tries to reset password with the selected strategy
+   * Tries to reset password
    *
    * Example:
    * resetPassword('email', {newPassword: 'test'})
    *
-   * @param strategyName
    * @param data
    * @returns {Observable<AuthResult>}
    */
@@ -313,10 +307,10 @@ export class AuthService {
 
   createToken(value: any, failWhenInvalidToken?: boolean): AuthJWTToken {
     const token = AuthCreateJWTToken(value, 'refreshToken');
-    // At this point, AuthCreateToken failed with AuthIllegalTokenError which MUST be intercepted by strategies
+    // At this point, AuthCreateToken failed with AuthIllegalTokenError which MUST be intercepted
     // Or token is created. It MAY be created even if backend did not return any token, in this case it is !Valid
     if (failWhenInvalidToken && !token.isValid()) {
-      // If we require a valid token (i.e. isValid), then we MUST throw AuthIllegalTokenError so that the strategies
+      // If we require a valid token (i.e. isValid), then we MUST throw AuthIllegalTokenError so that the we
       // intercept it
       throw new AuthIllegalTokenError('Token is empty or invalid.');
     }

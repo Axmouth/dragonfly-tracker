@@ -11,7 +11,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace DragonflyTracker.Controllers.V1
 {
-    public class IdentityController : Controller
+    [ApiController]
+    public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;
         
@@ -66,7 +67,7 @@ namespace DragonflyTracker.Controllers.V1
              authResponse.RefreshToken,
              new CookieOptions
              {
-                 HttpOnly = true
+                 HttpOnly = true,
              });
 
             return Ok(new AuthSuccessResponse
@@ -97,7 +98,7 @@ namespace DragonflyTracker.Controllers.V1
              authResponse.RefreshToken,
              new CookieOptions
              {
-                 HttpOnly = true
+                 HttpOnly = true,
              });
 
             return Ok(new AuthSuccessResponse

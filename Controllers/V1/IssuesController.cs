@@ -23,17 +23,17 @@ namespace DragonflyTracker.Controllers.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    public class IssuesController : Controller
+    public class IssuesController : ControllerBase
     {
-        private readonly DataContext _context;
+        private readonly PgMainDataContext _pgMainDataContext;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
         private readonly IssueService _issueService;
         private readonly ProjectService _projectService;
 
-        public IssuesController(DataContext context, IssueService issueService, ProjectService projectService, IMapper mapper, IUriService uriService)
+        public IssuesController(PgMainDataContext pgMainDataContext, IssueService issueService, ProjectService projectService, IMapper mapper, IUriService uriService)
         {
-            _context = context;
+            _pgMainDataContext = pgMainDataContext;
             _mapper = mapper;
             _uriService = uriService;
             _issueService = issueService;
@@ -174,8 +174,8 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPut(ApiRoutes.Issues.UpdateByUser)]
         public async Task<ActionResult<Issue>> PostIssue(Issue issue)
         {
-            _context.Issues.Add(issue);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Issues.Add(issue);
+            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
             return CreatedAtAction("GetIssue", new { id = issue.Id }, issue);
         }
@@ -184,21 +184,21 @@ namespace DragonflyTracker.Controllers.V1
         [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
         public async Task<ActionResult<Issue>> DeleteIssue(Guid id)
         {
-            var issue = await _context.Issues.FindAsync(id);
+            var issue = await _pgMainDataContext.Issues.FindAsync(id);
             if (issue == null)
             {
                 return NotFound();
             }
 
-            _context.Issues.Remove(issue);
-            await _context.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Issues.Remove(issue);
+            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
             return issue;
         }
 
         private bool IssueExists(Guid id)
         {
-            return _context.Issues.Any(e => e.Id == id);
+            return _pgMainDataContext.Issues.Any(e => e.Id == id);
         }
     }
 }

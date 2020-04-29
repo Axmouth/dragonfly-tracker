@@ -21,7 +21,7 @@ namespace DragonflyTracker
 
             using (var serviceScope = host.Services.CreateScope())
             {
-                var dbContext = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
+                var dbContext = serviceScope.ServiceProvider.GetRequiredService<PgMainDataContext>();
 
                 await dbContext.Database.MigrateAsync().ConfigureAwait(false);
 

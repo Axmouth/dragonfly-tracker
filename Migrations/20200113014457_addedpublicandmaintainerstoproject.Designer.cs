@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DragonflyTracker.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(PgMainDataContext))]
     [Migration("20200113014457_addedpublicandmaintainerstoproject")]
     partial class addedpublicandmaintainerstoproject
     {

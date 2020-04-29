@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Services
 {
-    public class UserService
+    public class UserService:IUserService
     {
-        private readonly DataContext _dataContext;
+        private readonly PgMainDataContext _dataContext;
         private readonly UserManager<DragonflyUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserService(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, DataContext dataContext)
+        public UserService(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, PgMainDataContext dataContext)
         {
             _dataContext = dataContext;
             _userManager = userManager;

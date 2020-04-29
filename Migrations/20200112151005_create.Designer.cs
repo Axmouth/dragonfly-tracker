@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DragonflyTracker.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(PgMainDataContext))]
     [Migration("20200112151005_create")]
     partial class create
     {

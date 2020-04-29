@@ -16,6 +16,8 @@ import { RegisterPageComponent } from './register-page/register-page.component';
 import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
 import { LogoutPageComponent } from './logout-page/logout-page.component';
 import { CreateIssueComponent } from './create-issue/create-issue.component';
+import { ViewOrgProjectIssueComponent } from './view-org-project-issue/view-org-project-issue.component';
+import { ViewUserProjectIssueComponent } from './view-user-project-issue/view-user-project-issue.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -35,8 +37,8 @@ const routes: Routes = [
   { path: 'org/:orgname/:projectname?tab=issues', component: ViewOrgProjectComponent },
   { path: 'user/:username/:projectname/create-issue', component: CreateIssueComponent },
   { path: 'org/:orgname/:projectname/create-issue', component: CreateIssueComponent },
-  { path: 'user/:username/:projectname/issues/:issueNumber', component: ViewUserProjectIssuesComponent },
-  { path: 'org/:orgname/:projectname/issues/:issueNumber', component: ViewOrgProjectIssuesComponent },
+  { path: 'user/:username/:projectname/issues/:issueNumber', component: ViewUserProjectIssueComponent },
+  { path: 'org/:orgname/:projectname/issues/:issueNumber', component: ViewOrgProjectIssueComponent },
   { path: '**', component: NotFoundPageComponent, pathMatch: 'full' },
 ];
 

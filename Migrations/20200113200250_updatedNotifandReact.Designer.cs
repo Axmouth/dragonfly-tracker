@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DragonflyTracker.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(PgMainDataContext))]
     [Migration("20200113200250_updatedNotifandReact")]
     partial class updatedNotifandReact
     {

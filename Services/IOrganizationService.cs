@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Services
 {
-    public class NotificationService: INotificationService
+    interface IOrganizationService
     {
     }
 }

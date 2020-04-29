@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DragonflyTracker.Migrations
 {
-    [DbContext(typeof(DataContext))]
+    [DbContext(typeof(PgMainDataContext))]
     partial class DataContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

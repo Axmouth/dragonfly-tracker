@@ -20,20 +20,20 @@ namespace DragonflyTracker.Services
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JwtSettings _jwtSettings;
         private readonly TokenValidationParameters _tokenValidationParameters;
-        private readonly DataContext _context;
+        private readonly PgMainDataContext _pgMainDataContext;
         
-        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, DataContext context, RoleManager<IdentityRole> roleManager)
+        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _tokenValidationParameters = tokenValidationParameters;
-            _context = context;
+            _pgMainDataContext = pgMainDataContext;
             _roleManager = roleManager;
         }
         
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
-            var existingUser = await _userManager.FindByEmailAsync(email);
+            var existingUser = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
 
             if (existingUser != null)
             {
@@ -51,7 +51,7 @@ namespace DragonflyTracker.Services
                 UserName = email
             };
 
-            var createdUser = await _userManager.CreateAsync(newUser, password);
+            var createdUser = await _userManager.CreateAsync(newUser, password).ConfigureAwait(false);
 
             if (!createdUser.Succeeded)
             {
@@ -61,12 +61,12 @@ namespace DragonflyTracker.Services
                 };
             }
             
-            return await GenerateAuthenticationResultForUserAsync(newUser);
+            return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
         
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -76,7 +76,7 @@ namespace DragonflyTracker.Services
                 };
             }
 
-            var userHasValidPassword = await _userManager.CheckPasswordAsync(user, password);
+            var userHasValidPassword = await _userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
 
             if (!userHasValidPassword)
             {
@@ -86,12 +86,12 @@ namespace DragonflyTracker.Services
                 };
             }
             
-            return await GenerateAuthenticationResultForUserAsync(user);
+            return await GenerateAuthenticationResultForUserAsync(user).ConfigureAwait(false);
         }
 
         public async Task<AuthenticationResult> LogoutAsync(string RefreshToken)
         {
-            var refreshToken = _context.RefreshTokens.SingleOrDefault(rt => rt.Token == RefreshToken);
+            var refreshToken = _pgMainDataContext.RefreshTokens.SingleOrDefault(rt => rt.Token == RefreshToken);
 
             if (refreshToken == null)
             {
@@ -99,8 +99,8 @@ namespace DragonflyTracker.Services
             }
 
             refreshToken.Invalidated = true;
-            _context.RefreshTokens.Update(refreshToken);
-            var updated = await _context.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.RefreshTokens.Update(refreshToken);
+            var updated = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
             // var refreshToken = new RefreshToken { Token = RefreshToken };
             // _context.RefreshTokens.Attach(refreshToken);
@@ -132,7 +132,7 @@ namespace DragonflyTracker.Services
 
             var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
 
-            var storedRefreshToken = await _context.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken);
+            var storedRefreshToken = await _pgMainDataContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken).ConfigureAwait(false);
 
             if (storedRefreshToken == null)
             {
@@ -160,11 +160,11 @@ namespace DragonflyTracker.Services
             }
 
             storedRefreshToken.Used = true;
-            _context.RefreshTokens.Update(storedRefreshToken);
-            await _context.SaveChangesAsync();
+            _pgMainDataContext.RefreshTokens.Update(storedRefreshToken);
+            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
-            var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value);
-            return await GenerateAuthenticationResultForUserAsync(user);
+            var user = await _userManager.FindByIdAsync(validatedToken.Claims.Single(x => x.Type == "id").Value).ConfigureAwait(false);
+            return await GenerateAuthenticationResultForUserAsync(user).ConfigureAwait(false);
         }
 
         private ClaimsPrincipal GetPrincipalFromToken(string token)
@@ -189,7 +189,7 @@ namespace DragonflyTracker.Services
             }
         }
 
-        private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
+        private static bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
         {
             return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
                    jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256,
@@ -209,16 +209,16 @@ namespace DragonflyTracker.Services
                 new Claim("id", user.Id)
             };
 
-            var userClaims = await _userManager.GetClaimsAsync(user);
+            var userClaims = await _userManager.GetClaimsAsync(user).ConfigureAwait(false);
             claims.AddRange(userClaims);
 
-            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRoles = await _userManager.GetRolesAsync(user).ConfigureAwait(false);
             foreach (var userRole in userRoles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, userRole));
-                var role = await _roleManager.FindByNameAsync(userRole);
+                var role = await _roleManager.FindByNameAsync(userRole).ConfigureAwait(false);
                 if(role == null) continue;
-                var roleClaims = await _roleManager.GetClaimsAsync(role);
+                var roleClaims = await _roleManager.GetClaimsAsync(role).ConfigureAwait(false);
 
                 foreach (var roleClaim in roleClaims)
                 {
@@ -247,8 +247,8 @@ namespace DragonflyTracker.Services
                 ExpiryDate = DateTime.UtcNow.AddMonths(6)
             };
 
-            await _context.RefreshTokens.AddAsync(refreshToken);
-            await _context.SaveChangesAsync();
+            await _pgMainDataContext.RefreshTokens.AddAsync(refreshToken);
+            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             
             return new AuthenticationResult
             {

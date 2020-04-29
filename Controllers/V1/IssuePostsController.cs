@@ -18,19 +18,20 @@ using System.Threading.Tasks;
 namespace DragonflyTracker.Controllers.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class IssuePostsController : Controller
+    [ApiController]
+    public class IssuePostsController : ControllerBase
     {
-        private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
-        private readonly IssueService _issueService;
+        private readonly IIssueService _issueService;
+        private readonly IIssuePostService _issuePostService;
 
-        public IssuePostsController(DataContext context, IssueService issueService, IMapper mapper, IUriService uriService)
+        public IssuePostsController(PgMainDataContext context, IIssueService issueService, IIssuePostService issuePostService, IMapper mapper, IUriService uriService)
         {
-            _context = context;
             _mapper = mapper;
             _uriService = uriService;
             _issueService = issueService;
+            _issuePostService = issuePostService;
         }
 
         [AllowAnonymous]
@@ -43,7 +44,7 @@ namespace DragonflyTracker.Controllers.V1
             filter.ProjectName = projectName;
             filter.OrganizationName = organizationName;
             filter.IssueNumber = issuePostNumber;
-            var issuePosts = await _issueService.GetAllIssuePostsAsync(filter, pagination).ConfigureAwait(false);
+            var issuePosts = await _issuePostService.GetAllIssuePostsAsync(filter, pagination).ConfigureAwait(false);
             var issuePostsResponse = _mapper.Map<List<IssuePostResponse>>(issuePosts);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)

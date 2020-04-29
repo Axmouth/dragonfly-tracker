@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Services
 {
-    public class ProjectService
+    public class ProjectService: IProjectService
     {
-        private readonly DataContext _dataContext;
+        private readonly PgMainDataContext _dataContext;
         private readonly IssueService _issueService;
 
-        public ProjectService(DataContext dataContext, IssueService issueService)
+        public ProjectService(PgMainDataContext dataContext, IssueService issueService)
         {
             _dataContext = dataContext;
             _issueService = issueService;

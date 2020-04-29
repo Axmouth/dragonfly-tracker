@@ -12,18 +12,22 @@ namespace DragonflyTracker.Installers
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<DataContext>(options =>
+            services.AddDbContext<PgMainDataContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection")));
+                configuration.GetConnectionString("MainConnection"))
+            );
             services.AddDefaultIdentity<DragonflyUser>()
                 .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<DataContext>();
+                .AddEntityFrameworkStores<PgMainDataContext>();
 
             services.AddScoped<IPostService, PostService>();
-            services.AddScoped<IssueService, IssueService>();
-            services.AddScoped<ProjectService, ProjectService>();
-            services.AddScoped<UserService, UserService>();
-            services.AddScoped<NotificationService, NotificationService>();
+            services.AddScoped<IIssueService, IssueService>();
+            services.AddScoped<IIssuePostService, IssuePostService>();
+            services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IUriService, UriService>();
         }
     }
 }

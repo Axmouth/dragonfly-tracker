@@ -16,7 +16,7 @@ namespace DragonflyTracker.Contracts.V1.Requests.Queries
 
         [FromQuery(Name = "search")]
         public string SearchText { get; set; }
-
+        
         [FromQuery(Name = "open")]
         public bool? Open { get; set; }
     }

@@ -19,7 +19,8 @@ using DragonflyTracker.Services;
 namespace DragonflyTracker.Controllers.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class PostsController : Controller
+    [ApiController]
+    public class PostsController : ControllerBase
     {
         private readonly IPostService _postService;
         private readonly IMapper _mapper;

@@ -31,7 +31,7 @@ namespace DragonflyTracker.Installers
             services
                 .AddMvc(options =>
                 {
-                    options.EnableEndpointRouting = false;
+                    // options.EnableEndpointRouting = false;
                     options.Filters.Add<ValidationFilter>();
                 })
                  .AddJsonOptions(options => {

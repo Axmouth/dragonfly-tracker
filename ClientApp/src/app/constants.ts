@@ -1,14 +1,15 @@
+export const apiRoute = 'https://localhost:5001/api/v1';
+// export const apiRoute = 'https://api.dragonflytracker.com:5001/api/v1';
 
-export const apiRoute = "https://localhost:5001/api/v1";
 export const pageSizeConst = 50;
 
-export function tokenGetter() {
-  const storageItem = localStorage.getItem("auth_app_token");
+export const tokenGetter = () => {
+  const storageItem = localStorage.getItem('auth_app_token');
   if (!storageItem) {
     return null;
   }
-  return JSON.parse(storageItem)["value"];
-}
+  return JSON.parse(storageItem)['value'];
+};
 
 export interface Project {
   name?: string;

@@ -12,16 +12,16 @@ namespace DragonflyTracker.Services
 
     public class PostService : IPostService
     {
-        private readonly DataContext _dataContext;
+        private readonly PgMainDataContext _pgMainDataContext;
 
-        public PostService(DataContext dataContext)
+        public PostService(PgMainDataContext pgMainDataContext)
         {
-            _dataContext = dataContext;
+            _pgMainDataContext = pgMainDataContext;
         }
 
         public async Task<List<Post>> GetPostsAsync(GetAllPostsFilter filter = null, PaginationFilter paginationFilter = null)
         {
-            var queryable = _dataContext.Posts.AsQueryable();
+            var queryable = _pgMainDataContext.Posts.AsQueryable();
 
             if (paginationFilter == null)
             {
@@ -37,7 +37,7 @@ namespace DragonflyTracker.Services
 
         public async Task<Post> GetPostByIdAsync(Guid postId)
         {
-            return await _dataContext.Posts
+            return await _pgMainDataContext.Posts
                 .Include(x => x.Tags)
                 .SingleOrDefaultAsync(x => x.Id == postId).ConfigureAwait(false);
         }
@@ -47,9 +47,9 @@ namespace DragonflyTracker.Services
             post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
             await AddNewTags(post).ConfigureAwait(false);
-            await _dataContext.Posts.AddAsync(post);
+            await _pgMainDataContext.Posts.AddAsync(post);
 
-            var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return created > 0;
         }
 
@@ -57,8 +57,8 @@ namespace DragonflyTracker.Services
         {
             postToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
             await AddNewTags(postToUpdate).ConfigureAwait(false);
-            _dataContext.Posts.Update(postToUpdate);
-            var updated = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Posts.Update(postToUpdate);
+            var updated = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return updated > 0;
         }
 
@@ -66,17 +66,17 @@ namespace DragonflyTracker.Services
         {
             var post = new Post { Id = postId };
 
-            _dataContext.Posts.Attach(post);
+            _pgMainDataContext.Posts.Attach(post);
 
 
-            _dataContext.Posts.Remove(post);
-            var deleted = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Posts.Remove(post);
+            var deleted = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return deleted > 0;
         }
 
         public async Task<bool> UserOwnsPostAsync(Guid postId, string userId)
         {
-            var post = await _dataContext.Posts.AsNoTracking().SingleOrDefaultAsync(x => x.Id == postId).ConfigureAwait(false);
+            var post = await _pgMainDataContext.Posts.AsNoTracking().SingleOrDefaultAsync(x => x.Id == postId).ConfigureAwait(false);
 
             if (post == null)
             {
@@ -93,38 +93,38 @@ namespace DragonflyTracker.Services
 
         public async Task<List<Tag>> GetAllTagsAsync()
         {
-            return await _dataContext.Tags.AsNoTracking().ToListAsync().ConfigureAwait(false);
+            return await _pgMainDataContext.Tags.AsNoTracking().ToListAsync().ConfigureAwait(false);
         }
 
         public async Task<bool> CreateTagAsync(Tag tag)
         {
             tag.Name = tag.Name.ToLower();
-            var existingTag = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tag.Name).ConfigureAwait(false);
+            var existingTag = await _pgMainDataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tag.Name).ConfigureAwait(false);
             if (existingTag != null)
                 return true;
 
-            await _dataContext.Tags.AddAsync(tag);
-            var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            await _pgMainDataContext.Tags.AddAsync(tag);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return created > 0;
         }
 
         public async Task<Tag> GetTagByNameAsync(string tagName)
         {
-            return await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower()).ConfigureAwait(false);
+            return await _pgMainDataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower()).ConfigureAwait(false);
         }
 
         public async Task<bool> DeleteTagAsync(string tagName)
         {
-            var tag = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower()).ConfigureAwait(false);
+            var tag = await _pgMainDataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower()).ConfigureAwait(false);
 
             if (tag == null)
                 return true;
 
-            var postTags = await _dataContext.PostTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync().ConfigureAwait(false);
+            var postTags = await _pgMainDataContext.PostTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync().ConfigureAwait(false);
 
-            _dataContext.PostTags.RemoveRange(postTags);
-            _dataContext.Tags.Remove(tag);
-            return await _dataContext.SaveChangesAsync().ConfigureAwait(false) > postTags.Count;
+            _pgMainDataContext.PostTags.RemoveRange(postTags);
+            _pgMainDataContext.Tags.Remove(tag);
+            return await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false) > postTags.Count;
         }
 
         private async Task AddNewTags(Post post)
@@ -132,12 +132,12 @@ namespace DragonflyTracker.Services
             foreach (var tag in post.Tags)
             {
                 var existingTag =
-                    await _dataContext.Tags.SingleOrDefaultAsync(x =>
+                    await _pgMainDataContext.Tags.SingleOrDefaultAsync(x =>
                         x.Name == tag.TagName).ConfigureAwait(false);
                 if (existingTag != null)
                     continue;
 
-                await _dataContext.Tags.AddAsync(new Tag
+                await _pgMainDataContext.Tags.AddAsync(new Tag
                 { Name = tag.TagName, CreatedOn = DateTime.UtcNow, CreatorId = post.UserId });
             }
         }

@@ -1,12 +1,13 @@
 ﻿using DragonflyTracker.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace DragonflyTracker.Data
 {
-    public class DataContext : IdentityDbContext
+    public class PgMainDataContext : IdentityDbContext
     {
-        public DataContext(DbContextOptions<DataContext> options) :base(options)
+        public PgMainDataContext(DbContextOptions<PgMainDataContext> options) :base(options)
         {
 
         }
@@ -42,6 +43,12 @@ namespace DragonflyTracker.Data
         public DbSet<ProjectMaintainer> ProjectMaintainers { get; set; }
 
         public DbSet<IssueIssueType> IssueIssueTypes { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder builder)
+        {
+            builder.UseNpgsql("User ID=Axmouth;Password=axmouth;Host=localhost;Port=5432;Database=dragonflydb;Pooling=true;",
+                o => o.UseTrigrams());
+        }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
