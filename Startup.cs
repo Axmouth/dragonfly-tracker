@@ -34,8 +34,8 @@ namespace DragonflyTracker
                                   builder =>
                                   {
                                       builder.WithOrigins(
+                                                          "http://localhost:4201",
                                                           "https://api.dragonflytracker.com",
-                                                          "http://localhost:4200",
                                                           "http://api.dragonflytracker.com",
                                                           "*")
                                                   .AllowAnyHeader()

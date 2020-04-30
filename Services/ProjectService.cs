@@ -11,9 +11,9 @@ namespace DragonflyTracker.Services
     public class ProjectService: IProjectService
     {
         private readonly PgMainDataContext _dataContext;
-        private readonly IssueService _issueService;
+        private readonly IIssueService _issueService;
 
-        public ProjectService(PgMainDataContext dataContext, IssueService issueService)
+        public ProjectService(PgMainDataContext dataContext, IIssueService issueService)
         {
             _dataContext = dataContext;
             _issueService = issueService;

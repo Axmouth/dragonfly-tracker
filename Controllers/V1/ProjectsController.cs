@@ -29,11 +29,11 @@ namespace DragonflyTracker.Controllers.V1
         private readonly PgMainDataContext _context;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
-        private readonly ProjectService _projectService;
+        private readonly IProjectService _projectService;
         private readonly UserManager<DragonflyUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public ProjectsController(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, PgMainDataContext context, ProjectService projectService, IMapper mapper, IUriService uriService)
+        public ProjectsController(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, PgMainDataContext context, IProjectService projectService, IMapper mapper, IUriService uriService)
         {
             _context = context;
             _mapper = mapper;

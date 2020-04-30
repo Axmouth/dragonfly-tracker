@@ -28,10 +28,10 @@ namespace DragonflyTracker.Controllers.V1
         private readonly PgMainDataContext _pgMainDataContext;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
-        private readonly IssueService _issueService;
-        private readonly ProjectService _projectService;
+        private readonly IIssueService _issueService;
+        private readonly IProjectService _projectService;
 
-        public IssuesController(PgMainDataContext pgMainDataContext, IssueService issueService, ProjectService projectService, IMapper mapper, IUriService uriService)
+        public IssuesController(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService)
         {
             _pgMainDataContext = pgMainDataContext;
             _mapper = mapper;
