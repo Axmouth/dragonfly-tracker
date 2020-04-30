@@ -3,8 +3,11 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
 };
+
+export const apiRoute = 'https://localhost:5001/api/v1';
+// export const apiRoute = 'https://api.dragonflytracker.com:5001/api/v1';
 
 /*
  * In development mode, to ignore zone related error stack frames such as

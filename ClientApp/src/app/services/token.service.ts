@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 import { filter, share } from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TokenService {
   protected token$: BehaviorSubject<AuthToken> = new BehaviorSubject(null);
@@ -55,11 +55,10 @@ export class TokenService {
    * @returns {Observable<AuthToken>}
    */
   tokenChange(): Observable<AuthToken> {
-    return this.token$
-      .pipe(
-        filter(value => !!value),
-        share(),
-      );
+    return this.token$.pipe(
+      filter((value) => !!value),
+      share(),
+    );
   }
 
   protected publishStoredToken() {
@@ -91,39 +90,33 @@ export class TokenService {
     }
 
     return AuthCreateJWTToken(tokenValue, tokenOwnerStrategyName, tokenCreatedAt);
-
   }
 
   protected parseTokenPack(value): TokenPack {
     try {
       return JSON.parse(value);
-    } catch (e) { }
+    } catch (e) {}
     return null;
   }
-  
 }
 
-export function AuthCreateJWTToken(
-  token: any,
-  ownerStrategyName: string,
-  createdAt?: Date) {
+export function AuthCreateJWTToken(token: any, ownerStrategyName: string, createdAt?: Date) {
   return new AuthJWTToken(token, ownerStrategyName, createdAt);
 }
 
 export interface AuthTokenClass<T = AuthToken> {
   NAME: string;
-  new(raw: any, strategyName: string, expDate?: Date): T;
+  new (raw: any, strategyName: string, expDate?: Date): T;
 }
 
 export interface TokenPack {
-  name: string,
-  ownerStrategyName?: string,
-  createdAt: Number,
-  value: string,
+  name: string;
+  ownerStrategyName?: string;
+  createdAt: Number;
+  value: string;
 }
 
 export abstract class AuthToken {
-
   protected payload: any = null;
 
   abstract getValue(): string;
@@ -145,12 +138,9 @@ export abstract class AuthToken {
  * Wrapper for simple (text) token
  */
 export class AuthSimpleToken extends AuthToken {
-
   static NAME = 'dragonfly:auth:simple:token';
 
-  constructor(protected readonly token: any,
-    protected readonly ownerStrategyName: string,
-    protected createdAt?: Date) {
+  constructor(protected readonly token: any, protected readonly ownerStrategyName: string, protected createdAt?: Date) {
     super();
     try {
       this.parsePayload();
@@ -229,13 +219,10 @@ export class AuthEmptyTokenError extends AuthIllegalTokenError {
   }
 }
 
-
-
 /**
  * Wrapper for JWT token with additional methods.
  */
 export class AuthJWTToken extends AuthSimpleToken {
-
   static NAME = 'dragonfly:auth:jwt:token';
 
   /**
@@ -252,7 +239,7 @@ export class AuthJWTToken extends AuthSimpleToken {
    */
   protected parsePayload(): void {
     if (!this.token) {
-      throw new AuthTokenNotFoundError('Token not found. ')
+      throw new AuthTokenNotFoundError('Token not found. ');
     }
     this.payload = decodeJwtPayload(this.token);
   }
@@ -280,7 +267,6 @@ export class AuthJWTToken extends AuthSimpleToken {
   }
 }
 
-
 export class AuthTokenNotFoundError extends Error {
   constructor(message: string) {
     super(message);
@@ -289,7 +275,6 @@ export class AuthTokenNotFoundError extends Error {
 }
 
 export function decodeJwtPayload(payload: string): any {
-
   if (payload.length === 0) {
     throw new AuthEmptyTokenError('Cannot extract from an empty payload.');
   }
@@ -298,20 +283,19 @@ export function decodeJwtPayload(payload: string): any {
 
   if (parts.length !== 3) {
     throw new AuthIllegalJWTTokenError(
-      `The payload ${payload} is not valid JWT payload and must consist of three parts.`);
+      `The payload ${payload} is not valid JWT payload and must consist of three parts.`,
+    );
   }
 
   let decoded;
   try {
     decoded = urlBase64Decode(parts[1]);
   } catch (e) {
-    throw new AuthIllegalJWTTokenError(
-      `The payload ${payload} is not valid JWT payload and cannot be parsed.`);
+    throw new AuthIllegalJWTTokenError(`The payload ${payload} is not valid JWT payload and cannot be parsed.`);
   }
 
   if (!decoded) {
-    throw new AuthIllegalJWTTokenError(
-      `The payload ${payload} is not valid JWT payload and cannot be decoded.`);
+    throw new AuthIllegalJWTTokenError(`The payload ${payload} is not valid JWT payload and cannot be decoded.`);
   }
   return JSON.parse(decoded);
 }
@@ -319,9 +303,17 @@ export function decodeJwtPayload(payload: string): any {
 export function urlBase64Decode(str: string): string {
   let output = str.replace(/-/g, '+').replace(/_/g, '/');
   switch (output.length % 4) {
-    case 0: { break; }
-    case 2: { output += '=='; break; }
-    case 3: { output += '='; break; }
+    case 0: {
+      break;
+    }
+    case 2: {
+      output += '==';
+      break;
+    }
+    case 3: {
+      output += '=';
+      break;
+    }
     default: {
       throw new Error('Illegal base64url string!');
     }
@@ -331,7 +323,7 @@ export function urlBase64Decode(str: string): string {
 
 export function b64decode(str: string): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  let output: string = '';
+  let output = '';
 
   str = String(str).replace(/=+$/, '');
 
@@ -341,14 +333,19 @@ export function b64decode(str: string): string {
 
   for (
     // initialize result and counters
-    let bc: number = 0, bs: any, buffer: any, idx: number = 0;
+    let bc = 0, bs: any, buffer: any, idx = 0;
     // get next character
-    buffer = str.charAt(idx++);
+    (buffer = str.charAt(idx++));
     // character found in table? initialize bit storage and add its ascii value;
-    ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
-      // and if not first of each 4 characters,
-      // convert the first 8 bits to one ascii character
-      bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+    // tslint:disable-next-line:no-bitwise
+    ~buffer &&
+    ((bs = bc % 4 ? bs * 64 + buffer : buffer),
+    // and if not first of each 4 characters,
+    // convert the first 8 bits to one ascii character
+    bc++ % 4)
+      ? // tslint:disable-next-line:no-bitwise
+        (output += String.fromCharCode(255 & (bs >> ((-2 * bc) & 6))))
+      : 0
   ) {
     // try to find character in table (0-63, not found => -1)
     buffer = chars.indexOf(buffer);
@@ -358,7 +355,11 @@ export function b64decode(str: string): string {
 
 // https://developer.mozilla.org/en/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_Unicode_Problem
 export function b64DecodeUnicode(str: any) {
-  return decodeURIComponent(Array.prototype.map.call(b64decode(str), (c: any) => {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
+  return decodeURIComponent(
+    Array.prototype.map
+      .call(b64decode(str), (c: any) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join(''),
+  );
 }

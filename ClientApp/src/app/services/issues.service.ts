@@ -1,17 +1,23 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { apiRoute, pageSizeConst } from './constants';
+import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
+import { apiRoute } from 'src/environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class IssuesService {
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
-
-
-  getUsersProjectsIssues(username: string, projectName: string, page: number = 1, myPageSize = pageSizeConst, search: string = undefined, isOpen: boolean = undefined) {
+  getUsersProjectsIssues(
+    username: string,
+    projectName: string,
+    page: number = 1,
+    myPageSize = pageSizeConst,
+    search: string,
+    isOpen: boolean,
+  ) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
@@ -32,7 +38,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.get(url, { headers });
   }
 
@@ -40,7 +46,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.delete(url, { headers });
   }
 
@@ -48,7 +54,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues`;
     return this.http.post(url, newIssue, { headers });
   }
 
@@ -56,12 +62,17 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.put(url, updatedIssue, { headers });
   }
 
-
-  getUsersProjectsIssuePosts(username: string, projectName: string, issueNumber: number, page: number = 1, myPageSize = pageSizeConst) {
+  getUsersProjectsIssuePosts(
+    username: string,
+    projectName: string,
+    issueNumber: number,
+    page: number = 1,
+    myPageSize = pageSizeConst,
+  ) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
@@ -76,7 +87,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.get(url, { headers });
   }
 
@@ -84,7 +95,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.delete(url, { headers });
   }
 
@@ -92,32 +103,50 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
+    const url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
     return this.http.post(url, newIssuePost, { headers });
   }
 
-  updateUsersProjectIssuePost(username: string, projectName: string, issueNumber: number, issuePostNumber: number, updatedIssuePost: object) {
+  updateUsersProjectIssuePost(
+    username: string,
+    projectName: string,
+    issueNumber: number,
+    issuePostNumber: number,
+    updatedIssuePost: object,
+  ) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.put(url, updatedIssuePost, { headers });
   }
 
-  deleteUsersProjectIssuePostReaction(username: string, projectName: string, issueNumber: number, issuePostNumber: number, reactionID: string) {
+  deleteUsersProjectIssuePostReaction(
+    username: string,
+    projectName: string,
+    issueNumber: number,
+    issuePostNumber: number,
+    reactionID: string,
+  ) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions/${reactionID}`;
+    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions/${reactionID}`;
     return this.http.delete(url, { headers });
   }
 
-  createUsersProjectIssuePostReaction(username: string, projectName: string, issueNumber: number, issuePostNumber: number, newIssuePostReaction: object, reactionType: string) {
+  createUsersProjectIssuePostReaction(
+    username: string,
+    projectName: string,
+    issueNumber: number,
+    issuePostNumber: number,
+    newIssuePostReaction: object,
+    reactionType: string,
+  ) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
+    const url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
     return this.http.post(url, newIssuePostReaction, { headers });
   }
-
 }

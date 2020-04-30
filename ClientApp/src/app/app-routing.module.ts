@@ -1,23 +1,23 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { CounterComponent } from './counter/counter.component';
-import { FetchDataComponent } from './fetch-data/fetch-data.component';
-import { HomeComponent } from './home/home.component';
-import { ViewMyProjectsComponent } from './view-my-projects/view-my-projects.component';
-import { ViewProfileComponent } from './view-profile/view-profile.component';
-import { ViewProjectIssuesComponent } from './view-project-issues/view-project-issues.component';
-import { CreateOwnProjectComponent } from './create-own-project/create-own-project.component';
-import { ViewUserProjectComponent } from './view-user-project/view-user-project.component';
-import { ViewOrgProjectComponent } from './view-org-project/view-org-project.component';
-import { ViewUserProjectIssuesComponent } from './view-user-project-issues/view-user-project-issues.component';
-import { ViewOrgProjectIssuesComponent } from './view-org-project-issues/view-org-project-issues.component';
-import { LoginPageComponent } from './login-page/login-page.component';
-import { RegisterPageComponent } from './register-page/register-page.component';
-import { NotFoundPageComponent } from './not-found-page/not-found-page.component';
-import { LogoutPageComponent } from './logout-page/logout-page.component';
-import { CreateIssueComponent } from './create-issue/create-issue.component';
-import { ViewOrgProjectIssueComponent } from './view-org-project-issue/view-org-project-issue.component';
-import { ViewUserProjectIssueComponent } from './view-user-project-issue/view-user-project-issue.component';
+import { CounterComponent } from './components/counter/counter.component';
+import { FetchDataComponent } from './components/fetch-data/fetch-data.component';
+import { HomeComponent } from './components/home/home.component';
+import { ViewMyProjectsComponent } from './components/view-my-projects/view-my-projects.component';
+import { ViewProfileComponent } from './components/view-profile/view-profile.component';
+import { ViewProjectIssuesComponent } from './components/view-project-issues/view-project-issues.component';
+import { CreateOwnProjectComponent } from './components/create-own-project/create-own-project.component';
+import { ViewUserProjectComponent } from './components/view-user-project/view-user-project.component';
+import { ViewOrgProjectComponent } from './components/view-org-project/view-org-project.component';
+import { ViewUserProjectIssuesComponent } from './components/view-user-project-issues/view-user-project-issues.component';
+import { ViewOrgProjectIssuesComponent } from './components/view-org-project-issues/view-org-project-issues.component';
+import { LoginPageComponent } from './components/login-page/login-page.component';
+import { RegisterPageComponent } from './components/register-page/register-page.component';
+import { NotFoundPageComponent } from './components/not-found-page/not-found-page.component';
+import { LogoutPageComponent } from './components/logout-page/logout-page.component';
+import { CreateIssueComponent } from './components/create-issue/create-issue.component';
+import { ViewOrgProjectIssueComponent } from './components/view-org-project-issue/view-org-project-issue.component';
+import { ViewUserProjectIssueComponent } from './components/view-user-project-issue/view-user-project-issue.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -44,8 +44,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [
-    RouterModule
-  ]
+  exports: [RouterModule],
 })
-export class RoutingModule { };
+export class RoutingModule {}

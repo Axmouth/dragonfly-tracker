@@ -1,28 +1,28 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ProjectsService } from '../projects.service';
+import { ProjectsService } from '../../services/projects.service';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription, Subject } from 'rxjs';
-import { Project, Issue } from '../constants';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
-import { IssuesService } from '../issues.service';
+import { IssuesService } from '../../services/issues.service';
+import { Issue } from 'src/app/models/issue';
 
 const openStatusMap = {
-  "open": true,
-  "closed": false,
-  "all": undefined,
+  open: true,
+  closed: false,
+  all: undefined,
 };
 
 @Component({
   selector: 'app-view-user-project',
   templateUrl: './view-user-project.component.html',
-  styleUrls: ['./view-user-project.component.scss']
+  styleUrls: ['./view-user-project.component.scss'],
 })
 export class ViewUserProjectComponent implements OnInit, OnDestroy {
   issuesList: Issue[] = [];
   projectSubscription$: Subscription;
   total: number;
-  loadingIssues: boolean = true;
+  loadingIssues = true;
   ngUnsubscribe = new Subject<void>();
   project = {};
   projectSub$: Subscription;
@@ -31,19 +31,25 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   loading = true;
   notFound = false;
   searchText: string;
-  openStatus: string = "open";
+  openStatus = 'open';
   state: ClrDatagridStateInterface;
 
-  constructor(private projectsService: ProjectsService, private route: ActivatedRoute, private issuesService: IssuesService) { }
+  constructor(
+    private projectsService: ProjectsService,
+    private route: ActivatedRoute,
+    private issuesService: IssuesService,
+  ) {}
 
   async ngOnInit() {
     const params = this.route.snapshot.paramMap;
-    this.targetUsername = params.get("username");
-    this.targetProjectName = params.get("projectname");
-    this.projectSub$ = this.projectsService.getUsersProject(this.targetUsername, this.targetProjectName).subscribe(result => {
-      this.project = result["data"];
-      console.log(this.project);
-    });
+    this.targetUsername = params.get('username');
+    this.targetProjectName = params.get('projectname');
+    this.projectSub$ = this.projectsService
+      .getUsersProject(this.targetUsername, this.targetProjectName)
+      .subscribe((result) => {
+        this.project = result['data'];
+        console.log(this.project);
+      });
   }
 
   ngOnDestroy() {
@@ -58,9 +64,12 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
 
   onIssueDeleteClick(issue: Issue) {
     console.log(issue);
-    this.issuesService.deleteUsersProjectIssue(this.targetUsername, this.targetProjectName, issue.number).pipe(takeUntil(this.ngUnsubscribe)).subscribe(result => {
-      console.log(result);
-    });
+    this.issuesService
+      .deleteUsersProjectIssue(this.targetUsername, this.targetProjectName, issue.number)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((result) => {
+        console.log(result);
+      });
     const index = this.issuesList.indexOf(issue);
     console.log(index);
     this.issuesList = this.issuesList.slice(index, 1);
@@ -77,21 +86,21 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     this.state = state;
     if (!this.targetProjectName || !this.targetUsername) {
       const params = this.route.snapshot.paramMap;
-      this.targetUsername = params.get("username");
-      this.targetProjectName = params.get("projectname");
+      this.targetUsername = params.get('username');
+      this.targetProjectName = params.get('projectname');
     }
     this.loadingIssues = true;
     console.log(state);
 
     // We convert the filters from an array to a map,
     // because that's what our backend-calling service is expecting
-    let filters: { [prop: string]: any[] } = {};
+    const filters: { [prop: string]: any[] } = {};
     if (state.filters) {
-      for (let filter of state.filters) {
-        let { property, value } = <{ property: string, value: string }>filter;
+      for (const filter of state.filters) {
+        const { property, value } = <{ property: string; value: string }>filter;
         filters[property] = [value];
       }
-    }/*
+    } /*
     this.inventory.filter(filters)
       .sort(<{ by: string, reverse: boolean }>state.sort)
       .fetch(state.page.from, state.page.size)
@@ -101,14 +110,21 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
         this.loading = false;
       });*/
 
-    this.projectSubscription$ = this.issuesService.getUsersProjectsIssues(this.targetUsername, this.targetProjectName, state.page.current, state.page.size, this.searchText, openStatusMap[this.openStatus])
-      .subscribe(async issuessResult => {
+    this.projectSubscription$ = this.issuesService
+      .getUsersProjectsIssues(
+        this.targetUsername,
+        this.targetProjectName,
+        state.page.current,
+        state.page.size,
+        this.searchText,
+        openStatusMap[this.openStatus],
+      )
+      .subscribe(async (issuessResult) => {
         console.log(issuessResult);
-        this.issuesList = issuessResult["data"];
-        this.total = issuessResult["total"];
+        this.issuesList = issuessResult['data'];
+        this.total = issuessResult['total'];
         console.log(this.issuesList);
         this.loadingIssues = false;
-    });
+      });
   }
-
 }

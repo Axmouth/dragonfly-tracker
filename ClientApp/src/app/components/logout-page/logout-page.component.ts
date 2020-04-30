@@ -1,20 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-logout-page',
   templateUrl: './logout-page.component.html',
-  styleUrls: ['./logout-page.component.scss']
+  styleUrls: ['./logout-page.component.scss'],
 })
 export class LogoutPageComponent implements OnInit {
   isSuccess = false;
   isFailure = false;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.authService.logout().subscribe(result => {
+    this.authService.logout().subscribe((result) => {
       console.log(result);
       if (result.isSuccess) {
         this.isFailure = false;
@@ -26,5 +26,4 @@ export class LogoutPageComponent implements OnInit {
       }
     });
   }
-
 }

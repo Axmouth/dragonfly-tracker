@@ -1,16 +1,16 @@
 import { Component, OnInit, Output, EventEmitter, Input, OnDestroy } from '@angular/core';
-import { Project } from '../constants';
 import { Subject } from 'rxjs';
+import { Project } from 'src/app/models/project';
 
 @Component({
   selector: 'app-project-editor',
   templateUrl: './project-editor.component.html',
-  styleUrls: ['./project-editor.component.scss']
+  styleUrls: ['./project-editor.component.scss'],
 })
 export class ProjectEditorComponent implements OnInit, OnDestroy {
   projectName: string;
   projectDescription: string;
-  isPublic: boolean = true;
+  isPublic = true;
   projectMaintainers: any[];
   projectAdmins: any[];
   projectIssueStages: any[];
@@ -21,7 +21,7 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
   submitProject = new EventEmitter<Project>();
   ngUnsubscribe = new Subject<void>();
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit() {
     if (this.oldProject) {
@@ -56,5 +56,4 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
-
 }

@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
-import { Issue } from '../constants';
 import { Subject } from 'rxjs';
+import { Issue } from 'src/app/models/issue';
 
 @Component({
   selector: 'app-issue-editor',
   templateUrl: './issue-editor.component.html',
-  styleUrls: ['./issue-editor.component.scss']
+  styleUrls: ['./issue-editor.component.scss'],
 })
 export class IssueEditorComponent implements OnInit, OnDestroy {
   issueTitle: string;
@@ -18,7 +18,7 @@ export class IssueEditorComponent implements OnInit, OnDestroy {
   submitIssue = new EventEmitter<Issue>();
   ngUnsubscribe = new Subject<void>();
 
-  constructor() { }
+  constructor() {}
 
   ngOnInit() {
     if (this.oldIssue) {
@@ -47,5 +47,4 @@ export class IssueEditorComponent implements OnInit, OnDestroy {
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }
-
 }

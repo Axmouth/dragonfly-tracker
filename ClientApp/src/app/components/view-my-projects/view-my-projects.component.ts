@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ProjectsService } from '../projects.service';
-import { tokenGetter, Project } from '../constants';
+import { ProjectsService } from '../../services/projects.service';
 import { Subscription, pipe, Subject } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
-import { AuthService } from '../auth.service';
-import { TokenService } from '../token.service';
+import { AuthService } from '../../services/auth.service';
+import { TokenService } from '../../services/token.service';
+import { Project } from 'src/app/models/project';
 
 @Component({
   selector: 'app-view-my-projects',
