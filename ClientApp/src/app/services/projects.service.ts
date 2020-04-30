@@ -3,6 +3,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
 import { apiRoot } from 'src/environments/environment';
+import { Observable } from 'rxjs';
+import { Project } from '../models/project';
+import { Response } from '../models/response';
+import { PagedResponse } from '../models/paged-response';
+import { ErrorResponse } from '../models/error-response';
 
 @Injectable({
   providedIn: 'root',
@@ -10,46 +15,49 @@ import { apiRoot } from 'src/environments/environment';
 export class ProjectsService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getUsersProjects(username: string, page: number = 1, myPageSize = pageSizeConst) {
+  getUsersProjects(
+    username: string,
+    page: number = 1,
+    myPageSize = pageSizeConst,
+  ): Observable<PagedResponse<Project> | ErrorResponse> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    // tslint:disable-next-line: max-line-length
     let url = `${apiRoot}/users/${username}/projects?PageSize=${myPageSize}`;
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
-    return this.http.get(url, { headers });
+    return this.http.get<PagedResponse<Project> | ErrorResponse>(url, { headers });
   }
 
-  getUsersProject(username: string, projectName: string) {
+  getUsersProject(username: string, projectName: string): Observable<Response<Project> | ErrorResponse> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    // tslint:disable-next-line: max-line-length
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.get(url, { headers });
+    return this.http.get<Response<Project> | ErrorResponse>(url, { headers });
   }
 
   deleteUsersProject(username: string, projectName: string) {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    // tslint:disable-next-line: max-line-length
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
     return this.http.delete(url, { headers });
   }
 
-  createUsersProject(username: string, newProject: object) {
+  createUsersProject(username: string, newProject: object): Observable<Response<Project> | ErrorResponse> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    // tslint:disable-next-line: max-line-length
     const url = `${apiRoot}/users/${username}/projects`;
-    return this.http.post(url, newProject, { headers });
+    return this.http.post<Response<Project> | ErrorResponse>(url, newProject, { headers });
   }
 
-  updateUsersProject(username: string, projectName: string, newProject: object) {
+  updateUsersProject(
+    username: string,
+    projectName: string,
+    newProject: object,
+  ): Observable<Response<Project> | ErrorResponse> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    // tslint:disable-next-line: max-line-length
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.put(url, newProject, { headers });
+    return this.http.put<Response<Project> | ErrorResponse>(url, newProject, { headers });
   }
 }

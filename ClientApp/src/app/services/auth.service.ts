@@ -5,6 +5,9 @@ import { Observable, of as observableOf } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
+import { AuthSuccessResponse } from '../models/auth-success-response';
+import { AuthFailedResponse } from '../models/auth-failed-response';
+import { EmptyResponse } from '../models/empty-response';
 
 @Injectable({
   providedIn: 'root',
@@ -23,21 +26,26 @@ export class AuthService {
    * @returns {Observable<AuthResult>}
    */
   authenticate(data?: any) {
-    const result = this.http.request('post', `${apiRoot}/identity/login`, { body: data, observe: 'response' }).pipe(
-      map((res) => {
-        return new AuthResult(
-          true,
-          res.body,
-          true,
-          ['Login/Email combination is not correct, please try again.'],
-          ['You have been successfully logged in.'],
-          this.createToken(res.body['token'], true),
-        );
-      }),
-      catchError((res) => {
-        return this.handleResponseError(res);
-      }),
-    );
+    const result = this.http
+      .request<AuthSuccessResponse | AuthFailedResponse>('post', `${apiRoot}/identity/login`, {
+        body: data,
+        observe: 'response',
+      })
+      .pipe(
+        map((res) => {
+          return new AuthResult(
+            true,
+            res.body,
+            true,
+            ['Login/Email combination is not correct, please try again.'],
+            ['You have been successfully logged in.'],
+            this.createToken(res.body['token'], true),
+          );
+        }),
+        catchError((res) => {
+          return this.handleResponseError(res);
+        }),
+      );
     return result.pipe(
       switchMap((authResult: AuthResult) => {
         return this.processResultToken(authResult);
@@ -61,7 +69,7 @@ export class AuthService {
         if (!url) {
           return observableOf(res);
         }
-        return this.http.request('delete', url, { observe: 'response' });
+        return this.http.request<EmptyResponse | AuthFailedResponse>('delete', url, { observe: 'response' });
       }),
       map((res) => {
         return new AuthResult(
@@ -98,21 +106,23 @@ export class AuthService {
    */
   register(data?: any) {
     const url = `${apiRoot}/identity/register`;
-    const result = this.http.request('post', url, { body: data, observe: 'response' }).pipe(
-      map((res) => {
-        return new AuthResult(
-          true,
-          res,
-          true,
-          ['Something went wrong, please try again.'],
-          ['You have been successfully registered.'],
-          this.createToken(res.body['token'], true),
-        );
-      }),
-      catchError((res) => {
-        return this.handleResponseError(res);
-      }),
-    );
+    const result = this.http
+      .request<AuthSuccessResponse | AuthFailedResponse>('post', url, { body: data, observe: 'response' })
+      .pipe(
+        map((res) => {
+          return new AuthResult(
+            true,
+            res,
+            true,
+            ['Something went wrong, please try again.'],
+            ['You have been successfully registered.'],
+            this.createToken(res.body['token'], true),
+          );
+        }),
+        catchError((res) => {
+          return this.handleResponseError(res);
+        }),
+      );
     return result.pipe(
       switchMap((authResult: AuthResult) => {
         return this.processResultToken(authResult);
@@ -174,7 +184,7 @@ export class AuthService {
   refreshToken(data?: any) {
     const url = `${apiRoot}/identity/refresh`;
     return this.http
-      .request('post', url, { body: data, observe: 'response' })
+      .request<AuthSuccessResponse | AuthFailedResponse>('post', url, { body: data, observe: 'response' })
       .pipe(
         map((res) => {
           const token = AuthCreateJWTToken(res.body['token'], 'refreshToken');

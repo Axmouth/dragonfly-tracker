@@ -1,2 +1,2 @@
-export class AuthFailedResponse {
-}
+import { ErrorResponse } from './error-response';
+export class AuthFailedResponse extends ErrorResponse {}
