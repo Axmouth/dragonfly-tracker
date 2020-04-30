@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
-import { apiRoute } from 'src/environments/environment';
+import { apiRoot } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +21,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues?PageSize=${myPageSize}`;
+    let url = `${apiRoot}/users/${username}/projects/${projectName}/issues?PageSize=${myPageSize}`;
     if (page !== undefined) {
       url = url + `&PageNumber=${page}`;
     }
@@ -38,7 +38,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.get(url, { headers });
   }
 
@@ -46,7 +46,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.delete(url, { headers });
   }
 
@@ -54,7 +54,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues`;
     return this.http.post(url, newIssue, { headers });
   }
 
@@ -62,7 +62,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
     return this.http.put(url, updatedIssue, { headers });
   }
 
@@ -76,7 +76,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts?PageSize=${myPageSize}`;
+    let url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts?PageSize=${myPageSize}`;
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
@@ -87,7 +87,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.get(url, { headers });
   }
 
@@ -95,7 +95,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.delete(url, { headers });
   }
 
@@ -103,7 +103,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
+    const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
     return this.http.post(url, newIssuePost, { headers });
   }
 
@@ -117,7 +117,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
     return this.http.put(url, updatedIssuePost, { headers });
   }
 
@@ -131,7 +131,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions/${reactionID}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions/${reactionID}`;
     return this.http.delete(url, { headers });
   }
 
@@ -146,7 +146,7 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
+    const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
     return this.http.post(url, newIssuePostReaction, { headers });
   }
 }

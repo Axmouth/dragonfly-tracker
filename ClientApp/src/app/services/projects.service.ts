@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
-import { apiRoute } from 'src/environments/environment';
+import { apiRoot } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    let url = `${apiRoute}/users/${username}/projects?PageSize=${myPageSize}`;
+    let url = `${apiRoot}/users/${username}/projects?PageSize=${myPageSize}`;
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
@@ -25,7 +25,7 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}`;
     return this.http.get(url, { headers });
   }
 
@@ -33,7 +33,7 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}`;
     return this.http.delete(url, { headers });
   }
 
@@ -41,7 +41,7 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects`;
+    const url = `${apiRoot}/users/${username}/projects`;
     return this.http.post(url, newProject, { headers });
   }
 
@@ -49,7 +49,7 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
-    const url = `${apiRoute}/users/${username}/projects/${projectName}`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}`;
     return this.http.put(url, newProject, { headers });
   }
 }
