@@ -30,6 +30,7 @@ import { CreateIssuePostComponent } from './components/create-issue-post/create-
 import { ViewUserProjectIssueComponent } from './components/view-user-project-issue/view-user-project-issue.component';
 import { ViewOrgProjectIssueComponent } from './components/view-org-project-issue/view-org-project-issue.component';
 import { tokenGetter } from './constants';
+import { UserPreferencesComponent } from './components/user-preferences/user-preferences.component';
 
 @NgModule({
   declarations: [
@@ -55,6 +56,7 @@ import { tokenGetter } from './constants';
     CreateIssuePostComponent,
     ViewUserProjectIssueComponent,
     ViewOrgProjectIssueComponent,
+    UserPreferencesComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

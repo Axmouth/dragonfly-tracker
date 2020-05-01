@@ -14,7 +14,8 @@ namespace DragonflyTracker.Installers
         {
             services.AddDbContext<PgMainDataContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("MainConnection"))
+                configuration.GetConnectionString("MainConnection")
+                ).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
             services.AddDefaultIdentity<DragonflyUser>()
                 .AddRoles<IdentityRole>()
@@ -27,7 +28,7 @@ namespace DragonflyTracker.Installers
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<INotificationService, NotificationService>();
-            services.AddScoped<IUriService, UriService>();
+            services.AddScoped<IUriService, RestfulUriService>();
         }
     }
 }

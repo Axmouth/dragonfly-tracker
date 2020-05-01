@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsService } from '../../services/projects.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, Subject } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
@@ -21,11 +21,11 @@ const openStatusMap = {
 })
 export class ViewUserProjectComponent implements OnInit, OnDestroy {
   issuesList: Issue[] = [];
-  projectSubscription$: Subscription;
+  projectIssuesSub$: Subscription;
   total: number;
   loadingIssues = true;
   ngUnsubscribe = new Subject<void>();
-  project: Project;
+  project = new Project();
   projectSub$: Subscription;
   targetUsername: string;
   targetProjectName: string;
@@ -39,6 +39,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     private projectsService: ProjectsService,
     private route: ActivatedRoute,
     private issuesService: IssuesService,
+    private router: Router,
   ) {}
 
   async ngOnInit() {
@@ -77,6 +78,13 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     // console.log(this.projectsList.filter((x: Project) => x.creator.username !== project.creator.username || x.name !== project.name));
   }
 
+  onProjectDeleteClick() {
+    this.projectsService.deleteUsersProject(this.targetUsername, this.targetProjectName).subscribe((result) => {
+      console.log(result);
+      this.router.navigate(['my-projects']);
+    });
+  }
+
   async onSearchClick() {
     const state = this.state;
     state.page.current = 1;
@@ -111,7 +119,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
         this.loading = false;
       });*/
 
-    this.projectSubscription$ = this.issuesService
+    this.projectIssuesSub$ = this.issuesService
       .getUsersProjectsIssues(
         this.targetUsername,
         this.targetProjectName,

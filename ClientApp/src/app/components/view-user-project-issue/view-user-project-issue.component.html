@@ -1,1 +1,41 @@
-<p>view-user-project-issue works!</p>
+<div class="clr-row">
+  <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4>{{ issue.title }}</h4>
+      </div>
+      <div class="card-block">
+        <div class="card-title">Description :</div>
+        <div class="card-text">
+          <p>{{ issue.content }}</p>
+        </div>
+      </div>
+      <div class="card-block">
+        <div class="card-title"></div>
+        <div class="card-text">
+          <p>other info here</p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-sm btn-link">
+          Action 1
+        </button>
+        <button class="btn btn-sm btn-link">
+          Action 2
+        </button>
+        <div class="dropdown top-left open">
+          <button class="dropdown-toggle btn btn-sm btn-link">
+            Dropdown 1
+            <clr-icon shape="caret down"></clr-icon>
+          </button>
+          <div class="dropdown-menu">
+            <a href="..." class="dropdown-item">Item 1</a>
+            <a href="..." class="dropdown-item">Item 2</a>
+            <a href="..." class="dropdown-item">Item 3</a>
+            <a href="..." class="dropdown-item">Item 4</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

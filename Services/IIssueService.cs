@@ -20,11 +20,11 @@ namespace DragonflyTracker.Services
 
         public Task<bool> CreateIssueTypeAsync(IssueType issueType);
 
-        public Task<bool> CreateIssueByUserAsync(Issue issue, string postContent, List<IssueType> types, string username, string projectName);
+        public Task<bool> CreateIssueByUserAsync(Issue issue, List<IssueType> types, string username, string projectName);
 
-        public Task<bool> CreateIssueByOrgAsync(Issue issue, string postContent, List<IssueType> types, string organizationName, string projectName);
+        public Task<bool> CreateIssueByOrgAsync(Issue issue, List<IssueType> types, string organizationName, string projectName);
 
-        public Task<bool> CreateIssueAsync(Issue issue, string postContent, List<IssueType> types);
+        public Task<bool> CreateIssueAsync(Issue issue, List<IssueType> types);
 
         public Task<bool> UpdateIssueAsync(Issue issueToUpdate);
 

@@ -79,7 +79,7 @@ namespace DragonflyTracker.Installers
                 var accessor = provider.GetRequiredService<IHttpContextAccessor>();
                 var request = accessor.HttpContext.Request;
                 var absoluteUri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
-                return new UriService(absoluteUri, accessor);
+                return new RestfulUriService(absoluteUri, accessor);
             });
         }
     }

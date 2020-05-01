@@ -135,11 +135,12 @@ namespace DragonflyTracker.Controllers.V1
                 Id = newIssueId,
                 Title = issueRequest.Title,
                 AuthorId = HttpContext.GetUserId(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Content = issueRequest.Content
                 // Types = issueRequest.Types
             };
 
-            await _issueService.CreateIssueByUserAsync(issue, issueRequest.PostContent, issueRequest.Types, username, projectName).ConfigureAwait(false);
+            await _issueService.CreateIssueByUserAsync(issue, issueRequest.Types, username, projectName).ConfigureAwait(false);
 
             var locationUri = _uriService.GetUri(issue.Number.ToString());
             return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
@@ -159,11 +160,12 @@ namespace DragonflyTracker.Controllers.V1
                 Id = newIssueId,
                 Title = issueRequest.Title,
                 AuthorId = HttpContext.GetUserId(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Content = issueRequest.Content
                 // Types = issueRequest.Types.Select(x => new IssueType { ParentProject.Name = projectName, TagName = x).ToList()
             };
 
-            await _issueService.CreateIssueByOrgAsync(issue, issueRequest.PostContent, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
+            await _issueService.CreateIssueByOrgAsync(issue, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
 
             var locationUri = _uriService.GetUri(issue.Number.ToString());
             return Created(locationUri, new Response<PostResponse>(_mapper.Map<PostResponse>(issue)));
@@ -173,8 +175,20 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Issues.UpdateByUser)]
-        public async Task<ActionResult<Issue>> PostIssue(Issue issue)
+        public async Task<ActionResult<Issue>> PostIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
         {
+            var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
+            if (issue == null)
+            {
+                return NotFound();
+            }
+            var userId = HttpContext.GetUserId();
+
+            if (userId != issue.AuthorId)
+            {
+                return Unauthorized();
+            }
+
             _pgMainDataContext.Issues.Add(issue);
             await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
@@ -183,18 +197,26 @@ namespace DragonflyTracker.Controllers.V1
 
         // DELETE: api/Issues/5
         [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
-        public async Task<ActionResult<Issue>> DeleteIssue(Guid id)
+        public async Task<ActionResult<Issue>> DeleteIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
-            var issue = await _pgMainDataContext.Issues.FindAsync(id);
+            var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
             if (issue == null)
             {
                 return NotFound();
             }
 
-            _pgMainDataContext.Issues.Remove(issue);
-            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            var userId = HttpContext.GetUserId();
 
-            return issue;
+            if (userId != issue.AuthorId)
+            {
+                return Unauthorized();
+            }
+
+            // _pgMainDataContext.Issues.Remove(issue);
+            //await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            await _issueService.DeleteIssueAsync(issue.Id).ConfigureAwait(false);
+
+            return NoContent();
         }
 
         private bool IssueExists(Guid id)

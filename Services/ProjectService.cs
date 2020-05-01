@@ -97,10 +97,7 @@ namespace DragonflyTracker.Services
         public async Task<bool> DeleteProjectAsync(Guid projectId)
         {
             var project = new Project { Id = projectId };
-
             _pgMainDataContext.Projects.Attach(project);
-
-
             _pgMainDataContext.Projects.Remove(project);
             var deleted = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return deleted > 0;

@@ -19,6 +19,8 @@ namespace DragonflyTracker.Domain
 
         public string Title { get; set; }
 
+        public string Content { get; set; }
+
         public int Number { get; set; }
 
         public bool Open { get; set; }

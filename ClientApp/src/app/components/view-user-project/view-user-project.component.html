@@ -1,11 +1,16 @@
-<h3>{{project.name}}</h3>
-<p>{{project.description}}</p>
+<h3>{{ project.name }}</h3>
+<p>{{ project.description }}</p>
 <clr-tabs>
   <clr-tab>
     <button clrTabLink id="link1">Issues</button>
     <clr-tab-content id="content1" *clrIfActive>
       <br />
-      <a class="btn btn-text btn-success" href="/user/{{targetUsername}}/{{targetProjectName}}/create-issue" routerLink="/user/{{targetUsername}}/{{targetProjectName}}/create-issue">Create Issue <clr-icon shape="plus"></clr-icon></a>
+      <a
+        class="btn btn-text btn-success"
+        href="/user/{{ targetUsername }}/{{ targetProjectName }}/create-issue"
+        routerLink="/user/{{ targetUsername }}/{{ targetProjectName }}/create-issue"
+        >Create Issue <clr-icon shape="plus"></clr-icon
+      ></a>
       <br />
       <form clrForm>
         <clr-input-container>
@@ -31,25 +36,45 @@
         <clr-dg-placeholder>We couldn't find any Issues!</clr-dg-placeholder>
 
         <clr-dg-row *ngFor="let issue of issuesList" [clrDgItem]="issue">
-
           <clr-dg-action-overflow>
-            <button class="action-item" (click)="onIssueEditClick(issue)">Edit <clr-icon shape="trash"></clr-icon></button>
-            <button class="action-item" (click)="onIssueDeleteClick(issue)">Delete <clr-icon shape="pencil"></clr-icon></button>
+            <button class="action-item" (click)="onIssueEditClick(issue)">
+              Edit <clr-icon shape="trash"></clr-icon>
+            </button>
+            <button class="action-item" (click)="onIssueDeleteClick(issue)">
+              Delete <clr-icon shape="pencil"></clr-icon>
+            </button>
           </clr-dg-action-overflow>
-          <clr-dg-cell><a href="/user/{{targetUsername}}/{{targetProjectName}}/issues/{{issue.number}}" routerLink="/user/{{targetUsername}}/{{targetProjectName}}/issues/{{issue.number}}">{{issue.title}}</a></clr-dg-cell>
-          <clr-dg-cell><a href="/user/{{targetUsername}}/{{targetProjectName}}/issues/{{issue.number}}" routerLink="/user/{{targetUsername}}/{{targetProjectName}}/issues/{{issue.number}}">#{{issue.number}}</a></clr-dg-cell>
+          <clr-dg-cell
+            ><a
+              href="/user/{{ targetUsername }}/{{ targetProjectName }}/issues/{{ issue.number }}"
+              routerLink="/user/{{ targetUsername }}/{{ targetProjectName }}/issues/{{ issue.number }}"
+              >{{ issue.title }}</a
+            ></clr-dg-cell
+          >
+          <clr-dg-cell
+            ><a
+              href="/user/{{ targetUsername }}/{{ targetProjectName }}/issues/{{ issue.number }}"
+              routerLink="/user/{{ targetUsername }}/{{ targetProjectName }}/issues/{{ issue.number }}"
+              >#{{ issue.number }}</a
+            ></clr-dg-cell
+          >
           <clr-dg-cell></clr-dg-cell>
         </clr-dg-row>
 
-
         <clr-dg-footer>
           <clr-dg-pagination #pagination [clrDgTotalItems]="total" [clrDgPageSize]="10">
-            <clr-dg-page-size [clrPageSizeOptions]="[10,20,50,100]">Projects per page</clr-dg-page-size>
-            {{pagination.firstItem + 1}} - {{pagination.lastItem + 1}}
-            of {{total}} projects
+            <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Projects per page</clr-dg-page-size>
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ total }} projects
           </clr-dg-pagination>
         </clr-dg-footer>
       </clr-datagrid>
     </clr-tab-content>
   </clr-tab>
+  <clr-tab>
+    <button clrTabLink id="link1">Settings</button>
+    <clr-tab-content id="content1" *clrIfActive>
+      <button class="btn btn-text btn-danger" (click)="onProjectDeleteClick()">
+        Delete Project <clr-icon shape="trash"></clr-icon>
+      </button> </clr-tab-content
+  ></clr-tab>
 </clr-tabs>

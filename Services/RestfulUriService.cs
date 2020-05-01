@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace DragonflyTracker.Services
 {
-    public class UriService : IUriService
+    public class RestfulUriService : IUriService
     {
         private readonly string _baseUri;
         IHttpContextAccessor _httpContextAccessor;
 
 
-        public UriService(string baseUri, IHttpContextAccessor httpContextAccessor)
+        public RestfulUriService(string baseUri, IHttpContextAccessor httpContextAccessor)
         {
             _baseUri = baseUri;
             _httpContextAccessor = httpContextAccessor;

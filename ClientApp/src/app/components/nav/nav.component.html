@@ -1,6 +1,5 @@
 <clr-main-container>
-  <div class="alert alert-app-level">
-  </div>
+  <div class="alert alert-app-level"></div>
   <clr-header class="header header-7">
     <div class="branding">
       <a href="" routerLink="" class="nav-link">
@@ -16,7 +15,13 @@
       <a class="nav-link nav-icon-text" href="/fetch-data" routerLink="/fetch-data" routerLinkActive="active">
         Weather Forecast
       </a>
-      <a class="nav-link nav-icon-text" *ngIf="isLoggedIn" href="/my-projects" routerLink="/my-projects" routerLinkActive="active">
+      <a
+        class="nav-link nav-icon-text"
+        *ngIf="isLoggedIn"
+        href="/my-projects"
+        routerLink="/my-projects"
+        routerLinkActive="active"
+      >
         <clr-icon shape="view-list"></clr-icon>
         My Projects
       </a>
@@ -26,24 +31,36 @@
         <clr-icon shape="login"></clr-icon>
         Login
       </a>
-      <a class="nav-link nav-icon-text" *ngIf="!isLoggedIn" href="/register" routerLink="/register" routerLinkActive="active">
+      <a
+        class="nav-link nav-icon-text"
+        *ngIf="!isLoggedIn"
+        href="/register"
+        routerLink="/register"
+        routerLinkActive="active"
+      >
         <clr-icon shape="user"></clr-icon>
         Register
       </a>
-      <a *ngIf="isLoggedIn" href="/notifications" routerLink="/notifications" class="nav-link nav-icon-text" routerLinkActive="active">
+      <a
+        *ngIf="isLoggedIn"
+        href="/notifications"
+        routerLink="/notifications"
+        class="nav-link nav-icon-text"
+        routerLinkActive="active"
+      >
         <clr-icon shape="bell"></clr-icon>
         <span class="badge badge-info">99+</span>
       </a>
       <clr-dropdown *ngIf="isLoggedIn">
         <button class="nav-icon-text" clrDropdownTrigger aria-label="toggle settings menu">
           <clr-icon shape="user"></clr-icon>
-          <span class="nav-text">{{username}}</span>
+          <span class="nav-text">{{ username }}</span>
           <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
           <label class="dropdown-header" aria-hidden="true">Profile Links</label>
           <a href="..." routerLink="/..." clrDropdownItem>About</a>
-          <a href="..." routerLink="/..." clrDropdownItem>Preferences</a>
+          <a href="/preferences" routerLink="/preferences" clrDropdownItem>Preferences</a>
           <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
           <a href="/logout" routerLink="/logout" clrDropdownItem>Log out</a>
         </clr-dropdown-menu>
@@ -55,9 +72,6 @@
     <main class="content-area">
       <router-outlet></router-outlet>
     </main>
-    <nav class="sidenav" [clr-nav-level]="2">
-
-    </nav>
+    <nav class="sidenav" [clr-nav-level]="2"></nav>
   </div>
-
 </clr-main-container>

@@ -130,13 +130,13 @@ namespace DragonflyTracker.Controllers.V1
         [HttpDelete(ApiRoutes.Identity.Logout)]
         public async Task<IActionResult> Logout()
         {
-            var RefreshToken = Request.Cookies["authRefreshToken"];
+            var RefreshToken = Request.Cookies[refreshTokenCookieName];
 
             var authResponse = await _identityService.LogoutAsync(RefreshToken).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
-                return BadRequest(new AuthFailedResponse
+                return Ok(new AuthFailedResponse
                 {
                     Errors = authResponse.Errors
                 });

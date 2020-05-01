@@ -1,5 +1,7 @@
 import { Project } from './project';
 import { User } from './user';
+import { IssueStage } from './issue-stage';
+import { IssueType } from './issue-type';
 
 export class Issue {
   title?: string;
@@ -8,6 +10,6 @@ export class Issue {
   isPublic?: boolean;
   parentProject?: Project;
   author?: User;
-  stages?: string[];
-  types?: string[];
+  stage?: IssueStage;
+  types?: IssueType[];
 }

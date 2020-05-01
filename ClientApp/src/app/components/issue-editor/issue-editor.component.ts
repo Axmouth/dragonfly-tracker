@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Issue } from 'src/app/models/issue';
+import { IssueStage } from '../../models/issue-stage';
+import { IssueType } from '../../models/issue-type';
 
 @Component({
   selector: 'app-issue-editor',
@@ -10,8 +12,8 @@ import { Issue } from 'src/app/models/issue';
 export class IssueEditorComponent implements OnInit, OnDestroy {
   issueTitle: string;
   issueContent: string;
-  issueStages: any[];
-  issueTypes: any[];
+  issueStage: IssueStage;
+  issueTypes: IssueType[];
   @Input()
   oldIssue: Issue;
   @Output()
@@ -24,7 +26,7 @@ export class IssueEditorComponent implements OnInit, OnDestroy {
     if (this.oldIssue) {
       this.issueTitle = this.oldIssue.title;
       this.issueContent = this.oldIssue.content;
-      this.issueStages = this.oldIssue.stages;
+      this.issueStage = this.oldIssue.stage;
       this.issueTypes = this.oldIssue.types;
     }
   }
@@ -37,7 +39,7 @@ export class IssueEditorComponent implements OnInit, OnDestroy {
     const newIssue: Issue = {
       title: this.issueTitle,
       content: this.issueContent,
-      stages: this.issueStages,
+      stage: this.issueStage,
       types: this.issueTypes,
     };
     this.submitIssue.next(newIssue);

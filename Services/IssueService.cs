@@ -71,7 +71,7 @@ namespace DragonflyTracker.Services
             return created > 0;
         }
 
-        public async Task<bool> CreateIssueByUserAsync(Issue issue, string postContent, List<IssueType> types, string username, string projectName)
+        public async Task<bool> CreateIssueByUserAsync(Issue issue, List<IssueType> types, string username, string projectName)
         {
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
@@ -79,16 +79,16 @@ namespace DragonflyTracker.Services
             issue.Open = true;
             issue.ProjectId = _pgMainDataContext.Projects.Where(p => p.Name == projectName && p.Creator.UserName == username).SingleOrDefault().Id;
             issue.Number = _pgMainDataContext.Issues.Where(i => i.ProjectId == issue.ProjectId).Count();
-            await _pgMainDataContext.Issues.AddAsync(issue);
+            await _pgMainDataContext.Issues.AddAsync(issue).ConfigureAwait(false);
 
-            var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
+            // var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = issue.Content, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
 
-            // var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
-            return created;
+            return created > 0;
         }
 
-        public async Task<bool> CreateIssueByOrgAsync(Issue issue, string postContent, List<IssueType> types, string organizationName, string projectName)
+        public async Task<bool> CreateIssueByOrgAsync(Issue issue, List<IssueType> types, string organizationName, string projectName)
         {
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
@@ -96,16 +96,16 @@ namespace DragonflyTracker.Services
             issue.Open = true;
             issue.ProjectId = _pgMainDataContext.Projects.Where(p => p.Name == projectName && p.ParentOrganization.Name == organizationName).SingleOrDefault().Id;
             issue.Number = _pgMainDataContext.Issues.Where(i => i.ProjectId == issue.ProjectId).Count();
-            await _pgMainDataContext.Issues.AddAsync(issue);
+            await _pgMainDataContext.Issues.AddAsync(issue).ConfigureAwait(false);
 
-            var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
+            // var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
 
-            // var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
-            return created;
+            return created > 0;
         }
 
-        public async Task<bool> CreateIssueAsync(Issue issue, string postContent, List<IssueType> types)
+        public async Task<bool> CreateIssueAsync(Issue issue, List<IssueType> types)
         {
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
@@ -113,13 +113,13 @@ namespace DragonflyTracker.Services
             // issue.ProjectId = _dataContext.Projects.Where(p => p.Name == projectName && p.ParentOrganization.Name == organizationName).SingleOrDefault().Id;
             issue.Open = true;
             issue.Number = _pgMainDataContext.Issues.Where(i => i.ProjectId == issue.ProjectId).Count();
-            await _pgMainDataContext.Issues.AddAsync(issue);
+            await _pgMainDataContext.Issues.AddAsync(issue).ConfigureAwait(false);
 
-            var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
+            // var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
 
-            // var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
-            return created;
+            return created > 0;
         }
 
         public async Task<bool> UpdateIssueAsync(Issue issueToUpdate)

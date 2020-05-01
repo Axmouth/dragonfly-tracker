@@ -155,11 +155,16 @@ namespace DragonflyTracker.Controllers.V1
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
-            var userOwnsProject = await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            var userOwnsProject = HttpContext.GetUserId() == project.Creator.Id; // await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
 
             if (!userOwnsProject)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel { Message = "You do not own this project" }));
+                return Unauthorized(new ErrorResponse(new ErrorModel { Message = "You do not own this project" }));
             }
 
             var deleted = await _projectService.DeleteProjectAsync(project.Id).ConfigureAwait(false);
@@ -181,7 +186,7 @@ namespace DragonflyTracker.Controllers.V1
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
-            var userOwnsProject = await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
+            var userOwnsProject = HttpContext.GetUserId() == project.Creator.Id; // await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
 
             if (!userOwnsProject)
             {

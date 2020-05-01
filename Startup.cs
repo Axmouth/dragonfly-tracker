@@ -146,7 +146,11 @@ namespace DragonflyTracker
 
                     if (env.IsDevelopment())
                     {
-                        spa.UseAngularCliServer(npmScript: "start");
+                        // spa.UseAngularCliServer(npmScript: "start");
+                        spa.UseProxyToSpaDevelopmentServer("http://localhost:4205");
+                    } else
+                    {
+                        // spa.UseAngularCliServer(npmScript: "start");
                     }
                 });
             }

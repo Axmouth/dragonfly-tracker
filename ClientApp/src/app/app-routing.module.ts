@@ -16,6 +16,7 @@ import { LogoutPageComponent } from './components/logout-page/logout-page.compon
 import { CreateIssueComponent } from './components/create-issue/create-issue.component';
 import { ViewOrgProjectIssueComponent } from './components/view-org-project-issue/view-org-project-issue.component';
 import { ViewUserProjectIssueComponent } from './components/view-user-project-issue/view-user-project-issue.component';
+import { UserPreferencesComponent } from './components/user-preferences/user-preferences.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' },
@@ -26,6 +27,7 @@ const routes: Routes = [
   { path: 'settings', component: ViewProfileComponent },
   { path: 'my-projects', component: ViewMyProjectsComponent },
   { path: 'my-projects/create', component: CreateOwnProjectComponent },
+  { path: 'preferences', component: UserPreferencesComponent },
   { path: 'user/:username', component: ViewProfileComponent },
   { path: 'user/:username/:projectname', component: ViewUserProjectComponent },
   { path: 'org/:orgname/:projectname', component: ViewOrgProjectComponent },
