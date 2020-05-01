@@ -5,8 +5,9 @@ namespace DragonflyTracker.Services
 {
     public interface IUriService
     {
-        Uri GetPostUri(string postId);
 
-        Uri GetAllPostsUri(PaginationQuery pagination = null);
+        Uri GetUri(string idAttribute);
+
+        Uri GetPagedUri(PaginationQuery pagination = null);
     }
 }

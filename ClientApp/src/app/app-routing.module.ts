@@ -1,7 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { CounterComponent } from './components/counter/counter.component';
-import { FetchDataComponent } from './components/fetch-data/fetch-data.component';
 import { HomeComponent } from './components/home/home.component';
 import { ViewMyProjectsComponent } from './components/view-my-projects/view-my-projects.component';
 import { ViewProfileComponent } from './components/view-profile/view-profile.component';
@@ -26,8 +24,6 @@ const routes: Routes = [
   { path: 'register', component: RegisterPageComponent },
   { path: 'profile', component: ViewProfileComponent },
   { path: 'settings', component: ViewProfileComponent },
-  { path: 'counter', component: CounterComponent },
-  { path: 'fetch-data', component: FetchDataComponent },
   { path: 'my-projects', component: ViewMyProjectsComponent },
   { path: 'my-projects/create', component: CreateOwnProjectComponent },
   { path: 'user/:username', component: ViewProfileComponent },

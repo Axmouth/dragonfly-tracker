@@ -6,7 +6,6 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
 import { AuthSuccessResponse } from '../models/auth-success-response';
-import { AuthFailedResponse } from '../models/auth-failed-response';
 import { EmptyResponse } from '../models/empty-response';
 
 @Injectable({
@@ -27,8 +26,7 @@ export class AuthService {
    */
   authenticate(data?: any) {
     const result = this.http
-      .request<AuthSuccessResponse | AuthFailedResponse>('post', `${apiRoot}/identity/login`, {
-        body: data,
+      .post<AuthSuccessResponse>(`${apiRoot}/identity/login`, data, {
         observe: 'response',
       })
       .pipe(
@@ -69,7 +67,7 @@ export class AuthService {
         if (!url) {
           return observableOf(res);
         }
-        return this.http.request<EmptyResponse | AuthFailedResponse>('delete', url, { observe: 'response' });
+        return this.http.delete<EmptyResponse>(url, { observe: 'response' });
       }),
       map((res) => {
         return new AuthResult(
@@ -107,7 +105,7 @@ export class AuthService {
   register(data?: any) {
     const url = `${apiRoot}/identity/register`;
     const result = this.http
-      .request<AuthSuccessResponse | AuthFailedResponse>('post', url, { body: data, observe: 'response' })
+      .post<AuthSuccessResponse>(url, data, { observe: 'response' })
       .pipe(
         map((res) => {
           return new AuthResult(
@@ -184,7 +182,7 @@ export class AuthService {
   refreshToken(data?: any) {
     const url = `${apiRoot}/identity/refresh`;
     return this.http
-      .request<AuthSuccessResponse | AuthFailedResponse>('post', url, { body: data, observe: 'response' })
+      .post<AuthSuccessResponse>(url, data, { observe: 'response' })
       .pipe(
         map((res) => {
           const token = AuthCreateJWTToken(res.body['token'], 'refreshToken');
@@ -239,7 +237,7 @@ export class AuthService {
    */
   requestPassword(data?: any) {
     const url = `${apiRoot}/identity/request-pass`;
-    return this.http.request('post', url, { body: data, observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response' }).pipe(
       map((res) => {
         return new AuthResult(
           true,
@@ -268,7 +266,7 @@ export class AuthService {
     const url = `${apiRoot}/identity/reset-pass`;
     const tokenKey = 'reset_password_token';
     data[tokenKey] = this.route.snapshot.queryParams[tokenKey];
-    return this.http.request('post', url, { body: data, observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response' }).pipe(
       map((res) => {
         return new AuthResult(
           true,

@@ -11,9 +11,11 @@ using Microsoft.AspNetCore.Http;
 
 namespace DragonflyTracker.Controllers.V1
 {
+
     [ApiController]
     public class IdentityController : ControllerBase
     {
+        public const string refreshTokenCookieName = "dragonflyAuthRefreshToken";
         private readonly IIdentityService _identityService;
         
         public IdentityController(IIdentityService identityService)
@@ -63,11 +65,12 @@ namespace DragonflyTracker.Controllers.V1
             }
 
             HttpContext.Response.Cookies.Append(
-             "authRefreshToken",
+             refreshTokenCookieName,
              authResponse.RefreshToken,
              new CookieOptions
              {
                  HttpOnly = true,
+                 //Domain = "localhost"
              });
 
             return Ok(new AuthSuccessResponse
@@ -94,11 +97,12 @@ namespace DragonflyTracker.Controllers.V1
             }
 
             HttpContext.Response.Cookies.Append(
-             "authRefreshToken",
+             refreshTokenCookieName,
              authResponse.RefreshToken,
              new CookieOptions
              {
                  HttpOnly = true,
+                 // Domain = ".dragonflytracker.com"
              });
 
             return Ok(new AuthSuccessResponse
@@ -106,6 +110,20 @@ namespace DragonflyTracker.Controllers.V1
                 Token = authResponse.Token,
                 RefreshToken = authResponse.RefreshToken
             });
+        }
+
+        private string RemoveSubdomain(string host)
+        {
+            var splitHostname = host.Split('.');
+            //if not localhost
+            if (splitHostname.Length > 1)
+            {
+                return string.Join(".", splitHostname.Skip(1));
+            }
+            else
+            {
+                return host;
+            }
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -124,13 +142,7 @@ namespace DragonflyTracker.Controllers.V1
                 });
             }
 
-            HttpContext.Response.Cookies.Append(
-             "authRefreshToken",
-             "derp",
-             new CookieOptions
-             {
-                 HttpOnly = true
-             });
+            HttpContext.Response.Cookies.Delete(refreshTokenCookieName);
 
             return NoContent();
         }

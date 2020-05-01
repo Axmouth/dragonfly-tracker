@@ -6,6 +6,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
 import { IssuesService } from '../../services/issues.service';
 import { Issue } from 'src/app/models/issue';
+import { Project } from 'src/app/models/project';
 
 const openStatusMap = {
   open: true,
@@ -24,7 +25,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   total: number;
   loadingIssues = true;
   ngUnsubscribe = new Subject<void>();
-  project = {};
+  project: Project;
   projectSub$: Subscription;
   targetUsername: string;
   targetProjectName: string;
@@ -47,7 +48,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     this.projectSub$ = this.projectsService
       .getUsersProject(this.targetUsername, this.targetProjectName)
       .subscribe((result) => {
-        this.project = result['data'];
+        this.project = result.data;
         console.log(this.project);
       });
   }

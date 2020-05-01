@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 import { Project } from '../models/project';
 import { Response } from '../models/response';
 import { PagedResponse } from '../models/paged-response';
-import { ErrorResponse } from '../models/error-response';
 
 @Injectable({
   providedIn: 'root',
@@ -15,25 +14,21 @@ import { ErrorResponse } from '../models/error-response';
 export class ProjectsService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  getUsersProjects(
-    username: string,
-    page: number = 1,
-    myPageSize = pageSizeConst,
-  ): Observable<PagedResponse<Project> | ErrorResponse> {
+  getUsersProjects(username: string, page: number = 1, myPageSize = pageSizeConst): Observable<PagedResponse<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     let url = `${apiRoot}/users/${username}/projects?PageSize=${myPageSize}`;
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
-    return this.http.get<PagedResponse<Project> | ErrorResponse>(url, { headers });
+    return this.http.get<PagedResponse<Project>>(url, { headers });
   }
 
-  getUsersProject(username: string, projectName: string): Observable<Response<Project> | ErrorResponse> {
+  getUsersProject(username: string, projectName: string): Observable<Response<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.get<Response<Project> | ErrorResponse>(url, { headers });
+    return this.http.get<Response<Project>>(url, { headers });
   }
 
   deleteUsersProject(username: string, projectName: string) {
@@ -43,21 +38,17 @@ export class ProjectsService {
     return this.http.delete(url, { headers });
   }
 
-  createUsersProject(username: string, newProject: object): Observable<Response<Project> | ErrorResponse> {
+  createUsersProject(username: string, newProject: object): Observable<Response<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects`;
-    return this.http.post<Response<Project> | ErrorResponse>(url, newProject, { headers });
+    return this.http.post<Response<Project>>(url, newProject, { headers });
   }
 
-  updateUsersProject(
-    username: string,
-    projectName: string,
-    newProject: object,
-  ): Observable<Response<Project> | ErrorResponse> {
+  updateUsersProject(username: string, projectName: string, newProject: object): Observable<Response<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.put<Response<Project> | ErrorResponse>(url, newProject, { headers });
+    return this.http.put<Response<Project>>(url, newProject, { headers });
   }
 }

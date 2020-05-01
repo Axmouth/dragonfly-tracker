@@ -45,14 +45,14 @@ namespace DragonflyTracker.Controllers.V1
             filter.OrganizationName = organizationName;
             filter.IssueNumber = issuePostNumber;
             var issuePosts = await _issuePostService.GetAllIssuePostsAsync(filter, pagination).ConfigureAwait(false);
-            var issuePostsResponse = _mapper.Map<List<IssuePostResponse>>(issuePosts);
+            var issuePostsResponse = _mapper.Map<List<IssuePostResponse>>(issuePosts.Item1); 
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<IssuePostResponse>(issuePostsResponse));
+                return Ok(new PagedResponse<IssuePostResponse>(issuePostsResponse, issuePosts.Item2));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuePostsResponse);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuePostsResponse, issuePosts.Item2);
             return Ok(paginationResponse);
         }
     }

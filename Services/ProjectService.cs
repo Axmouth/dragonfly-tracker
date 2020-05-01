@@ -10,39 +10,39 @@ namespace DragonflyTracker.Services
 {
     public class ProjectService: IProjectService
     {
-        private readonly PgMainDataContext _dataContext;
+        private readonly PgMainDataContext _pgMainDataContext;
         private readonly IIssueService _issueService;
 
-        public ProjectService(PgMainDataContext dataContext, IIssueService issueService)
+        public ProjectService(PgMainDataContext pgMainDataContext, IIssueService issueService)
         {
-            _dataContext = dataContext;
+            _pgMainDataContext = pgMainDataContext;
             _issueService = issueService;
         }
 
         public async Task<Project> GetProjectByIdAsync(Guid Id)
         {
-            return await _dataContext.Projects
+            return await _pgMainDataContext.Projects
                 .Include(p => p.Creator)
                 .SingleOrDefaultAsync(x => x.Id == Id).ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByUserAsync(string username, string projectName)
         {
-            return await _dataContext.Projects
+            return await _pgMainDataContext.Projects
                 .Include(p => p.Creator)
                 .SingleOrDefaultAsync(x => x.Name == projectName && x.Creator.UserName == username).ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByOrgAsync(string organizationName, string projectName)
         {
-            return await _dataContext.Projects
+            return await _pgMainDataContext.Projects
                 .Include(p => p.Creator)
                 .SingleOrDefaultAsync(x => x.Name == projectName && x.ParentOrganization.Name == organizationName).ConfigureAwait(false);
         }
 
         public async Task<Tuple<List<Project>, int>> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
         {
-            var queryable = _dataContext.Projects.AsQueryable();
+            var queryable = _pgMainDataContext.Projects.AsQueryable();
 
             if (!string.IsNullOrEmpty(filter?.SearchText))
             {
@@ -68,17 +68,18 @@ namespace DragonflyTracker.Services
                     .Include(x => x.Creator)
                     .ToListAsync()
                     .ConfigureAwait(false);
-                return Tuple.Create(projects, count);
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                projects = await queryable
+                        .Include(x => x.ParentOrganization)
+                        .Include(x => x.Creator)
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
             }
 
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            projects = await queryable
-                    .Include(x => x.ParentOrganization)
-                    .Include(x => x.Creator)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
             return Tuple.Create(projects, count);
         }
 
@@ -87,8 +88,8 @@ namespace DragonflyTracker.Services
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
             // await AddNewTags(post).ConfigureAwait(false);
-            await _dataContext.Projects.AddAsync(project);
-            var created = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            await _pgMainDataContext.Projects.AddAsync(project);
+            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
 
             return created > 0;
         }
@@ -97,11 +98,11 @@ namespace DragonflyTracker.Services
         {
             var project = new Project { Id = projectId };
 
-            _dataContext.Projects.Attach(project);
+            _pgMainDataContext.Projects.Attach(project);
 
 
-            _dataContext.Projects.Remove(project);
-            var deleted = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Projects.Remove(project);
+            var deleted = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return deleted > 0;
         }
 
@@ -109,14 +110,14 @@ namespace DragonflyTracker.Services
         {
             // projectToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
             // await AddNewTags(projectToUpdate).ConfigureAwait(false);
-            _dataContext.Projects.Update(projectToUpdate);
-            var updated = await _dataContext.SaveChangesAsync().ConfigureAwait(false);
+            _pgMainDataContext.Projects.Update(projectToUpdate);
+            var updated = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return updated > 0;
         }
 
         public async Task<bool> UserOwnsProjectAsync(Guid projectId, string userId)
         {
-            var project = await _dataContext.Projects.AsNoTracking().SingleOrDefaultAsync(x => x.Id == projectId).ConfigureAwait(false);
+            var project = await _pgMainDataContext.Projects.AsNoTracking().SingleOrDefaultAsync(x => x.Id == projectId).ConfigureAwait(false);
 
             if (project == null)
             {
@@ -129,6 +130,56 @@ namespace DragonflyTracker.Services
             }
 
             return true;
+        }
+
+        public async Task<Tuple<List<Project>, int>> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
+        {
+            var queryable = _pgMainDataContext.Projects.AsQueryable()
+                    .Where(x => x.ParentOrganization.Name == organizationName);
+            List<Project> projects;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
+
+            if (paginationFilter == null)
+            {
+                projects = await queryable
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                projects = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+            }
+            return Tuple.Create(projects, count);
+        }
+
+        public async Task<Tuple<List<Project>, int>> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
+        {
+            var queryable = _pgMainDataContext.Projects.AsQueryable()
+                    .Where(x => x.OrganizationId == organizationId);
+            List<Project> projects;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
+
+            if (paginationFilter == null)
+            {
+                projects = await queryable
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                projects = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+            }
+            return Tuple.Create(projects, count);
         }
 
         private async Task AddIssueStages(Issue issue)

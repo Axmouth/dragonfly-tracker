@@ -34,14 +34,15 @@ namespace DragonflyTracker
                                   builder =>
                                   {
                                       builder.WithOrigins(
+                                                          "*",
+                                                          "http://dragonflytracker.com",
                                                           "http://localhost:4201",
-                                                          "https://api.dragonflytracker.com",
-                                                          "http://api.dragonflytracker.com",
-                                                          "*")
+                                                          "https://api.dragonflytracker.com")
                                                   .AllowAnyHeader()
                                                   .AllowAnyMethod();
                                   });
             });
+            services.AddMvc();
             // services.AddDbContextPool<>
             services.AddControllersWithViews();
             // In production, the Angular files will be served from this directory
@@ -112,7 +113,16 @@ namespace DragonflyTracker
             }
 
             app.UseRouting();
-            app.UseCors(MyAllowSpecificOrigins);
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins("http://*.dragonflytracker.com", "https://*.dragonflytracker.com", "http://localhost")
+                            .SetIsOriginAllowedToAllowWildcardSubdomains()
+                            .AllowCredentials()
+                            //.AllowAnyOrigin()
+                            .SetIsOriginAllowed((host) => true)
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+            });
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -120,10 +130,12 @@ namespace DragonflyTracker
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
+                    pattern: "{controller}/{action=Index}/{id?}")
+                .RequireCors(MyAllowSpecificOrigins); ;
             });
 
-            if (!env.IsDevelopment())
+            // if (!env.IsDevelopment())
+            if (env.IsDevelopment())
             {
                 app.UseSpa(spa =>
                 {

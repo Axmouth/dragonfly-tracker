@@ -1,4 +1,5 @@
 export class AuthSuccessResponse {
-  token: string;
-  refreshToken: string;
+  token?: string;
+  refreshToken?: string;
+  errors?: Error[];
 }

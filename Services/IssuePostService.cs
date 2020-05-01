@@ -92,36 +92,37 @@ namespace DragonflyTracker.Services
             return true;
         }
 
-        public async Task<List<IssuePost>> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<IssuePost>, int>> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.IssuePosts.AsQueryable();
+            var queryable = _pgMainDataContext.IssuePosts.AsQueryable()
+                    .Include(x => x.Author)
+                    .Include(x => x.Reactions)
+                    .Where(x => x.IssueId == issueId);
+            List<IssuePost> issuePosts;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.Reactions)
-                    .Where(x => x.IssueId == issueId)
+                issuePosts = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
-
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.Reactions)
-                    .Where(x => x.IssueId == issueId)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+            else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issuePosts = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+            }
+            return Tuple.Create(issuePosts, count);
         }
 
-        public async Task<List<IssuePost>> GetAllIssuePostsAsync(GetAllIssuePostsFilter filter, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<IssuePost>, int>> GetAllIssuePostsAsync(GetAllIssuePostsFilter filter, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.IssuePosts.AsQueryable();
+            List<IssuePost> issuePosts;
 
             if (!string.IsNullOrEmpty(filter?.ProjectName) && !string.IsNullOrEmpty(filter?.OrganizationName))
             {
@@ -148,23 +149,27 @@ namespace DragonflyTracker.Services
                     .Where(i => i.ParentIssue.Open == filter.Open);
             }
 
+            var count = await queryable.CountAsync().ConfigureAwait(false);
+            queryable = queryable
+                    .Include(x => x.Author)
+                    .Include(x => x.Reactions);
+
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.Reactions)
+                issuePosts = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.Reactions)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+            else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issuePosts = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+            }
+            return Tuple.Create(issuePosts, count);
         }
     }
 }

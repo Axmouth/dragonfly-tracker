@@ -1,3 +1,4 @@
 export class Response<T> {
-  data: T;
+  data?: T;
+  errors?: Error[];
 }

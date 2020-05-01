@@ -81,14 +81,14 @@ namespace DragonflyTracker.Controllers.V1
             var filter = _mapper.Map<GetAllProjectsFilter>(query);
             filter.OrganizationName = organizationName;
             var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
-            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects);
+            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.Item1);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<ProjectResponse>(projectsResponse));
+                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.Item2));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.Item2);
             return Ok(paginationResponse);
         }
 
@@ -145,7 +145,7 @@ namespace DragonflyTracker.Controllers.V1
 
             await _projectService.CreateProjectAsync(project, projectRequest.Types).ConfigureAwait(false);
 
-            var locationUri = _uriService.GetPostUri(project.Id.ToString());
+            var locationUri = _uriService.GetUri(project.Name);
             return Created(locationUri, new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(project)));
         }
 
@@ -179,7 +179,7 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPut(ApiRoutes.Projects.UpdateByUser)]
         public async Task<IActionResult> Update([FromRoute] string username, [FromRoute]string projectName, [FromBody] UpdatePostRequest request)
         {
-            var project = await _projectService.GetProjectByUserAsync(username, projectName);
+            var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
             var userOwnsProject = await _projectService.UserOwnsProjectAsync(project.Id, HttpContext.GetUserId()).ConfigureAwait(false);
 

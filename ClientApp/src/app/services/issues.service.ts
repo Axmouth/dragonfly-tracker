@@ -5,7 +5,6 @@ import { AuthService } from './auth.service';
 import { apiRoot } from 'src/environments/environment';
 import { PagedResponse } from '../models/paged-response';
 import { Issue } from '../models/issue';
-import { ErrorResponse } from '../models/error-response';
 import { Observable } from 'rxjs';
 import { Response } from '../models/response';
 import { IssuePost } from '../models/issue-post';
@@ -24,7 +23,7 @@ export class IssuesService {
     myPageSize = pageSizeConst,
     search: string,
     isOpen: boolean,
-  ): Observable<PagedResponse<Issue> | ErrorResponse> {
+  ): Observable<PagedResponse<Issue>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     let url = `${apiRoot}/users/${username}/projects/${projectName}/issues?PageSize=${myPageSize}`;
@@ -37,18 +36,14 @@ export class IssuesService {
     if (isOpen !== undefined) {
       url = url + `&open=${isOpen}`;
     }
-    return this.http.get<PagedResponse<Issue> | ErrorResponse>(url, { headers });
+    return this.http.get<PagedResponse<Issue>>(url, { headers });
   }
 
-  getUsersProjectIssue(
-    username: string,
-    projectName: string,
-    issueNumber: number,
-  ): Observable<Response<Issue> | ErrorResponse> {
+  getUsersProjectIssue(username: string, projectName: string, issueNumber: number): Observable<Response<Issue>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
-    return this.http.get<Response<Issue> | ErrorResponse>(url, { headers });
+    return this.http.get<Response<Issue>>(url, { headers });
   }
 
   deleteUsersProjectIssue(username: string, projectName: string, issueNumber: number) {
@@ -58,15 +53,11 @@ export class IssuesService {
     return this.http.delete(url, { headers });
   }
 
-  createUsersProjectIssue(
-    username: string,
-    projectName: string,
-    newIssue: object,
-  ): Observable<Response<Issue> | ErrorResponse> {
+  createUsersProjectIssue(username: string, projectName: string, newIssue: object): Observable<Response<Issue>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues`;
-    return this.http.post<Response<Issue> | ErrorResponse>(url, newIssue, { headers });
+    return this.http.post<Response<Issue>>(url, newIssue, { headers });
   }
 
   updateUsersProjectIssue(
@@ -74,11 +65,11 @@ export class IssuesService {
     projectName: string,
     issueNumber: number,
     updatedIssue: object,
-  ): Observable<Response<Issue> | ErrorResponse> {
+  ): Observable<Response<Issue>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
-    return this.http.put<Response<Issue> | ErrorResponse>(url, updatedIssue, { headers });
+    return this.http.put<Response<Issue>>(url, updatedIssue, { headers });
   }
 
   getUsersProjectsIssuePosts(
@@ -87,14 +78,14 @@ export class IssuesService {
     issueNumber: number,
     page: number = 1,
     myPageSize = pageSizeConst,
-  ): Observable<PagedResponse<IssuePost> | ErrorResponse> {
+  ): Observable<PagedResponse<IssuePost>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     let url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts?PageSize=${myPageSize}`;
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
-    return this.http.get<PagedResponse<IssuePost> | ErrorResponse>(url, { headers });
+    return this.http.get<PagedResponse<IssuePost>>(url, { headers });
   }
 
   getUsersProjectIssuePost(
@@ -102,11 +93,11 @@ export class IssuesService {
     projectName: string,
     issueNumber: number,
     issuePostNumber: number,
-  ): Observable<Response<IssuePost> | ErrorResponse> {
+  ): Observable<Response<IssuePost>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
-    return this.http.get<Response<IssuePost> | ErrorResponse>(url, { headers });
+    return this.http.get<Response<IssuePost>>(url, { headers });
   }
 
   deleteUsersProjectIssuePost(username: string, projectName: string, issueNumber: number, issuePostNumber: number) {
@@ -121,11 +112,11 @@ export class IssuesService {
     projectName: string,
     issueNumber: number,
     newIssuePost: object,
-  ): Observable<Response<IssuePost> | ErrorResponse> {
+  ): Observable<Response<IssuePost>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
-    return this.http.post<Response<IssuePost> | ErrorResponse>(url, newIssuePost, { headers });
+    return this.http.post<Response<IssuePost>>(url, newIssuePost, { headers });
   }
 
   updateUsersProjectIssuePost(
@@ -134,11 +125,11 @@ export class IssuesService {
     issueNumber: number,
     issuePostNumber: number,
     updatedIssuePost: object,
-  ): Observable<Response<IssuePost> | ErrorResponse> {
+  ): Observable<Response<IssuePost>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
-    return this.http.put<Response<IssuePost> | ErrorResponse>(url, updatedIssuePost, { headers });
+    return this.http.put<Response<IssuePost>>(url, updatedIssuePost, { headers });
   }
 
   deleteUsersProjectIssuePostReaction(
@@ -162,10 +153,10 @@ export class IssuesService {
     issuePostNumber: number,
     newIssuePostReaction: object,
     reactionType: string,
-  ): Observable<Response<IssuePostReaction> | ErrorResponse> {
+  ): Observable<Response<IssuePostReaction>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
-    return this.http.post<Response<IssuePostReaction> | ErrorResponse>(url, newIssuePostReaction, { headers });
+    return this.http.post<Response<IssuePostReaction>>(url, newIssuePostReaction, { headers });
   }
 }

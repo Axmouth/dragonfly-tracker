@@ -116,7 +116,7 @@ namespace DragonflyTracker.Controllers.V1
             
             await _postService.CreatePostAsync(post).ConfigureAwait(false);
             
-            var locationUri = _uriService.GetPostUri(post.Id.ToString());
+            var locationUri = _uriService.GetUri(post.Id.ToString());
             return Created(locationUri, new Response<PostResponse>(_mapper.Map<PostResponse>(post)));
         }
     }

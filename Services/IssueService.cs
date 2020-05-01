@@ -205,38 +205,40 @@ namespace DragonflyTracker.Services
             return true;
         }
 
-        public async Task<List<Issue>> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Issues.AsQueryable();
+            var queryable = _pgMainDataContext.Issues.AsQueryable()
+                    .Where(x => x.ProjectId == projectId)
+                    .Include(x => x.Author);
+            List<Issue> issues;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.ProjectId == projectId)
+                issues = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
-            }
-
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.ProjectId == projectId)
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
                     .Skip(skip)
                     .Take(paginationFilter.PageSize)
                     .ToListAsync()
                     .ConfigureAwait(false);
+            }
+            return Tuple.Create(issues, count);
+
         }
 
-        public async Task<List<Issue>> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable();
+            List<Issue> issues;
 
             if (filter == null)
             {
-                return new List<Issue>(){ };
+                return Tuple.Create(new List<Issue>(){ }, 0);
             }
 
             if (filter.ProjectId.HasValue)
@@ -283,194 +285,160 @@ namespace DragonflyTracker.Services
                     .Where(i => i.Open == filter.Open);
             }
 
+            var count = await queryable.CountAsync().ConfigureAwait(false);
+
             if (paginationFilter == null)
             {
-                return await queryable
+                issues = await queryable
                     .Include(x => x.Author)
                     .Include(x => x.ParentProject)
                     .ToListAsync()
                     .ConfigureAwait(false);
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
+                        .Include(x => x.Author)
+                        .Include(x => x.ParentProject)
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
             }
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.ParentProject)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+            return Tuple.Create(issues, count);
         }
 
-        public async Task<List<Issue>> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Issues.AsQueryable();
+            var queryable = _pgMainDataContext.Issues.AsQueryable()
+                    .Include(x => x.Author)
+                    .Where(x => x.ParentOrganization.Name == organizationName && x.ParentProject.Name == projectName);
+            List<Issue> issues;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.ParentOrganization.Name == organizationName && x.ParentProject.Name == projectName)
+                issues = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
             }
+            return Tuple.Create(issues, count);
 
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.ParentOrganization.Name == organizationName && x.ParentProject.Name == projectName)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
         }
 
-        public async Task<List<Issue>> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Issues.AsQueryable();
+            var queryable = _pgMainDataContext.Issues.AsQueryable()
+                    .Include(x => x.Author)
+                    .Where(x => x.AuthorId == authortId);
+            List<Issue> issues;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.AuthorId == authortId)
+                issues = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
             }
-
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.AuthorId == authortId)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+            return Tuple.Create(issues, count);
         }
 
-        public async Task<List<Issue>> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Issues.AsQueryable();
+            var queryable = _pgMainDataContext.Issues.AsQueryable()
+                    .Include(x => x.Author)
+                    .Where(x => x.Author.UserName == authortName);
+            List<Issue> issues;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.Author.UserName == authortName)
+                issues =  await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
+            } else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
             }
+            return Tuple.Create(issues, count);
 
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Include(x => x.Author)
-                    .Where(x => x.Author.UserName == authortName)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
         }
 
-        public async Task<List<IssueUpdate>> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<IssueUpdate>, int>> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.IssueUpdates.AsQueryable();
+            var queryable = _pgMainDataContext.IssueUpdates.AsQueryable()
+                    .Where(x => x.IssueId == issueId && end < x.CreatedAt && x.CreatedAt <= start);
+            List<IssueUpdate> issueUpdates;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    .Where(x => x.IssueId == issueId &&  end < x.CreatedAt && x.CreatedAt <= start)
+                issueUpdates = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
-
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Where(x => x.IssueId == issueId && end < x.CreatedAt && x.CreatedAt <= start)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
-        }
-
-        public async Task<List<Project>> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
-        {
-            var queryable = _pgMainDataContext.Projects.AsQueryable();
-
-            if (paginationFilter == null)
+            else
             {
-                return await queryable
-                    .Where(x => x.ParentOrganization.Name == organizationName)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
-            }
-
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Where(x => x.ParentOrganization.Name == organizationName)
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issueUpdates = await queryable
                     .Skip(skip)
                     .Take(paginationFilter.PageSize)
                     .ToListAsync()
                     .ConfigureAwait(false);
-        }
 
-        public async Task<List<Project>> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
-        {
-            var queryable = _pgMainDataContext.Projects.AsQueryable();
-
-            if (paginationFilter == null)
-            {
-                return await queryable
-                    .Where(x => x.OrganizationId == organizationId)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
             }
+            return Tuple.Create(issueUpdates, count);
 
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    .Where(x => x.OrganizationId == organizationId)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
         }
 
-        public async Task<List<Issue>> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Issues.AsQueryable();
+            var queryable = _pgMainDataContext.Issues.AsQueryable()
+                    // .Include(x => x.Tags)
+                    .Where(x => x.AuthorId == authortId);
+            List<Issue> issues;
+            var count = await queryable.CountAsync().ConfigureAwait(false);
 
             throw new NotImplementedException("Derp");
 
             if (paginationFilter == null)
             {
-                return await queryable
-                    // .Include(x => x.Tags)
-                    .Where(x => x.AuthorId == authortId)
+                issues = await queryable
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
+            else
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                issues = await queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize)
+                        .ToListAsync()
+                        .ConfigureAwait(false);
+            }
 
-            // queryable = AddFiltersOnQuery(filter, queryable);
-
-            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-            return await queryable
-                    // .Include(x => x.Tags)
-                    .Where(x => x.AuthorId == authortId)
-                    .Skip(skip)
-                    .Take(paginationFilter.PageSize)
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+            return Tuple.Create(issues, count);
         }
 
         private async Task AddIssueTypes(Issue issue)

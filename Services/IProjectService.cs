@@ -16,5 +16,9 @@ namespace DragonflyTracker.Services
         public Task<bool> DeleteProjectAsync(Guid projectId);
         public Task<bool> UpdateProjectAsync(Project projectToUpdate);
         public Task<bool> UserOwnsProjectAsync(Guid projectId, string userId);
+
+        public Task<Tuple<List<Project>, int>> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null);
+
+        public Task<Tuple<List<Project>, int>> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null);
     }
 }

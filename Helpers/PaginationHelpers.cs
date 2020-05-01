@@ -12,11 +12,11 @@ namespace DragonflyTracker.Helpers
         public static PagedResponse<T> CreatePaginatedResponse<T>(IUriService uriService, PaginationFilter pagination, List<T> response)
         {
              var nextPage = pagination.PageNumber >= 1
-                ? uriService.GetAllPostsUri(new PaginationQuery(pagination.PageNumber + 1, pagination.PageSize)).ToString()
+                ? uriService.GetPagedUri(new PaginationQuery(pagination.PageNumber + 1, pagination.PageSize)).ToString()
                 : null;
             
             var previousPage = pagination.PageNumber - 1 >= 1
-                ? uriService.GetAllPostsUri(new PaginationQuery(pagination.PageNumber - 1, pagination.PageSize)).ToString()
+                ? uriService.GetPagedUri(new PaginationQuery(pagination.PageNumber - 1, pagination.PageSize)).ToString()
                 : null;
 
             return new PagedResponse<T>
@@ -31,11 +31,11 @@ namespace DragonflyTracker.Helpers
         public static PagedResponse<T> CreatePaginatedResponse<T>(IUriService uriService, PaginationFilter pagination, List<T> response, int count)
         {
             var nextPage = pagination.PageNumber >= 1
-               ? uriService.GetAllPostsUri(new PaginationQuery(pagination.PageNumber + 1, pagination.PageSize)).ToString()
+               ? uriService.GetPagedUri(new PaginationQuery(pagination.PageNumber + 1, pagination.PageSize)).ToString()
                : null;
 
             var previousPage = pagination.PageNumber - 1 >= 1
-                ? uriService.GetAllPostsUri(new PaginationQuery(pagination.PageNumber - 1, pagination.PageSize)).ToString()
+                ? uriService.GetPagedUri(new PaginationQuery(pagination.PageNumber - 1, pagination.PageSize)).ToString()
                 : null;
 
             return new PagedResponse<T>

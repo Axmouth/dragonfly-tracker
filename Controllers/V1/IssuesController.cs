@@ -18,6 +18,7 @@ using DragonflyTracker.Contracts.V1.Requests;
 using DragonflyTracker.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace DragonflyTracker.Controllers.V1
 {
@@ -53,14 +54,14 @@ namespace DragonflyTracker.Controllers.V1
             // filter.AuthorUsername = username;
             filter.ProjectId = project.Id;
             var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
-            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.Item1);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<IssueResponse>(issuesResponse));
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.Item2));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.Item2);
             return Ok(paginationResponse);
         }
 
@@ -74,14 +75,14 @@ namespace DragonflyTracker.Controllers.V1
             filter.ProjectName = projectName;
             filter.OrganizationName = organizationName;
             var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
-            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.Item1);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<IssueResponse>(issuesResponse));
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.Item2));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.Item2);
             return Ok(paginationResponse);
         }
 
@@ -140,7 +141,7 @@ namespace DragonflyTracker.Controllers.V1
 
             await _issueService.CreateIssueByUserAsync(issue, issueRequest.PostContent, issueRequest.Types, username, projectName).ConfigureAwait(false);
 
-            var locationUri = _uriService.GetPostUri(issue.Id.ToString());
+            var locationUri = _uriService.GetUri(issue.Number.ToString());
             return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
@@ -164,7 +165,7 @@ namespace DragonflyTracker.Controllers.V1
 
             await _issueService.CreateIssueByOrgAsync(issue, issueRequest.PostContent, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
 
-            var locationUri = _uriService.GetPostUri(issue.Id.ToString());
+            var locationUri = _uriService.GetUri(issue.Number.ToString());
             return Created(locationUri, new Response<PostResponse>(_mapper.Map<PostResponse>(issue)));
         }
 

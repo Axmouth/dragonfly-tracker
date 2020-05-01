@@ -7,8 +7,6 @@ import { JwtModule } from '@auth0/angular-jwt';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
-import { CounterComponent } from './components/counter/counter.component';
-import { FetchDataComponent } from './components/fetch-data/fetch-data.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ViewProfileComponent } from './components/view-profile/view-profile.component';
 import { ViewProjectIssuesComponent } from './components/view-project-issues/view-project-issues.component';
@@ -37,8 +35,6 @@ import { tokenGetter } from './constants';
   declarations: [
     AppComponent,
     HomeComponent,
-    CounterComponent,
-    FetchDataComponent,
     ViewProfileComponent,
     ViewProjectIssuesComponent,
     NavComponent,
