@@ -40,7 +40,7 @@ namespace DragonflyTracker.Services
                 .SingleOrDefaultAsync(x => x.Name == projectName && x.ParentOrganization.Name == organizationName).ConfigureAwait(false);
         }
 
-        public async Task<Tuple<List<Project>, int>> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
+        public async Task<(List<Project> list, int count)> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Projects.AsQueryable();
 
@@ -79,8 +79,7 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-
-            return Tuple.Create(projects, count);
+            return (list: projects, count);
         }
 
         public async Task<bool> CreateProjectAsync(Project project, List<IssueType> types)
@@ -129,7 +128,7 @@ namespace DragonflyTracker.Services
             return true;
         }
 
-        public async Task<Tuple<List<Project>, int>> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
+        public async Task<(List<Project> list, int count)> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Projects.AsQueryable()
                     .Where(x => x.ParentOrganization.Name == organizationName);
@@ -151,10 +150,10 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(projects, count);
+            return (list: projects, count);
         }
 
-        public async Task<Tuple<List<Project>, int>> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Project> list, int count)> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Projects.AsQueryable()
                     .Where(x => x.OrganizationId == organizationId);
@@ -176,7 +175,7 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(projects, count);
+            return (list: projects, count);
         }
 
         private async Task AddIssueStages(Issue issue)

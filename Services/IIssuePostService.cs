@@ -21,8 +21,8 @@ namespace DragonflyTracker.Services
 
         public Task<bool> UserOwnsIssuePostAsync(Guid issuePostId, string userId);
 
-        public Task<Tuple<List<IssuePost>, int>> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null);
+        public Task<(List<IssuePost> list, int count)> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<IssuePost>, int>> GetAllIssuePostsAsync(GetAllIssuePostsFilter filter, PaginationFilter paginationFilter = null);
+        public Task<(List<IssuePost> list, int count)> GetAllIssuePostsAsync(GetAllIssuePostsFilter filter, PaginationFilter paginationFilter = null);
     }
 }

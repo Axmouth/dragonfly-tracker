@@ -54,14 +54,14 @@ namespace DragonflyTracker.Controllers.V1
             // filter.AuthorUsername = username;
             filter.ProjectId = project.Id;
             var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
-            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.Item1);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.list);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.Item2));
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.count));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.Item2);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.count);
             return Ok(paginationResponse);
         }
 
@@ -75,14 +75,14 @@ namespace DragonflyTracker.Controllers.V1
             filter.ProjectName = projectName;
             filter.OrganizationName = organizationName;
             var issues = await _issueService.GetIssuesAsync(filter, pagination).ConfigureAwait(false);
-            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.Item1);
+            var issuesResponse = _mapper.Map<List<IssueResponse>>(issues.list);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.Item2));
+                return Ok(new PagedResponse<IssueResponse>(issuesResponse, issues.count));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.Item2);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, issuesResponse, issues.count);
             return Ok(paginationResponse);
         }
 

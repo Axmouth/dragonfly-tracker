@@ -81,14 +81,14 @@ namespace DragonflyTracker.Controllers.V1
             var filter = _mapper.Map<GetAllProjectsFilter>(query);
             filter.OrganizationName = organizationName;
             var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
-            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.Item1);
+            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.list);
 
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.Item2));
+                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.count));
             }
 
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.Item2);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.count);
             return Ok(paginationResponse);
         }
 

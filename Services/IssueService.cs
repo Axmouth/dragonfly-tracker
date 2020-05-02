@@ -205,7 +205,7 @@ namespace DragonflyTracker.Services
             return true;
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable()
                     .Where(x => x.ProjectId == projectId)
@@ -227,18 +227,18 @@ namespace DragonflyTracker.Services
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
 
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable();
             List<Issue> issues;
 
             if (filter == null)
             {
-                return Tuple.Create(new List<Issue>(){ }, 0);
+                return (list: new List<Issue>(){ }, count:  0);
             }
 
             if (filter.ProjectId.HasValue)
@@ -305,10 +305,10 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable()
                     .Include(x => x.Author)
@@ -330,11 +330,11 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
 
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable()
                     .Include(x => x.Author)
@@ -356,10 +356,10 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable()
                     .Include(x => x.Author)
@@ -381,11 +381,11 @@ namespace DragonflyTracker.Services
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
 
         }
 
-        public async Task<Tuple<List<IssueUpdate>, int>> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null)
+        public async Task<(List<IssueUpdate> list, int count)> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.IssueUpdates.AsQueryable()
                     .Where(x => x.IssueId == issueId && end < x.CreatedAt && x.CreatedAt <= start);
@@ -408,11 +408,11 @@ namespace DragonflyTracker.Services
                     .ConfigureAwait(false);
 
             }
-            return Tuple.Create(issueUpdates, count);
+            return (list: issueUpdates, count);
 
         }
 
-        public async Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _pgMainDataContext.Issues.AsQueryable()
                     // .Include(x => x.Tags)
@@ -438,7 +438,7 @@ namespace DragonflyTracker.Services
                         .ConfigureAwait(false);
             }
 
-            return Tuple.Create(issues, count);
+            return (list: issues, count);
         }
 
         private async Task AddIssueTypes(Issue issue)
@@ -467,7 +467,7 @@ namespace DragonflyTracker.Services
                     continue;
 
                 await _pgMainDataContext.IssueStages.AddAsync(new IssueStage
-                { Name = stage.Name, ProjectId = project.Id });
+                { Name = stage.Name, ProjectId = project.Id }).ConfigureAwait(false);
             }
         }
 

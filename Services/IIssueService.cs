@@ -40,19 +40,19 @@ namespace DragonflyTracker.Services
 
         public Task<bool> UserOwnsIssueAsync(Guid issueId, string userId);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesAsync(GetAllIssuesFilter filter, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<IssueUpdate>, int>> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null);
+        public Task<(List<IssueUpdate> list, int count)> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null);
 
-        public Task<Tuple<List<Issue>, int>> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null);
 
 
 
