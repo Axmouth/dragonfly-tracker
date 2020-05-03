@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { TokenService } from '../../services/token.service';
 import { Project } from 'src/app/models/project';
+import { ActivatedRoute, Router, Params } from '@angular/router';
 
 @Component({
   selector: 'app-view-my-projects',
@@ -19,21 +20,24 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   loading = true;
   username: string;
   ngUnsubscribe = new Subject<void>();
+  state: ClrDatagridStateInterface;
+  currentPage: number;
 
   constructor(
     private projectsService: ProjectsService,
     private authService: AuthService,
     private tokenService: TokenService,
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
   ) {}
 
   async ngOnInit() {
+    // this.username = (await this.authService.getToken().toPromise()).getName();
     this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
-    /*
-    this.projectSubscription$ = this.projectsService.getUsersProjects(this.username).subscribe(async projectsResult => {
-      console.log(projectsResult);
-      this.projectsList = projectsResult["data"];
-      console.log(this.projectsList);
-    });*/
+    const qParams = this.activatedRoute.snapshot.queryParams;
+    if (qParams.page !== undefined && qParams.page !== null) {
+      this.currentPage = +qParams.page;
+    }
   }
 
   onProjectEditClick(project: Project) {
@@ -41,25 +45,24 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   onProjectDeleteClick(project: Project) {
-    console.log(project);
     this.projectsService
       .deleteUsersProject(project.creator.username, project.name)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
-        console.log(result);
+        this.refresh(this.state);
       });
-    const index = this.projectsList.indexOf(project);
-    console.log(index);
-    this.projectsList = this.projectsList.slice(index, 1);
-    // console.log(this.projectsList.filter((x: Project) => x.creator.username !== project.creator.username || x.name !== project.name));
   }
 
   async refresh(state: ClrDatagridStateInterface) {
-    if (!this.username) {
-      this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
-    }
+    this.username = await (await this.tokenService.get().toPromise()).getPayload().sub;
+    this.state = state;
+    const queryParams: Params = { page: state.page.current };
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: queryParams,
+      queryParamsHandling: 'merge', // remove to replace all query params by provided
+    });
     this.loading = true;
-    console.log(state);
 
     // We convert the filters from an array to a map,
     // because that's what our backend-calling service is expecting
@@ -82,10 +85,8 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
     this.projectSubscription$ = this.projectsService
       .getUsersProjects(this.username, state.page.current, state.page.size)
       .subscribe(async (projectsResult) => {
-        console.log(projectsResult);
         this.projectsList = projectsResult['data'];
         this.total = projectsResult['total'];
-        console.log(this.projectsList);
         this.loading = false;
       });
   }

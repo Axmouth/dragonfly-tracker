@@ -22,7 +22,7 @@ namespace DragonflyTracker.Services
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
             // await AddNewTags(post).ConfigureAwait(false);
-            await _pgMainDataContext.IssuePosts.AddAsync(issuePost);
+            await _pgMainDataContext.IssuePosts.AddAsync(issuePost).ConfigureAwait(false);
 
             var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return created > 0;
@@ -33,7 +33,7 @@ namespace DragonflyTracker.Services
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
             // await AddNewTags(post).ConfigureAwait(false);
-            await _pgMainDataContext.IssuePostReactions.AddAsync(issuePostReaction);
+            await _pgMainDataContext.IssuePostReactions.AddAsync(issuePostReaction).ConfigureAwait(false);
 
             var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             return created > 0;
@@ -94,7 +94,8 @@ namespace DragonflyTracker.Services
 
         public async Task<(List<IssuePost> list, int count)> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.IssuePosts.AsQueryable()
+            var queryable = _pgMainDataContext.IssuePosts.AsNoTracking()
+                    .AsQueryable()
                     .Include(x => x.Author)
                     .Include(x => x.Reactions)
                     .Where(x => x.IssueId == issueId);
@@ -121,7 +122,8 @@ namespace DragonflyTracker.Services
 
         public async Task<(List<IssuePost> list, int count)> GetAllIssuePostsAsync(GetAllIssuePostsFilter filter, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.IssuePosts.AsQueryable();
+            var queryable = _pgMainDataContext.IssuePosts.AsNoTracking()
+                .AsQueryable();
             List<IssuePost> issuePosts;
 
             if (!string.IsNullOrEmpty(filter?.ProjectName) && !string.IsNullOrEmpty(filter?.OrganizationName))

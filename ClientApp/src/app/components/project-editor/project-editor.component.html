@@ -1,19 +1,27 @@
-
-  <form clrForm>
-    <clr-input-container>
-      <label>Project Name</label>
-      <input clrInput type="text" [(ngModel)]="projectName" name="projectName"/>
-    </clr-input-container>
-    <clr-textarea-container>
-      <label>Project Description</label>
-      <textarea clrTextarea [(ngModel)]="projectDescription" name="projectDescription"></textarea>
-    </clr-textarea-container>
-    <h5>Advanced</h5>
-    <clr-checkbox-wrapper>
-      <input clrCheckbox type="checkbox" (checkedChange)="onProjectPublicChange($event)" [(ngModel)]="isPublic" value="isPublic" name="isPublic"/>
-      <label>Make Project Public</label>
-    </clr-checkbox-wrapper>
-    <br />
-    <br />
-    <button  type="button" class="btn btn-icon btn-success" aria-label="success" (click)="onProjectSubmitClick()">Submit<clr-icon shape="plus"></clr-icon></button>
-  </form>
+<form clrForm>
+  <clr-input-container>
+    <label>Project Name</label>
+    <input clrInput type="text" [(ngModel)]="projectName" name="projectName" />
+  </clr-input-container>
+  <clr-textarea-container>
+    <label>Project Description</label>
+    <textarea clrTextarea [(ngModel)]="projectDescription" name="projectDescription"></textarea>
+  </clr-textarea-container>
+  <h5>Advanced</h5>
+  <clr-checkbox-wrapper>
+    <input
+      clrCheckbox
+      type="checkbox"
+      (checkedChange)="onProjectPublicChange($event)"
+      [(ngModel)]="isPublic"
+      value="isPublic"
+      name="isPublic"
+    />
+    <label>Make Project Public</label>
+  </clr-checkbox-wrapper>
+  <br />
+  <br />
+  <button type="button" class="btn btn-icon btn-success" aria-label="success" (click)="onProjectSubmitClick()">
+    Submit<clr-icon shape="plus"></clr-icon>
+  </button>
+</form>

@@ -83,7 +83,7 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Refresh)]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
-            var RefreshToken = Request.Cookies["authRefreshToken"];
+            var RefreshToken = Request.Cookies[refreshTokenCookieName];
 
             // var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken).ConfigureAwait(false);
             var authResponse = await _identityService.RefreshTokenAsync(request.Token, RefreshToken).ConfigureAwait(false);

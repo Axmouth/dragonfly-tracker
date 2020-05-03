@@ -54,7 +54,16 @@ namespace DragonflyTracker.Data
         {
             base.OnModelCreating(builder);
 
+            if (builder == null)
+            {
+                return;
+            }
+
             builder.Entity<PostTag>().Ignore(x => x.Post).HasKey(x => new { x.PostId, x.TagName });
+
+            builder.Entity<Project>(p => {
+                p.HasIndex(p => new { p.Name, p.UserId }).IsUnique();
+            });
 
 
             builder.Entity<ProjectAdmin>()

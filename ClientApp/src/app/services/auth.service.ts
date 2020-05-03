@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
-import { TokenService, AuthToken, AuthCreateJWTToken, AuthJWTToken, AuthIllegalTokenError } from './token.service';
+import {
+  TokenService,
+  AuthToken,
+  AuthCreateJWTToken,
+  AuthJWTToken,
+  AuthIllegalTokenError,
+  AuthSimpleToken,
+} from './token.service';
 import { map, switchMap, catchError } from 'rxjs/operators';
-import { Observable, of as observableOf } from 'rxjs';
+import { Observable, of as observableOf, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
@@ -12,6 +19,8 @@ import { EmptyResponse } from '../models/empty-response';
   providedIn: 'root',
 })
 export class AuthService {
+  authenticating = false;
+
   constructor(private tokenService: TokenService, private http: HttpClient, private route: ActivatedRoute) {}
 
   /**
@@ -24,7 +33,7 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  authenticate(data?: any) {
+  authenticate(data?: any): Observable<AuthResult> {
     const result = this.http
       .post<AuthSuccessResponse>(`${apiRoot}/identity/login`, data, {
         observe: 'response',
@@ -102,7 +111,7 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  register(data?: any) {
+  register(data?: any): Observable<AuthResult> {
     const url = `${apiRoot}/identity/register`;
     const result = this.http
       .post<AuthSuccessResponse>(url, data, { observe: 'response' })
@@ -132,7 +141,7 @@ export class AuthService {
    * Returns true if auth token is present in the token storage
    * @returns {Observable<boolean>}
    */
-  isAuthenticated() {
+  isAuthenticated(): Observable<boolean> {
     return this.getToken().pipe(map((token: AuthToken) => token.isValid()));
   }
 
@@ -141,12 +150,16 @@ export class AuthService {
    * If not, calls refreshToken, and returns isAuthenticated() if success, false otherwise
    * @returns {Observable<boolean>}
    */
-  isAuthenticatedOrRefresh() {
+  isAuthenticatedOrRefresh(): Observable<boolean> {
     return this.getToken().pipe(
       switchMap((token) => {
         if (token.getValue() && !token.isValid()) {
           return this.refreshToken(token).pipe(
             switchMap((res) => {
+              if (res === null) {
+                // For the case where there is an auth request in progress. Keep the status Quo
+                return observableOf(this.isAuthenticated());
+              }
               if (res.isSuccess()) {
                 return this.isAuthenticated();
               } else {
@@ -165,7 +178,7 @@ export class AuthService {
    * Returns authentication status stream
    * @returns {Observable<boolean>}
    */
-  onAuthenticationChange() {
+  onAuthenticationChange(): Observable<boolean> {
     return this.onTokenChange().pipe(map((token: AuthToken) => token.isValid()));
   }
 
@@ -179,13 +192,21 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  refreshToken(data?: any) {
+  refreshToken(data?: any): Observable<AuthResult> {
+    if (this.authenticating) {
+      // check if auth request is in progress and do nothing then
+      return observableOf(null);
+    }
+    // set the flag that there is an auth request in progress
+    this.authenticating = true;
+
     const url = `${apiRoot}/identity/refresh`;
     return this.http
       .post<AuthSuccessResponse>(url, data, { observe: 'response' })
       .pipe(
         map((res) => {
           const token = AuthCreateJWTToken(res.body['token'], 'refreshToken');
+          this.authenticating = false;
           return new AuthResult(
             true,
             res,
@@ -196,11 +217,13 @@ export class AuthService {
           );
         }),
         catchError((res) => {
+          this.authenticating = false;
           return this.handleResponseError(res);
         }),
       )
       .pipe(
         switchMap((result: AuthResult) => {
+          this.authenticating = false;
           return this.processResultToken(result);
         }),
       );
@@ -214,15 +237,15 @@ export class AuthService {
    * Retrieves current authenticated token stored
    * @returns {Observable<any>}
    */
-  getToken() {
+  getToken(): Observable<any> {
     return this.tokenService.get();
   }
 
   /**
    * Returns tokens stream
-   * @returns {Observable<AuthSimpleToken>}
+   * @returns {Observable<AuthToken>}
    */
-  onTokenChange() {
+  onTokenChange(): Observable<AuthToken> {
     return this.tokenService.tokenChange();
   }
 
@@ -235,7 +258,7 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  requestPassword(data?: any) {
+  requestPassword(data?: any): Observable<AuthResult> {
     const url = `${apiRoot}/identity/request-pass`;
     return this.http.post(url, data, { observe: 'response' }).pipe(
       map((res) => {
@@ -262,7 +285,7 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  resetPassword(data?: any) {
+  resetPassword(data?: any): Observable<AuthResult> {
     const url = `${apiRoot}/identity/reset-pass`;
     const tokenKey = 'reset_password_token';
     data[tokenKey] = this.route.snapshot.queryParams[tokenKey];
