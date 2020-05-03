@@ -113,9 +113,6 @@ namespace DragonflyTracker.Services
         public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
         {
             var validatedToken = GetPrincipalFromToken(token);
-            Console.WriteLine(token);
-            Console.WriteLine(refreshToken);
-            Console.WriteLine(validatedToken);
 
             if (validatedToken == null)
             {

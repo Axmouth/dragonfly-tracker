@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, Input, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
-import { Project } from 'src/app/models/project';
+import { Project } from 'src/app/models/api/project';
 
 @Component({
   selector: 'app-project-editor',

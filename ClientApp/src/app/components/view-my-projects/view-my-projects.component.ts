@@ -5,7 +5,7 @@ import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { TokenService } from '../../services/token.service';
-import { Project } from 'src/app/models/project';
+import { Project } from 'src/app/models/api/project';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 
 @Component({

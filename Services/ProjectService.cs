@@ -1,5 +1,6 @@
 ﻿using DragonflyTracker.Data;
 using DragonflyTracker.Domain;
+using DragonflyTracker.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,44 +11,48 @@ namespace DragonflyTracker.Services
 {
     public class ProjectService: IProjectService
     {
-        private readonly PgMainDataContext _pgMainDataContext;
+        private readonly IProjectRepository _projectRepository;
         private readonly IIssueService _issueService;
 
-        public ProjectService(PgMainDataContext pgMainDataContext, IIssueService issueService)
+        public ProjectService(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectRepository projectRepository)
         {
-            _pgMainDataContext = pgMainDataContext;
             _issueService = issueService;
+            _projectRepository = projectRepository;
         }
 
         public async Task<Project> GetProjectByIdAsync(Guid Id)
         {
-            return await _pgMainDataContext.Projects.AsNoTracking()
+            return await _projectRepository
+                .FindByCondition(x => x.Id == Id)
                 .Include(p => p.Creator)
-                .SingleOrDefaultAsync(x => x.Id == Id).ConfigureAwait(false);
+                .SingleOrDefaultAsync()
+                .ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByUserAsync(string username, string projectName)
         {
-            return await _pgMainDataContext.Projects.AsNoTracking()
+            return await _projectRepository
+                .FindByCondition(x => x.Name == projectName && x.Creator.UserName == username)
                 .Include(p => p.Creator)
-                .SingleOrDefaultAsync(x => x.Name == projectName && x.Creator.UserName == username).ConfigureAwait(false);
+                .SingleOrDefaultAsync()
+                .ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByOrgAsync(string organizationName, string projectName)
         {
-            return await _pgMainDataContext.Projects.AsNoTracking()
+            return await _projectRepository
+                .FindByCondition(x => x.Name == projectName && x.ParentOrganization.Name == organizationName)
                 .Include(p => p.Creator)
-                .SingleOrDefaultAsync(x => x.Name == projectName && x.ParentOrganization.Name == organizationName).ConfigureAwait(false);
+                .SingleOrDefaultAsync().ConfigureAwait(false);
         }
 
         public async Task<(List<Project> list, int count)> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Projects.AsNoTracking().AsQueryable();
+            var queryable = _projectRepository.FindAll();
 
             if (!string.IsNullOrEmpty(filter?.SearchText))
             {
-                queryable = queryable
-                    .Where(p => EF.Functions.ToTsVector("english", p.Name + ' ' + p.Description).Matches(filter.SearchText));
+                queryable = _projectRepository.FindAllWithTextSearch(filter.SearchText);
             }
 
             if (!string.IsNullOrEmpty(filter?.CreatorUsername))
@@ -87,8 +92,8 @@ namespace DragonflyTracker.Services
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
             // await AddNewTags(post).ConfigureAwait(false);
-            await _pgMainDataContext.Projects.AddAsync(project).ConfigureAwait(false);
-            var created = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            await _projectRepository.CreateAsync(project).ConfigureAwait(false);
+            var created = await _projectRepository.SaveAsync().ConfigureAwait(false);
 
             return created > 0;
         }
@@ -96,9 +101,8 @@ namespace DragonflyTracker.Services
         public async Task<bool> DeleteProjectAsync(Guid projectId)
         {
             var project = new Project { Id = projectId };
-            _pgMainDataContext.Projects.Attach(project);
-            _pgMainDataContext.Projects.Remove(project);
-            var deleted = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            _projectRepository.Delete(project);
+            var deleted = await _projectRepository.SaveAsync().ConfigureAwait(false);
             return deleted > 0;
         }
 
@@ -106,14 +110,14 @@ namespace DragonflyTracker.Services
         {
             // projectToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
             // await AddNewTags(projectToUpdate).ConfigureAwait(false);
-            _pgMainDataContext.Projects.Update(projectToUpdate);
-            var updated = await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            _projectRepository.Update(projectToUpdate);
+            var updated = await _projectRepository.SaveAsync().ConfigureAwait(false);
             return updated > 0;
         }
 
         public async Task<bool> UserOwnsProjectAsync(Guid projectId, string userId)
         {
-            var project = await _pgMainDataContext.Projects.AsNoTracking().SingleOrDefaultAsync(x => x.Id == projectId).ConfigureAwait(false);
+            var project = await _projectRepository.FindByCondition(x => x.Id == projectId).SingleOrDefaultAsync().ConfigureAwait(false);
 
             if (project == null)
             {
@@ -130,8 +134,8 @@ namespace DragonflyTracker.Services
 
         public async Task<(List<Project> list, int count)> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Projects.AsNoTracking().AsQueryable()
-                    .Where(x => x.ParentOrganization.Name == organizationName);
+            var queryable = _projectRepository
+                .FindByCondition(x => x.ParentOrganization.Name == organizationName);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -155,8 +159,8 @@ namespace DragonflyTracker.Services
 
         public async Task<(List<Project> list, int count)> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
         {
-            var queryable = _pgMainDataContext.Projects.AsNoTracking().AsQueryable()
-                    .Where(x => x.OrganizationId == organizationId);
+            var queryable = _projectRepository
+                .FindByCondition(x => x.OrganizationId == organizationId);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 

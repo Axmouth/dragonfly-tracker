@@ -5,8 +5,8 @@ import { Subscription, Subject } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil } from 'rxjs/operators';
 import { IssuesService } from '../../services/issues.service';
-import { Issue } from 'src/app/models/issue';
-import { Project } from 'src/app/models/project';
+import { Issue } from 'src/app/models/api/issue';
+import { Project } from 'src/app/models/api/project';
 
 const openStatusMap = {
   open: true,

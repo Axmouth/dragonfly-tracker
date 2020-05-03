@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Issue } from '../../models/issue';
-import { IssuePost } from '../../models/issue-post';
+import { Issue } from '../../models/api/issue';
+import { IssuePost } from '../../models/api/issue-post';
 import { Subscription, Subject } from 'rxjs';
 import { ProjectsService } from 'src/app/services/projects.service';
 import { ActivatedRoute } from '@angular/router';

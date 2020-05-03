@@ -3,12 +3,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
 import { apiRoot } from 'src/environments/environment';
-import { PagedResponse } from '../models/paged-response';
-import { Issue } from '../models/issue';
+import { PagedResponse } from '../models/api/paged-response';
+import { Issue } from '../models/api/issue';
 import { Observable } from 'rxjs';
-import { Response } from '../models/response';
-import { IssuePost } from '../models/issue-post';
-import { IssuePostReaction } from '../models/issue-post-reaction';
+import { Response } from '../models/api/response';
+import { IssuePost } from '../models/api/issue-post';
+import { IssuePostReaction } from '../models/api/issue-post-reaction';
 
 @Injectable({
   providedIn: 'root',

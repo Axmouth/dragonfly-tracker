@@ -4,9 +4,9 @@ import { pageSizeConst } from '../constants';
 import { AuthService } from './auth.service';
 import { apiRoot } from 'src/environments/environment';
 import { Observable } from 'rxjs';
-import { Project } from '../models/project';
-import { Response } from '../models/response';
-import { PagedResponse } from '../models/paged-response';
+import { Project } from '../models/api/project';
+import { Response } from '../models/api/response';
+import { PagedResponse } from '../models/api/paged-response';
 
 @Injectable({
   providedIn: 'root',

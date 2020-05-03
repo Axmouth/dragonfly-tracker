@@ -1,0 +1,13 @@
+﻿using DragonflyTracker.Domain;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace DragonflyTracker.Repositories
+{
+    public interface IIssueStageRepository : IRepositoryBase<IssueStage>
+    {
+        public IQueryable<IssueStage> FindAllWithTextSearch(string searchTerms);
+    }
+}

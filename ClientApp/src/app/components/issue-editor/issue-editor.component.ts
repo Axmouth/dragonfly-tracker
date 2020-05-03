@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy, Input, Output, EventEmitter } from '@angular/core';
 import { Subject } from 'rxjs';
-import { Issue } from 'src/app/models/issue';
-import { IssueStage } from '../../models/issue-stage';
-import { IssueType } from '../../models/issue-type';
+import { Issue } from 'src/app/models/api/issue';
+import { IssueStage } from '../../models/api/issue-stage';
+import { IssueType } from '../../models/api/issue-type';
 
 @Component({
   selector: 'app-issue-editor',

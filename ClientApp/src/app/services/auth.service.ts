@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
-import {
-  TokenService,
-  AuthToken,
-  AuthCreateJWTToken,
-  AuthJWTToken,
-  AuthIllegalTokenError,
-  AuthSimpleToken,
-} from './token.service';
+import { TokenService } from './token.service';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { Observable, of as observableOf, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
-import { AuthSuccessResponse } from '../models/auth-success-response';
-import { EmptyResponse } from '../models/empty-response';
+import { AuthSuccessResponse } from '../models/api/auth-success-response';
+import { EmptyResponse } from '../models/api/empty-response';
+import { AuthResult } from '../models/internal/auth-result';
+import { AuthToken } from '../models/internal/auth-token';
+import { AuthJWTToken, AuthCreateJWTToken } from '../models/internal/auth-jwt-token';
+import { AuthIllegalTokenError } from '../models/internal/auth-illegal-token-error';
 
 @Injectable({
   providedIn: 'root',
@@ -327,61 +324,5 @@ export class AuthService {
       throw new AuthIllegalTokenError('Token is empty or invalid.');
     }
     return token;
-  }
-}
-
-export class AuthResult {
-  protected token: AuthToken;
-  protected errors: string[] = [];
-  protected messages: string[] = [];
-
-  // TODO: better pass object
-  constructor(
-    protected success: boolean,
-    protected response?: any,
-    protected redirect?: any,
-    errors?: any,
-    messages?: any,
-    token: AuthToken = null,
-  ) {
-    this.errors = this.errors.concat([errors]);
-    if (errors instanceof Array) {
-      this.errors = errors;
-    }
-
-    this.messages = this.messages.concat([messages]);
-    if (messages instanceof Array) {
-      this.messages = messages;
-    }
-
-    this.token = token;
-  }
-
-  getResponse(): any {
-    return this.response;
-  }
-
-  getToken(): AuthToken {
-    return this.token;
-  }
-
-  getRedirect(): string {
-    return this.redirect;
-  }
-
-  getErrors(): string[] {
-    return this.errors.filter((val) => !!val);
-  }
-
-  getMessages(): string[] {
-    return this.messages.filter((val) => !!val);
-  }
-
-  isSuccess(): boolean {
-    return this.success;
-  }
-
-  isFailure(): boolean {
-    return !this.success;
   }
 }
