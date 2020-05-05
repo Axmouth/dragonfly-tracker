@@ -12,13 +12,11 @@ namespace DragonflyTracker.Services
         public Task<Project> GetProjectByUserAsync(string username, string projectName);
         public Task<Project> GetProjectByOrgAsync(string organizationName, string projectName);
         public Task<(List<Project> list, int count)> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null);
-        public Task<bool> CreateProjectAsync(Project project, List<IssueType> types);
+        public Task<bool> CreateProjectAsync(Project project, List<IssueType> types, List<IssueStage> stages, List<DragonflyUser> admins, List<DragonflyUser> maintainers);
         public Task<bool> DeleteProjectAsync(Guid projectId);
-        public Task<bool> UpdateProjectAsync(Project projectToUpdate);
+        public Task<bool> UpdateProjectAsync(Project projectToUpdate, List<IssueType> types, List<IssueStage> stages, List<DragonflyUser> admins, List<DragonflyUser> maintainers);
         public Task<bool> UserOwnsProjectAsync(Guid projectId, string userId);
-
         public Task<(List<Project> list, int count)> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null);
-
         public Task<(List<Project> list, int count)> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null);
     }
 }

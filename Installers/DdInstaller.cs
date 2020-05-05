@@ -15,7 +15,7 @@ namespace DragonflyTracker.Installers
         {
             services.AddDbContext<PgMainDataContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("MainConnection")
+                configuration.GetConnectionString("PgMainConnection")
                 )
             //.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             );
@@ -39,8 +39,11 @@ namespace DragonflyTracker.Installers
             services.AddScoped<IIssueTypeRepository, IssueTypePgRepository>();
             services.AddScoped<IIssueUpdateRepository, IssueUpdatePgRepository>();
             services.AddScoped<IIssuePostReactionRepository, IssuePostReactionPgRepository>();
+            services.AddScoped<IIssueIssueTypeRepository, IssueIssueTypePgRepository>();
             services.AddScoped<INotificationRepository, NotificationPgRepository>();
             services.AddScoped<IOrganizationRepository, OrganizationPgRepository>();
+            services.AddScoped<IProjectAdminRepository, ProjectAdminPgRepository>();
+            services.AddScoped<IProjectMaintainerRepository, ProjectMaintainerPgRepository>();
             services.AddScoped<IUserRepository, UserPgRepository>();
         }
     }

@@ -1,13 +1,12 @@
 ﻿using DragonflyTracker.Domain;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace DragonflyTracker.Contracts.V1.Requests
 {
-    public class CreateProjectRequest
+    public class UpdateProjectRequest
     {
         public string Name { get; set; }
 

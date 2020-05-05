@@ -26,7 +26,7 @@ namespace DragonflyTracker.Controllers.V1
     [ApiController]
     public class IssuesController : ControllerBase
     {
-        private readonly PgMainDataContext _pgMainDataContext;
+        //private readonly PgMainDataContext _pgMainDataContext;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
         private readonly IIssueService _issueService;
@@ -34,7 +34,7 @@ namespace DragonflyTracker.Controllers.V1
 
         public IssuesController(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService)
         {
-            _pgMainDataContext = pgMainDataContext;
+            //_pgMainDataContext = pgMainDataContext;
             _mapper = mapper;
             _uriService = uriService;
             _issueService = issueService;
@@ -137,7 +137,6 @@ namespace DragonflyTracker.Controllers.V1
                 AuthorId = HttpContext.GetUserId(),
                 CreatedAt = DateTime.UtcNow,
                 Content = issueRequest.Content
-                // Types = issueRequest.Types
             };
 
             await _issueService.CreateIssueByUserAsync(issue, issueRequest.Types, username, projectName).ConfigureAwait(false);
@@ -161,8 +160,7 @@ namespace DragonflyTracker.Controllers.V1
                 Title = issueRequest.Title,
                 AuthorId = HttpContext.GetUserId(),
                 CreatedAt = DateTime.UtcNow,
-                Content = issueRequest.Content
-                // Types = issueRequest.Types.Select(x => new IssueType { ParentProject.Name = projectName, TagName = x).ToList()
+                Content = issueRequest.Content,
             };
 
             await _issueService.CreateIssueByOrgAsync(issue, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
@@ -189,8 +187,11 @@ namespace DragonflyTracker.Controllers.V1
                 return Unauthorized();
             }
 
-            _pgMainDataContext.Issues.Add(issue);
-            await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
+            issue.Title = issueRequest?.Title;
+            issue.UpdatedAt = DateTime.UtcNow;
+            issue.Content = issueRequest.Content;
+
+            await _issueService.UpdateIssueAsync(issue, issueRequest.Types).ConfigureAwait(false);
 
             return CreatedAtAction("GetIssue", new { id = issue.Id }, issue);
         }
@@ -217,11 +218,6 @@ namespace DragonflyTracker.Controllers.V1
             await _issueService.DeleteIssueAsync(issue.Id).ConfigureAwait(false);
 
             return NoContent();
-        }
-
-        private bool IssueExists(Guid id)
-        {
-            return _pgMainDataContext.Issues.Any(e => e.Id == id);
         }
     }
 }

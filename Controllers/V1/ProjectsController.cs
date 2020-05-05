@@ -143,7 +143,7 @@ namespace DragonflyTracker.Controllers.V1
                 // Types = issueRequest.Types
             };
 
-            await _projectService.CreateProjectAsync(project, projectRequest.Types).ConfigureAwait(false);
+            await _projectService.CreateProjectAsync(project, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
 
             var locationUri = _uriService.GetUri(project.Name);
             return Created(locationUri, new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(project)));
@@ -182,7 +182,7 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Projects.UpdateByUser)]
-        public async Task<IActionResult> Update([FromRoute] string username, [FromRoute]string projectName, [FromBody] UpdatePostRequest request)
+        public async Task<IActionResult> Update([FromRoute] string username, [FromRoute]string projectName, [FromBody] UpdateProjectRequest projectRequest)
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
@@ -194,9 +194,9 @@ namespace DragonflyTracker.Controllers.V1
             }
 
             var updatedProject = await _projectService.GetProjectByIdAsync(project.Id).ConfigureAwait(false);
-            updatedProject.Name = request.Name;
+            updatedProject.Name = projectRequest.Name;
 
-            var updated = await _projectService.UpdateProjectAsync(updatedProject).ConfigureAwait(false);
+            var updated = await _projectService.UpdateProjectAsync(updatedProject, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
 
             if (updated)
                 return Ok(new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(updatedProject)));

@@ -26,7 +26,7 @@ namespace DragonflyTracker.Services
 
         public Task<bool> CreateIssueAsync(Issue issue, List<IssueType> types);
 
-        public Task<bool> UpdateIssueAsync(Issue issueToUpdate);
+        public Task<bool> UpdateIssueAsync(Issue issueToUpdate, List<IssueType> types);
 
         public Task<bool> UpdateIssueStageAsync(IssueStage issueStageToUpdate);
 

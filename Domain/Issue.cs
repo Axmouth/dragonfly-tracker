@@ -28,6 +28,9 @@ namespace DragonflyTracker.Domain
         [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
+        [Column(TypeName = "timestamp")]
+        public DateTime UpdatedAt { get; set; }
+
         public string AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
         public DragonflyUser Author { get; set; }
@@ -42,7 +45,7 @@ namespace DragonflyTracker.Domain
 
         public Guid? StageId { get; set; }
         [ForeignKey(nameof(StageId))]
-        public IssueStage CurrentStage { get; set; }
+        public virtual IssueStage CurrentStage { get; set; }
 
         public virtual List<IssueIssueType> Types { get; set; }
 

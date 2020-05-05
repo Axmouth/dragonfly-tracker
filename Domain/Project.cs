@@ -22,6 +22,9 @@ namespace DragonflyTracker.Domain
         [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
+        [Column(TypeName = "timestamp")]
+        public DateTime UpdatedAt { get; set; }
+
         public Guid? OrganizationId { get; set; }
         [ForeignKey(nameof(OrganizationId))]
         public Organization ParentOrganization { get; set; }

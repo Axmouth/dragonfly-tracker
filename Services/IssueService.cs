@@ -18,9 +18,11 @@ namespace DragonflyTracker.Services
         private readonly IIssueUpdateRepository _issueUpdateRepository;
         private readonly IIssuePostService _issuePostService;
         private readonly IProjectRepository _projectRepository;
+        private readonly IIssueIssueTypeRepository _issueIssueTypeRepository;
 
         public IssueService(IProjectRepository projectRepository, IIssuePostService issuePostService, IIssueRepository issueRepository,
-            IIssueUpdateRepository issueUpdateRepository, IIssueStageRepository issueStageRepository, IIssueTypeRepository issueTypeRepository)
+            IIssueUpdateRepository issueUpdateRepository, IIssueStageRepository issueStageRepository, IIssueTypeRepository issueTypeRepository,
+            IIssueIssueTypeRepository issueIssueTypeRepository)
         {
             _issueRepository = issueRepository;
             _issuePostService = issuePostService;
@@ -28,12 +30,17 @@ namespace DragonflyTracker.Services
             _issueTypeRepository = issueTypeRepository;
             _issueUpdateRepository = issueUpdateRepository;
             _projectRepository = projectRepository;
+            _issueIssueTypeRepository = issueIssueTypeRepository;
         }
 
         public async Task<Issue> GetIssueByIdAsync(Guid issueId)
         {
             return await _issueRepository
                 .FindByCondition(x => x.Id == issueId)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType)
+                .Include(x => x.ParentProject)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -42,6 +49,10 @@ namespace DragonflyTracker.Services
         {
             return await _issueRepository
                 .FindByCondition(x => x.ParentProject.Name == projectName && x.Author.UserName == username && x.Number == issueNumber)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType)
+                .Include(x => x.ParentProject)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -50,15 +61,16 @@ namespace DragonflyTracker.Services
         {
             return await _issueRepository
                 .FindByCondition(x => x.ParentProject.Name == projectName && x.ParentOrganization.Name == organizationName && x.Number == issueNumber)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType)
+                .Include(x => x.ParentProject)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
 
         public async Task<bool> CreateIssueUpdateAsync(IssueUpdate issueUpdate)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
             await _issueUpdateRepository.CreateAsync(issueUpdate).ConfigureAwait(false);
 
             var created = await _issueUpdateRepository.SaveAsync().ConfigureAwait(false);
@@ -67,9 +79,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> CreateIssueStageAsync(IssueStage issueStage)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
             await _issueStageRepository.CreateAsync(issueStage).ConfigureAwait(false);
 
             var created = await _issueStageRepository.SaveAsync().ConfigureAwait(false);
@@ -78,9 +87,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> CreateIssueTypeAsync(IssueType issueType)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
             await _issueTypeRepository.CreateAsync(issueType).ConfigureAwait(false);
 
             var created = await _issueTypeRepository.SaveAsync().ConfigureAwait(false);
@@ -91,10 +97,13 @@ namespace DragonflyTracker.Services
         {
             // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
 
-            // await AddNewTags(post).ConfigureAwait(false);
             if (issue == null)
             {
                 return false;
+            }
+            if (types != null)
+            {
+                await AddIssueTypes(issue, types).ConfigureAwait(false);
             }
             issue.Open = true;
             issue.ProjectId = _projectRepository.FindByCondition(p => p.Name == projectName && p.Creator.UserName == username).SingleOrDefault().Id;
@@ -110,9 +119,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> CreateIssueByOrgAsync(Issue issue, List<IssueType> types, string organizationName, string projectName)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
             if (issue == null)
             {
                 return false;
@@ -121,20 +127,17 @@ namespace DragonflyTracker.Services
             issue.ProjectId = _projectRepository.FindByCondition(p => p.Name == projectName && p.ParentOrganization.Name == organizationName).SingleOrDefault().Id;
             issue.Number = _issueRepository.FindByCondition(i => i.ProjectId == issue.ProjectId).Count();
             await _issueRepository.CreateAsync(issue).ConfigureAwait(false);
-
-            // var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
-
             var created = await _issueRepository.SaveAsync().ConfigureAwait(false);
+            if (types != null)
+            {
+                await AddIssueTypes(issue, types).ConfigureAwait(false);
+            }
 
             return created > 0;
         }
 
         public async Task<bool> CreateIssueAsync(Issue issue, List<IssueType> types)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
-            // issue.ProjectId = _dataContext.Projects.Where(p => p.Name == projectName && p.ParentOrganization.Name == organizationName).SingleOrDefault().Id;
             if (issue == null)
             {
                 return false;
@@ -143,26 +146,31 @@ namespace DragonflyTracker.Services
             issue.Number = _issueRepository.FindByCondition(i => i.ProjectId == issue.ProjectId).Count();
             await _issueRepository.CreateAsync(issue).ConfigureAwait(false);
 
-            // var created = await _issuePostService.CreateIssuePostAsync(new IssuePost { Id = new Guid(), AuthorId = issue.AuthorId, Content = postContent, Number = 0, IssueId = issue.Id, CreatedAt = DateTime.UtcNow }).ConfigureAwait(false);
-
             var created = await _issueRepository.SaveAsync().ConfigureAwait(false);
-
+            if (types != null)
+            {
+                await AddIssueTypes(issue, types).ConfigureAwait(false);
+            }
             return created > 0;
         }
 
-        public async Task<bool> UpdateIssueAsync(Issue issueToUpdate)
+        public async Task<bool> UpdateIssueAsync(Issue issueToUpdate, List<IssueType> types = null)
         {
-            // postToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-            // await AddNewTags(postToUpdate).ConfigureAwait(false);
+            if (issueToUpdate == null)
+            {
+                return false;
+            }
             _issueRepository.Update(issueToUpdate);
             var updated = await _issueRepository.SaveAsync().ConfigureAwait(false);
+            if (types != null)
+            {
+                await AddIssueTypes(issueToUpdate, types).ConfigureAwait(false);
+            }
             return updated > 0;
         }
 
         public async Task<bool> UpdateIssueStageAsync(IssueStage issueStageToUpdate)
         {
-            // postToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-            // await AddNewTags(postToUpdate).ConfigureAwait(false);
             _issueStageRepository.Update(issueStageToUpdate);
             var updated = await _issueStageRepository.SaveAsync().ConfigureAwait(false);
             return updated > 0;
@@ -170,8 +178,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> UpdateIssueTypeAsync(IssueType issueTypeToUpdate)
         {
-            // postToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-            // await AddNewTags(postToUpdate).ConfigureAwait(false);
             _issueTypeRepository.Update(issueTypeToUpdate);
             var updated = await _issueTypeRepository.SaveAsync().ConfigureAwait(false);
             return updated > 0;
@@ -225,7 +231,9 @@ namespace DragonflyTracker.Services
         {
             var queryable = _issueRepository
                 .FindByCondition(x => x.ProjectId == projectId)
-                .Include(x => x.Author);
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType);
             List<Issue> issues;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -258,6 +266,11 @@ namespace DragonflyTracker.Services
 
                 queryable = _issueRepository.FindAllWithTextSearch(filter.SearchText);
             }
+            queryable = queryable
+                .Include(x => x.ParentProject)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType);
 
             if (filter == null)
             {
@@ -304,8 +317,6 @@ namespace DragonflyTracker.Services
             if (paginationFilter == null)
             {
                 issues = await queryable
-                    .Include(x => x.Author)
-                    .Include(x => x.ParentProject)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -313,8 +324,6 @@ namespace DragonflyTracker.Services
             {
                 var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
                 issues = await queryable
-                        .Include(x => x.Author)
-                        .Include(x => x.ParentProject)
                         .Skip(skip)
                         .Take(paginationFilter.PageSize)
                         .ToListAsync()
@@ -353,10 +362,14 @@ namespace DragonflyTracker.Services
         public async Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueRepository
-                    .FindByCondition(x => x.AuthorId == authortId)
-                    .Include(x => x.Author);
+                    .FindByCondition(x => x.AuthorId == authortId);
             List<Issue> issues;
             var count = await queryable.CountAsync().ConfigureAwait(false);
+            queryable = queryable
+                .Include(x => x.ParentProject)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType);
 
             if (paginationFilter == null)
             {
@@ -379,10 +392,14 @@ namespace DragonflyTracker.Services
         public async Task<(List<Issue> list, int count)> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueRepository
-                .FindByCondition(x => x.Author.UserName == authortName)
-                .Include(x => x.Author);
+                .FindByCondition(x => x.Author.UserName == authortName);
             List<Issue> issues;
             var count = await queryable.CountAsync().ConfigureAwait(false);
+            queryable = queryable
+                .Include(x => x.ParentProject)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType);
 
             if (paginationFilter == null)
             {
@@ -433,8 +450,12 @@ namespace DragonflyTracker.Services
         public async Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueRepository
-                .FindByCondition(x => x.AuthorId == authortId);
-                    // .Include(x => x.Tags)
+                .FindByCondition(x => x.AuthorId == authortId)
+                .Include(x => x.ParentProject)
+                .Include(i => i.Author)
+                .Include(i => i.Types)
+                .ThenInclude(t => t.IssueType);
+            // .Include(x => x.Tags)
             List<Issue> issues;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -459,8 +480,8 @@ namespace DragonflyTracker.Services
             return (list: issues, count);
         }
 
-        private async Task AddIssueTypes(Issue issue)
-        {/*
+        /*private async Task AddIssueTypes(Issue issue)
+        {
             foreach (var type in issue.Types)
             {
                 var existingIssueType =
@@ -471,25 +492,34 @@ namespace DragonflyTracker.Services
 
                 await _dataContext.IssueTypes.AddAsync(new IssueType
                 { Name = type.Name, ProjectId = issue.ProjectId });
-            }*/
-        }
+            }
+        }*/
 
-        private async Task AddIssueStages(Project project)
+        private async Task AddIssueTypes(Issue issue, List<IssueType> types)
         {
-            foreach (var stage in project.Stages)
+            List<IssueIssueType> newTypes = new List<IssueIssueType> { };
+            foreach (var type in types)
             {
-                var existingTag =
+                var existingType =
                     await _issueTypeRepository
                     .FindByCondition(x =>
-                        x.Name == stage.Name && x.ProjectId == stage.ProjectId)
+                        x.Name == type.Name && x.ProjectId == issue.ProjectId)
                     .SingleOrDefaultAsync().ConfigureAwait(false);
-                if (existingTag != null)
+                if (existingType != null)
+                {
                     continue;
+                }
+                else
+                {
+                    var newType = new IssueType {  Id = Guid.NewGuid(), Name = type.Name, ProjectId = issue.ProjectId };
+                    await _issueTypeRepository.CreateAsync(newType).ConfigureAwait(false);
+                    newTypes.Add(new IssueIssueType { Issue = issue, IssueType = newType });
+                }
 
-                await _issueStageRepository.CreateAsync(new IssueStage
-                { Name = stage.Name, ProjectId = project.Id }).ConfigureAwait(false);
             }
-            await _issueStageRepository.SaveAsync().ConfigureAwait(false);
+            await _issueIssueTypeRepository.AddRangeAsync(newTypes).ConfigureAwait(false);
+            await _issueIssueTypeRepository.SaveAsync().ConfigureAwait(false);
+            await _issueTypeRepository.SaveAsync().ConfigureAwait(false);
         }
 
     }
