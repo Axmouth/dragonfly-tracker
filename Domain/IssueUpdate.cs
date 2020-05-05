@@ -20,6 +20,8 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [MaxLength(65)]
+        [MinLength(2)]
         public string Content { get; set; }
 
         public UpdateType Type { get; set; }

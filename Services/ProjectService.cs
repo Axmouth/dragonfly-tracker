@@ -175,7 +175,7 @@ namespace DragonflyTracker.Services
                 return false;
             }
 
-            if (project.UserId != userId)
+            if (project.CreatorId != userId)
             {
                 return false;
             }

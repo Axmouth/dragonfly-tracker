@@ -17,24 +17,30 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
         public string Title { get; set; }
 
+        [Required]
         public string Content { get; set; }
 
+        [Required]
         public int Number { get; set; }
 
         public bool Open { get; set; }
 
+        [Required]
         [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
         [Column(TypeName = "timestamp")]
         public DateTime UpdatedAt { get; set; }
 
+        [Required]
         public string AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
         public DragonflyUser Author { get; set; }
 
+        [Required]
         public Guid ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
         public Project ParentProject { get; set; }

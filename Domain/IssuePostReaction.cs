@@ -12,8 +12,10 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public DragonflyUser Creator { get; set; }

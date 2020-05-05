@@ -12,7 +12,15 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
+        [MaxLength(30)]
+        [MinLength(2)]
         public string Name { get; set; }
+
+        [Required]
+        [MaxLength(450)]
+        [MinLength(2)]
+        public string Description { get; set; }
 
         [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }

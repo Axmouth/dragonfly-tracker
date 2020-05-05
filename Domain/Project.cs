@@ -13,12 +13,18 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
+        [MaxLength(30)]
+        [MinLength(2)]
         public string Name { get; set; }
 
+
+        [MaxLength(350)]
         public string Description { get; set; }
 
         public bool Public { get; set; }
 
+        [Required]
         [Column(TypeName = "timestamp")]
         public DateTime CreatedAt { get; set; }
 
@@ -29,9 +35,15 @@ namespace DragonflyTracker.Domain
         [ForeignKey(nameof(OrganizationId))]
         public Organization ParentOrganization { get; set; }
 
-        public string UserId { get; set; }
-        [ForeignKey(nameof(UserId))]
+        [Required]
+        public string CreatorId { get; set; }
+        [ForeignKey(nameof(CreatorId))]
         public DragonflyUser Creator { get; set; }
+
+        [Required]
+        public string OwnerId { get; set; }
+        [ForeignKey(nameof(OwnerId))]
+        public DragonflyUser Owner { get; set; }
 
         public virtual List<ProjectAdmin> Admins { get; set; }
 

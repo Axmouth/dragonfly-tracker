@@ -59,10 +59,16 @@ namespace DragonflyTracker.Data
                 return;
             }
 
+            builder.Entity<Project>()
+                .HasOne(p => p.Creator).WithMany(du => du.CreatedProjects);
+
+            builder.Entity<Project>()
+                .HasOne(p => p.Owner).WithMany(du => du.OwnedProjects);
+
             builder.Entity<PostTag>().Ignore(x => x.Post).HasKey(x => new { x.PostId, x.TagName });
 
             builder.Entity<Project>(p => {
-                p.HasIndex(p => new { p.Name, p.UserId }).IsUnique();
+                p.HasIndex(p => new { p.Name, p.CreatorId }).IsUnique();
             });
 
 

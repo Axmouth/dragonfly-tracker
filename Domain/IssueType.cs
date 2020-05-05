@@ -12,8 +12,12 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
+        [MaxLength(30)]
+        [MinLength(2)]
         public string Name { get; set; }
 
+        [Required]
         public Guid ProjectId { get; set; }
         [ForeignKey(nameof(ProjectId))]
         public Project ParentProject { get; set; }

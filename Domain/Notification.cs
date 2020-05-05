@@ -13,8 +13,12 @@ namespace DragonflyTracker.Domain
         [Key]
         public Guid Id { get; set; }
 
+        [MaxLength(45)]
+        [MinLength(2)]
         public string Name { get; set; }
 
+        [MaxLength(45)]
+        [MinLength(7)]
         public string Link { get; set; }
 
         [Column(TypeName = "Date")]

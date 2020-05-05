@@ -10,7 +10,13 @@ namespace DragonflyTracker.Domain
 {
     public class DragonflyUser : IdentityUser
     {
+        [MaxLength(30)]
         public string Title { get; set; }
+
+        [Required]
+        [MaxLength(450)]
+        [MinLength(2)]
+        public string Description { get; set; }
 
         public virtual List<IssuePostReaction> Reactions { get; set; }
 
@@ -25,5 +31,6 @@ namespace DragonflyTracker.Domain
         public virtual List<ProjectMaintainer> MaintainedProjects { get; set; }
 
         public virtual List<Project> CreatedProjects { get; set; }
+        public virtual List<Project> OwnedProjects { get; set; }
     }
 }
