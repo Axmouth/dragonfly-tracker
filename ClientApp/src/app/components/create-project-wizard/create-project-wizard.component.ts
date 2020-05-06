@@ -30,11 +30,31 @@ export class CreateProjectWizardComponent implements OnInit {
   }
 
   onNewIssueTypeSubmit() {
-    this.newProject.types.push({ name: this.newIssueType });
+    let index = -1;
+    for (let i = 0; i < this.newProject.types.length; i++) {
+      if (this.newProject.types[i].name === this.newIssueType) {
+        index = i;
+      }
+    }
+    if (index > -1) {
+      this.newProject.types[index].name = this.newIssueType;
+    } else {
+      this.newProject.types.push({ name: this.newIssueType });
+    }
   }
 
   onNewIssueStageSubmit() {
-    this.newProject.stages.push({ name: this.newIssueStage });
+    let index = -1;
+    for (let i = 0; i < this.newProject.stages.length; i++) {
+      if (this.newProject.stages[i].name === this.newIssueStage) {
+        index = i;
+      }
+    }
+    if (index > -1) {
+      this.newProject.stages[index].name = this.newIssueStage;
+    } else {
+      this.newProject.stages.push({ name: this.newIssueStage });
+    }
   }
 
   onStageLabelClick(stage: IssueStage) {

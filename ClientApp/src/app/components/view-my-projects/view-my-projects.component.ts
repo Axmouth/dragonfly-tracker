@@ -18,7 +18,8 @@ const DEFAULT_TAB = 'owned';
 })
 export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   projectsList: any[] = [];
-  projectSubscription$: Subscription;
+  $projectSubscription: Subscription;
+  $qParamsSub: Subscription;
   total: number;
   loading = true;
   username: string;
@@ -30,7 +31,6 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   myMaintainedProjectsActive: boolean;
   tab = DEFAULT_TAB;
   firstLoad = true;
-  $qParamsSub: Subscription;
 
   constructor(
     private projectsService: ProjectsService,
@@ -85,6 +85,9 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(tabName: string) {
+    if (!this.firstLoad) {
+      this.$projectSubscription.unsubscribe();
+    }
     const queryParams: Params = {};
     if (this.tab !== tabName) {
       queryParams.page = 1;
@@ -97,8 +100,6 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
       queryParams: queryParams,
       queryParamsHandling: 'merge', // remove to replace all query params by provided
     });
-    this.state.page.current = 1;
-    this.refresh(this.state);
   }
 
   onProjectDeleteClick(project: Project) {
@@ -111,6 +112,9 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   async refresh(state: ClrDatagridStateInterface) {
+    if (!this.firstLoad) {
+      this.$projectSubscription.unsubscribe();
+    }
     this.username = await (await this.tokenService.get().toPromise()).getPayload().sub;
     this.state = state;
     if (!this.firstLoad) {
@@ -151,7 +155,7 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
     } else if (this.myMaintainedProjectsActive) {
       $projects = this.projectsService.getAllProjects(state.page.current, state.page.size, '', false, true);
     }
-    this.projectSubscription$ = $projects.subscribe(async (projectsResult) => {
+    this.$projectSubscription = $projects.subscribe(async (projectsResult) => {
       this.projectsList = projectsResult['data'];
       this.total = projectsResult['total'];
       this.loading = false;
@@ -160,5 +164,6 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.$qParamsSub.unsubscribe();
+    this.$projectSubscription.unsubscribe();
   }
 }
