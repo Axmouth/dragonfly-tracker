@@ -66,9 +66,9 @@ namespace DragonflyTracker.Installers
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("MustWorkForChapsas", policy =>
+                options.AddPolicy("google", policy =>
                     {
-                        policy.AddRequirements(new WorksForCompanyRequirement("chapsas.com"));
+                        policy.AddRequirements(new WorksForCompanyRequirement("google.com"));
                     });
             });
 

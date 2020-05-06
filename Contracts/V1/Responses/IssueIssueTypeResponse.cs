@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Contracts.V1.Responses
 {
-    [AutoMap(typeof(IssuePostReaction))]
-    public class IssuePostReactionResponse
+    [AutoMap(typeof(IssueIssueType))]
+    public class IssueIssueTypeResponse
     {
-        public string Name { get; set; }
-        public UserResponse Creator { get; set; }
+        public IssueType IssueType { get; set; }
     }
 }

@@ -24,6 +24,13 @@ namespace DragonflyTracker.Domain
         [Ignore]
         public string AuthorEmail { get; set; }
 
+        [Ignore]
+        public string CurrentUserId { get; set; }
+
         public string SearchText { get; set; }
+        public string Admin { get; set; }
+        public string Maintainer { get; set; }
+        public bool? Admined { get; set; }
+        public bool? Maintained { get; set; }
     }
 }

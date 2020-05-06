@@ -1,6 +1,8 @@
 ﻿using DragonflyTracker.Data;
 using DragonflyTracker.Domain;
+using DragonflyTracker.Extensions;
 using DragonflyTracker.Repositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,10 +20,11 @@ namespace DragonflyTracker.Services
         private readonly IIssueTypeRepository _issueTypeRepository;
         private readonly IProjectAdminRepository _projectAdminRepository;
         private readonly IProjectMaintainerRepository _projectMaintainerRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ProjectService(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectRepository projectRepository,
             IIssueStageRepository issueStageRepository, IIssueTypeRepository issueTypeRepository, IProjectAdminRepository projectAdminRepository,
-            IProjectMaintainerRepository projectMaintainerRepository)
+            IProjectMaintainerRepository projectMaintainerRepository, IHttpContextAccessor httpContextAccessor)
         {
             _issueService = issueService;
             _projectRepository = projectRepository;
@@ -29,6 +32,7 @@ namespace DragonflyTracker.Services
             _issueTypeRepository = issueTypeRepository;
             _projectAdminRepository = projectAdminRepository;
             _projectMaintainerRepository = projectMaintainerRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Project> GetProjectByIdAsync(Guid Id)
@@ -37,8 +41,11 @@ namespace DragonflyTracker.Services
                 .FindByCondition(x => x.Id == Id)
                 .Include(p => p.ParentOrganization)
                 .Include(p => p.Creator)
+                .Include(p => p.Owner)
                 .Include(p => p.Stages)
                 .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -48,8 +55,11 @@ namespace DragonflyTracker.Services
             return await _projectRepository
                 .FindByCondition(x => x.Name == projectName && x.Creator.UserName == username)
                 .Include(p => p.Creator)
+                .Include(p => p.Owner)
                 .Include(p => p.Stages)
                 .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -58,14 +68,19 @@ namespace DragonflyTracker.Services
         {
             return await _projectRepository
                 .FindByCondition(x => x.Name == projectName && x.ParentOrganization.Name == organizationName)
+                .Include(p => p.ParentOrganization)
                 .Include(p => p.Creator)
+                .Include(p => p.Owner)
                 .Include(p => p.Stages)
                 .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers)
                 .SingleOrDefaultAsync().ConfigureAwait(false);
         }
 
         public async Task<(List<Project> list, int count)> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
         {
+            List<Project> projects;
             var queryable = _projectRepository
                     .FindAll();
 
@@ -76,20 +91,44 @@ namespace DragonflyTracker.Services
             }
 
             queryable = queryable
-                    .Include(x => x.ParentOrganization)
-                    .Include(p => p.Creator)
-                    .Include(p => p.Stages)
-                    .Include(p => p.Types);
+                .Include(x => x.ParentOrganization)
+                .Include(p => p.Creator)
+                .Include(p => p.Owner)
+                .Include(p => p.Stages)
+                .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers);
 
             if (!string.IsNullOrEmpty(filter?.CreatorUsername))
             {
                 queryable = queryable
-                    .Where(i => i.Creator.UserName == filter.CreatorUsername);
+                    .Where(p => p.Creator.UserName == filter.CreatorUsername);
             }
 
-            List<Project> projects;
-            var count = await queryable.CountAsync().ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(filter?.Admin))
+            {
+                queryable = queryable
+                    .Where(p => p.Admins.Any(a => a.Admin.UserName == filter.Admin) || p.Owner.UserName == filter.Admin);
+            }
 
+            if (!string.IsNullOrEmpty(filter?.Maintainer))
+            {
+                queryable = queryable
+                    .Where(p => p.Maintainers.Any(m => m.Maintainer.UserName == filter.Maintainer) || p.Owner.UserName == filter.Maintainer);
+            }
+
+            if (filter.Admined.HasValue && filter.Admined == true && filter.CurrentUserId != null)
+            {
+                queryable = queryable
+                    .Where(p => p.Admins.Any(a => a.AdminId == filter.CurrentUserId) || p.OwnerId == filter.CurrentUserId);
+            }
+
+            if (filter.Maintained.HasValue && filter.Maintained == true && filter.CurrentUserId != null)
+            {
+                queryable = queryable
+                    .Where(p => p.Maintainers.Any(m => m.MaintainerId == filter.CurrentUserId) || p.OwnerId == filter.CurrentUserId);
+            }
+            var count = await queryable.CountAsync().ConfigureAwait(false);
             if (paginationFilter == null)
             {
                 projects = await queryable
@@ -145,6 +184,10 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> UpdateProjectAsync(Project projectToUpdate, List<IssueType> types, List<IssueStage> stages, List<DragonflyUser> admins, List<DragonflyUser> maintainers)
         {
+            if (projectToUpdate == null)
+            {
+                return false;
+            }
             _projectRepository.Update(projectToUpdate);
             var updated = await _projectRepository.SaveAsync().ConfigureAwait(false);
             if (types != null)
@@ -187,8 +230,12 @@ namespace DragonflyTracker.Services
         {
             var queryable = _projectRepository
                 .FindByCondition(x => x.ParentOrganization.Name == organizationName)
+                .Include(p => p.Creator)
+                .Include(p => p.Owner)
                 .Include(p => p.Stages)
-                .Include(p => p.Types);
+                .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -214,8 +261,13 @@ namespace DragonflyTracker.Services
         {
             var queryable = _projectRepository
                 .FindByCondition(x => x.OrganizationId == organizationId)
+                .Include(p => p.ParentOrganization)
+                .Include(p => p.Creator)
+                .Include(p => p.Owner)
                 .Include(p => p.Stages)
-                .Include(p => p.Types);
+                .Include(p => p.Types)
+                .Include(p => p.Admins)
+                .Include(p => p.Maintainers);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 

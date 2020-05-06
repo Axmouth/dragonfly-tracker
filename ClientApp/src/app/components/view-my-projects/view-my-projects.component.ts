@@ -1,12 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsService } from '../../services/projects.service';
-import { Subscription, pipe, Subject } from 'rxjs';
+import { Subscription, pipe, Subject, Observable } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, first } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { TokenService } from '../../services/token.service';
 import { Project } from 'src/app/models/api/project';
 import { ActivatedRoute, Router, Params } from '@angular/router';
+import { PagedResponse } from '../../models/Api/paged-response';
+
+const DEFAULT_TAB = 'owned';
 
 @Component({
   selector: 'app-view-my-projects',
@@ -22,6 +25,12 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
   state: ClrDatagridStateInterface;
   currentPage: number;
+  myOwnProjectsActive: boolean;
+  myAdminedProjectsActive: boolean;
+  myMaintainedProjectsActive: boolean;
+  tab = DEFAULT_TAB;
+  firstLoad = true;
+  $qParamsSub: Subscription;
 
   constructor(
     private projectsService: ProjectsService,
@@ -34,14 +43,62 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   async ngOnInit() {
     // this.username = (await this.authService.getToken().toPromise()).getName();
     this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
-    const qParams = this.activatedRoute.snapshot.queryParams;
-    if (qParams.page !== undefined && qParams.page !== null) {
-      this.currentPage = +qParams.page;
+    this.$qParamsSub = this.activatedRoute.queryParams.subscribe((qParams) => {
+      if (qParams.page !== undefined && qParams.page !== null) {
+        this.currentPage = +qParams.page;
+      }
+      this.setTab(qParams.tab);
+    });
+  }
+
+  setTab(tabName: string) {
+    if (tabName !== undefined && tabName !== null) {
+      this.tab = tabName;
+      switch (this.tab) {
+        case 'owned':
+          this.myOwnProjectsActive = true;
+          this.myAdminedProjectsActive = false;
+          this.myMaintainedProjectsActive = false;
+          break;
+        case 'admined':
+          this.myOwnProjectsActive = false;
+          this.myAdminedProjectsActive = true;
+          this.myMaintainedProjectsActive = false;
+          break;
+        case 'maintained':
+          this.myOwnProjectsActive = false;
+          this.myAdminedProjectsActive = false;
+          this.myMaintainedProjectsActive = true;
+          break;
+
+        default:
+          this.myOwnProjectsActive = true;
+          this.myAdminedProjectsActive = false;
+          this.myMaintainedProjectsActive = false;
+          break;
+      }
     }
   }
 
   onProjectEditClick(project: Project) {
     console.log(project);
+  }
+
+  onTabChange(tabName: string) {
+    const queryParams: Params = {};
+    if (this.tab !== tabName) {
+      queryParams.page = 1;
+      queryParams.tab = tabName;
+      this.tab = tabName;
+    }
+    this.firstLoad = true;
+    this.router.navigate([], {
+      relativeTo: this.activatedRoute,
+      queryParams: queryParams,
+      queryParamsHandling: 'merge', // remove to replace all query params by provided
+    });
+    this.state.page.current = 1;
+    this.refresh(this.state);
   }
 
   onProjectDeleteClick(project: Project) {
@@ -56,12 +113,16 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   async refresh(state: ClrDatagridStateInterface) {
     this.username = await (await this.tokenService.get().toPromise()).getPayload().sub;
     this.state = state;
-    const queryParams: Params = { page: state.page.current };
-    this.router.navigate([], {
-      relativeTo: this.activatedRoute,
-      queryParams: queryParams,
-      queryParamsHandling: 'merge', // remove to replace all query params by provided
-    });
+    if (!this.firstLoad) {
+      const queryParams: Params = { page: state.page.current };
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: queryParams,
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
+      });
+    } else {
+      this.firstLoad = false;
+    }
     this.loading = true;
 
     // We convert the filters from an array to a map,
@@ -82,14 +143,22 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
         this.loading = false;
       });*/
 
-    this.projectSubscription$ = this.projectsService
-      .getUsersProjects(this.username, state.page.current, state.page.size)
-      .subscribe(async (projectsResult) => {
-        this.projectsList = projectsResult['data'];
-        this.total = projectsResult['total'];
-        this.loading = false;
-      });
+    let $projects: Observable<PagedResponse<Project>>;
+    if (this.myOwnProjectsActive) {
+      $projects = this.projectsService.getUsersProjects(this.username, state.page.current, state.page.size);
+    } else if (this.myAdminedProjectsActive) {
+      $projects = this.projectsService.getAllProjects(state.page.current, state.page.size, '', true, false);
+    } else if (this.myMaintainedProjectsActive) {
+      $projects = this.projectsService.getAllProjects(state.page.current, state.page.size, '', false, true);
+    }
+    this.projectSubscription$ = $projects.subscribe(async (projectsResult) => {
+      this.projectsList = projectsResult['data'];
+      this.total = projectsResult['total'];
+      this.loading = false;
+    });
   }
 
-  ngOnDestroy() {}
+  ngOnDestroy() {
+    this.$qParamsSub.unsubscribe();
+  }
 }

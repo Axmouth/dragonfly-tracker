@@ -14,6 +14,28 @@ import { PagedResponse } from '../models/api/paged-response';
 export class ProjectsService {
   constructor(private http: HttpClient, private authService: AuthService) {}
 
+  getAllProjects(
+    page: number = 1,
+    myPageSize = pageSizeConst,
+    search = '',
+    admined: boolean,
+    maintained: boolean,
+  ): Observable<PagedResponse<Project>> {
+    const headers = new HttpHeaders();
+    headers.append('Content-Type', 'application/json');
+    let url = `${apiRoot}/projects-search?PageSize=${myPageSize}`;
+    if (page) {
+      url = url + `&PageNumber=${page}`;
+    }
+    if (admined) {
+      url = url + `&admined=${admined}`;
+    }
+    if (maintained) {
+      url = url + `&maintained=${maintained}`;
+    }
+    return this.http.get<PagedResponse<Project>>(url, { headers });
+  }
+
   getUsersProjects(username: string, page: number = 1, myPageSize = pageSizeConst): Observable<PagedResponse<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');

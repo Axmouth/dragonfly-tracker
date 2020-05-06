@@ -9,7 +9,7 @@ namespace DragonflyTracker.Services
     public class RestfulUriService : IUriService
     {
         private readonly string _baseUri;
-        IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
 
         public RestfulUriService(string baseUri, IHttpContextAccessor httpContextAccessor)
@@ -17,7 +17,6 @@ namespace DragonflyTracker.Services
             _baseUri = baseUri;
             _httpContextAccessor = httpContextAccessor;
         }
-        
 
         public Uri GetUri(string idAttribute)
         {

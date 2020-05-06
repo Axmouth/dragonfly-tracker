@@ -81,6 +81,8 @@
             public const string CreateByUser = Users.Get + "/projects";
 
             public const string DeleteByUser = Users.Get + "/projects/{projectName}";
+
+            public const string GetAll = Base + "/projects-search";
         }
 
         public static class Issues

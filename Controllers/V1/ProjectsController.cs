@@ -14,6 +14,7 @@ using DragonflyTracker.Domain;
 using DragonflyTracker.Extensions;
 using DragonflyTracker.Helpers;
 using DragonflyTracker.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -26,78 +27,95 @@ namespace DragonflyTracker.Controllers.V1
     [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private readonly PgMainDataContext _context;
         private readonly IMapper _mapper;
         private readonly IUriService _uriService;
         private readonly IProjectService _projectService;
         private readonly UserManager<DragonflyUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public ProjectsController(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, PgMainDataContext context, IProjectService projectService, IMapper mapper, IUriService uriService)
+        public ProjectsController(UserManager<DragonflyUser> userManager, IProjectService projectService, IMapper mapper, IUriService uriService)
         {
-            _context = context;
             _mapper = mapper;
             _uriService = uriService;
             _projectService = projectService;
             _userManager = userManager;
-            _roleManager = roleManager;
         }
 
-        // GET: api/Issues
+        // GET: api/v1/users/{username}/projects
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Projects.GetAllByUser)]
         // [Cached(600)]
         public async Task<ActionResult> GetAllProjectsByUser([FromRoute]string username, [FromQuery] GetAllProjectsQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             var user = await _userManager.FindByNameAsync(username).ConfigureAwait(false);
-
             if (user == null)
             {
                 return new NotFoundResult();
             }
-
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllProjectsFilter>(query);
             filter.CreatorUsername = username;
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                filter.CurrentUserId = HttpContext.GetUserId();
+            }
             var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
-            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.Item1);
-
+            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.list);
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
-                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.Item2));
+                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.count));
             }
-
-            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.Item2);
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.count);
             return Ok(paginationResponse);
         }
 
-        // GET: api/Issues
+        // GET: api/api/v1/orgs/{organizationName}/projects
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Projects.GetAllByOrg)]
-        // [Cached(600)]
         public async Task<ActionResult> GetAllProjectsByOrg([FromRoute]string organizationName, [FromQuery] GetAllProjectsQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllProjectsFilter>(query);
             filter.OrganizationName = organizationName;
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                filter.CurrentUserId = HttpContext.GetUserId();
+            }
             var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
             var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.list);
-
             if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
             {
                 return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.count));
             }
+            var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.count);
+            return Ok(paginationResponse);
+        }
 
+        // GET: api/v1/projects-search
+        [AllowAnonymous]
+        [HttpGet(ApiRoutes.Projects.GetAll)]
+        public async Task<ActionResult> GetAllProjects([FromQuery] GetAllProjectsQuery query, [FromQuery]PaginationQuery paginationQuery)
+        {
+            var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
+            var filter = _mapper.Map<GetAllProjectsFilter>(query);
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                filter.CurrentUserId = HttpContext.GetUserId();
+            }
+            var projects = await _projectService.GetProjectsAsync(filter, pagination).ConfigureAwait(false);
+            var projectsResponse = _mapper.Map<List<ProjectResponse>>(projects.list);
+            if (pagination == null || pagination.PageNumber < 1 || pagination.PageSize < 1)
+            {
+                return Ok(new PagedResponse<ProjectResponse>(projectsResponse, projects.count));
+            }
             var paginationResponse = PaginationHelpers.CreatePaginatedResponse(_uriService, pagination, projectsResponse, projects.count);
             return Ok(paginationResponse);
         }
 
 
 
-        // GET: api/Issues/5
+        // GET: api/v1/users/{username}/projects/{projectName}
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Projects.GetByUser)]
-        // [Cached(600)]
         public async Task<ActionResult<Issue>> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName)
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
@@ -110,7 +128,7 @@ namespace DragonflyTracker.Controllers.V1
             return Ok(new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(project)));
         }
 
-        // POST: api/Issues
+        // POST: api/v1/users/{username}/projects
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPost(ApiRoutes.Projects.CreateByUser)]
@@ -141,7 +159,6 @@ namespace DragonflyTracker.Controllers.V1
                 CreatedAt = DateTime.UtcNow,
                 ParentOrganization = null,
                 Public = projectRequest.Public,
-                // Types = issueRequest.Types
             };
 
             await _projectService.CreateProjectAsync(project, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
@@ -150,7 +167,7 @@ namespace DragonflyTracker.Controllers.V1
             return Created(locationUri, new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(project)));
         }
 
-        // DELETE: api/Issues/5
+        // DELETE: api/v1/users/{username}/projects/{projectName}
         [HttpDelete(ApiRoutes.Projects.DeleteByUser)]
         public async Task<IActionResult> Delete([FromRoute] string username, [FromRoute]string projectName)
         {
@@ -179,7 +196,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
 
-        // PUT: api/Issues/5
+        // PUT: api/v1/users/{username}/projects/{projectName}
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Projects.UpdateByUser)]
@@ -192,6 +209,11 @@ namespace DragonflyTracker.Controllers.V1
             if (!userOwnsProject)
             {
                 return BadRequest(new ErrorResponse(new ErrorModel { Message = "You do not own this project" }));
+            }
+
+            if (projectRequest == null)
+            {
+                return BadRequest();
             }
 
             var updatedProject = await _projectService.GetProjectByIdAsync(project.Id).ConfigureAwait(false);

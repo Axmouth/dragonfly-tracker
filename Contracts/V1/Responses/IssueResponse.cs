@@ -12,24 +12,15 @@ namespace DragonflyTracker.Contracts.V1.Responses
     public class IssueResponse
     {
         public string Title { get; set; }
-
         public string Content { get; set; }
-
         public int Number { get; set; }
-
         public bool Open { get; set; }
-
         public DateTime CreatedAt { get; set; }
-
         public UserResponse Author { get; set; }
-
         public ProjectResponse ParentProject { get; set; }
-
         public IssueStageResponse CurrentStage { get; set; }
-
         [Ignore]
-        public virtual List<IssueTypeResponse> Types { get; set; }
-
-        public virtual List<IssueUpdateResponse> Updates { get; set; }
+        public virtual List<IssueTypeResponse> Types { get;  }
+        public virtual List<IssueUpdateResponse> Updates { get;  }
     }
 }

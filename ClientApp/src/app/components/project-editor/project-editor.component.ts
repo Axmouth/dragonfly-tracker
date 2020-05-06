@@ -1,6 +1,9 @@
 import { Component, OnInit, Output, EventEmitter, Input, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Project } from 'src/app/models/api/project';
+import { IssueStage } from '../../models/Api/issue-stage';
+import { IssueType } from '../../models/Api/issue-type';
+import { User } from '../../models/Api/user';
 
 @Component({
   selector: 'app-project-editor',
@@ -11,10 +14,10 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
   projectName: string;
   projectDescription: string;
   isPublic = true;
-  projectMaintainers: any[];
-  projectAdmins: any[];
-  projectIssueStages: any[];
-  projectIssueTypes: any[];
+  projectMaintainers: User[];
+  projectAdmins: User[];
+  projectIssueStages: IssueStage[] = [{ name: 'test1' }, { name: 'name2' }];
+  projectIssueTypes: IssueType[] = [{ name: 'derp' }, { name: 'dorp' }];
   @Input()
   oldProject: Project;
   @Output()
@@ -30,8 +33,8 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
       this.isPublic = this.oldProject.isPublic;
       this.projectMaintainers = this.oldProject.maintainers;
       this.projectAdmins = this.oldProject.admins;
-      this.projectIssueStages = this.oldProject.issueStages;
-      this.projectIssueTypes = this.oldProject.issueTypes;
+      this.projectIssueStages = this.oldProject.stages;
+      this.projectIssueTypes = this.oldProject.types;
     }
   }
 
@@ -46,8 +49,8 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
       isPublic: this.isPublic,
       maintainers: this.projectMaintainers,
       admins: this.projectAdmins,
-      issueStages: this.projectIssueStages,
-      issueTypes: this.projectIssueTypes,
+      stages: this.projectIssueStages,
+      types: this.projectIssueTypes,
     };
     this.submitProject.next(newProject);
   }
