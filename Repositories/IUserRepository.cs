@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Repositories
 {
-    interface IUserRepository: IRepositoryBase<DragonflyUser>
+    public interface IUserRepository: IRepositoryBase<DragonflyUser>
     {
+        public IQueryable<DragonflyUser> FindAllWithTextSearch(string searchTerms);
     }
 }

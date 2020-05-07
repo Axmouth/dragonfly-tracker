@@ -192,7 +192,7 @@ namespace DragonflyTracker.Services
             var updated = await _projectRepository.SaveAsync().ConfigureAwait(false);
             if (types != null)
             {
-                await AddIssueTypes(projectToUpdate, types).ConfigureAwait(false);
+                await UpdateIssueTypes(projectToUpdate, types).ConfigureAwait(false);
             }
             if (stages != null)
             {
@@ -288,6 +288,34 @@ namespace DragonflyTracker.Services
             }
             return (list: projects, count);
         }
+
+        private async Task UpdateIssueTypes(Project project, List<IssueType> types)
+        {
+            for (int i = 0; i < types.Count; i++)
+            {
+                var existingType =
+                    await _issueTypeRepository
+                    .FindByCondition(x =>
+                        x.Name == types[i].Name && x.ProjectId == project.Id)
+                    .SingleOrDefaultAsync().ConfigureAwait(false);
+                if (existingType != null)
+                {
+                    types[i] = existingType;
+                    continue;
+                }
+                else
+                {
+                    var newType = new IssueType { Id = Guid.NewGuid(), Name = types[i].Name, ProjectId = project.Id };
+                    await _issueTypeRepository.CreateAsync(newType).ConfigureAwait(false);
+                }
+
+            }
+            project.Types = types;
+            _projectRepository.Update(project);
+            await _projectRepository.SaveAsync().ConfigureAwait(false);
+            await _issueTypeRepository.SaveAsync().ConfigureAwait(false);
+        }
+
 
         private async Task AddIssueTypes(Project project, List<IssueType> types)
         {

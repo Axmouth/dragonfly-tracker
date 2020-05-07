@@ -35,7 +35,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.IssuePosts.GetAllByOrg)]
+        [HttpGet(ApiRoutes.IssuePosts.GetAllByOrgProjectIssue)]
         // [Cached(600)]
         public async Task<ActionResult<IEnumerable<IssuePost>>> GetAllIssuePosts([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issuePostNumber, [FromQuery] GetAllIssuePostsQuery query, [FromQuery]PaginationQuery paginationQuery)
         {

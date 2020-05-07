@@ -18,9 +18,13 @@ namespace DragonflyTracker.Domain
         public Guid Id { get; set; }
 
         [Required]
+        [MaxLength(150)]
+        [MinLength(2)]
         public string Title { get; set; }
 
         [Required]
+        [MaxLength(2500)]
+        [Column(TypeName = "text")]
         public string Content { get; set; }
 
         [Required]

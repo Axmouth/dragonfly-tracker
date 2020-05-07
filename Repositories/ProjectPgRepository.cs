@@ -16,7 +16,10 @@ namespace DragonflyTracker.Repositories
         public IQueryable<Project> FindAllWithTextSearch(string searchTerms)
         {
             return this._dataContext.Set<Project>().AsNoTracking()
-                    .Where(p => EF.Functions.ToTsVector("english", p.Name + ' ' + p.Description).Matches(searchTerms));
+                    // .Where(i => EF.Functions.ToTsVector("english", i.Title).Matches(filter.SearchText));
+                    // .Where(i => EF.Functions.FuzzyStringMatchLevenshteinLessEqual(i.Title, filter.SearchText, 5) <= 5);
+                    .Where(p => EF.Functions.TrigramsWordSimilarity(p.Name, searchTerms) > 0.0)
+                    .OrderByDescending(p => EF.Functions.TrigramsWordSimilarity(p.Name, searchTerms));
         }
     }
 }

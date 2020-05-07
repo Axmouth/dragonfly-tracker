@@ -70,6 +70,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20200507005059_issue-max-lengths.cs" />
+    <Compile Remove="Migrations\20200507005059_issue-max-lengths.Designer.cs" />
+    <Compile Remove="Migrations\20200507010017_issue-max-lengths.cs" />
+    <Compile Remove="Migrations\20200507010017_issue-max-lengths.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\app\constants.ts" />
   </ItemGroup>
 

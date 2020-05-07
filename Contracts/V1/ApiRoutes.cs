@@ -53,8 +53,6 @@
 
             public const string Get = Base + "/users/{username}";
 
-            public const string GetAllIssuePosts = Base + "/users/{username}/issue-posts";
-
             public const string Create = Base + "/users";
 
             public const string Delete = Base + "/users/{username}";
@@ -156,48 +154,50 @@
 
         public static class IssuePosts
         {
-            public const string GetAllByOrg = Issues.GetByOrg + "/issue-posts";
+            public const string GetAllByOrgProjectIssue = Issues.GetByOrg + "/issue-posts";
 
-            public const string UpdateByOrg = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
+            public const string UpdateByOrgProjectIssue = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
 
-            public const string GetByOrg = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
+            public const string GetByOrgProjectIssue = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
 
-            public const string CreateByOrg = Issues.GetByOrg + "/issue-posts";
+            public const string CreateByOrgProjectIssue = Issues.GetByOrg + "/issue-posts";
 
-            public const string DeleteByOrg = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
+            public const string DeleteByOrgProjectIssue = Issues.GetByOrg + "/issue-posts/{issuePostNumber}";
 
-            public const string GetAllByUser = Issues.GetByUser + "/issue-posts";
+            public const string GetAllByUserProjectIssue = Issues.GetByUser + "/issue-posts";
 
-            public const string UpdateByUser = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
+            public const string UpdateByUserProjectIssue = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
 
-            public const string GetByUser = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
+            public const string GetByUserProjectIssue = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
 
-            public const string CreateByUser = Issues.GetByUser + "/issue-posts";
+            public const string CreateByUserProjectIssue = Issues.GetByUser + "/issue-posts";
 
-            public const string DeleteByUser = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
+            public const string DeleteByUserProjectIssue = Issues.GetByUser + "/issue-posts/{issuePostNumber}";
+
+            public const string GetAllByUser = Users.Get + "/issue-posts";
         }
 
         public static class IssuePostReactions
         {
-            public const string GetAllByOrg = IssuePosts.GetByOrg + "/issue-posts";
+            public const string GetAllByOrg = IssuePosts.GetByOrgProjectIssue + "/issue-posts";
 
-            public const string UpdateByOrg = IssuePosts.GetByOrg + "/issue-posts/{reactionId}";
+            public const string UpdateByOrg = IssuePosts.GetByOrgProjectIssue + "/issue-posts/{reactionId}";
 
-            public const string GetByOrg = IssuePosts.GetByOrg + "/issue-posts/{reactionId}";
+            public const string GetByOrg = IssuePosts.GetByOrgProjectIssue + "/issue-posts/{reactionId}";
 
-            public const string CreateByOrg = IssuePosts.GetByOrg + "/issue-posts";
+            public const string CreateByOrg = IssuePosts.GetByOrgProjectIssue + "/issue-posts";
 
-            public const string DeleteByOrg = IssuePosts.GetByOrg + "/issue-posts/{reactionId}";
+            public const string DeleteByOrg = IssuePosts.GetByOrgProjectIssue + "/issue-posts/{reactionId}";
 
-            public const string GetAllByUser = IssuePosts.GetAllByUser + "/issue-posts";
+            public const string GetAllByUser = IssuePosts.GetAllByUserProjectIssue + "/issue-posts";
 
-            public const string UpdateByUser = IssuePosts.GetAllByUser + "/issue-posts/{reactionId}";
+            public const string UpdateByUser = IssuePosts.GetAllByUserProjectIssue + "/issue-posts/{reactionId}";
 
-            public const string GetByUser = IssuePosts.GetAllByUser + "/issue-posts/{reactionId}";
+            public const string GetByUser = IssuePosts.GetAllByUserProjectIssue + "/issue-posts/{reactionId}";
 
-            public const string CreateByUser = IssuePosts.GetAllByUser + "/issue-posts";
+            public const string CreateByUser = IssuePosts.GetAllByUserProjectIssue + "/issue-posts";
 
-            public const string DeleteByUser = IssuePosts.GetAllByUser + "/issue-posts/{reactionId}";
+            public const string DeleteByUser = IssuePosts.GetAllByUserProjectIssue + "/issue-posts/{reactionId}";
         }
 
         public static class IssuePostUpdates

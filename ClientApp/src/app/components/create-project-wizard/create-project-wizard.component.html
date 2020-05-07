@@ -89,7 +89,35 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>Who will be admins?</ng-template>
-    <form clrForm #formPageFive="ngForm"></form>
+    <form clrForm #formPageFive="ngForm">
+      <clr-datalist-container>
+        <label>Add users you want as Admins</label>
+        <input
+          clrDatalistInput
+          [(ngModel)]="newAdminName"
+          placeholder="Username here.."
+          name="name"
+          (ngModelChange)="onAdminType($event)"
+        />
+        <datalist *ngIf="adminSearch$ | async as adminSearch">
+          <option *ngFor="let user of adminSearch.data" [value]="user.username"></option>
+        </datalist>
+      </clr-datalist-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onAdminSubmit()"
+        [disabled]="name.pristine || !formPageFive.valid || adminNotFound"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Admins:</label>
+      </clr-input-container>
+      <span class="label label-blue clickable" *ngFor="let admin of newProject.admins"
+        >{{ admin.username }}<clr-icon shape="close" (click)="onAdminLabelClick(admin)"></clr-icon
+      ></span>
+    </form>
   </clr-wizard-page>
 
   <clr-wizard-page>
@@ -97,13 +125,7 @@
     <form clrForm #formPageSix="ngForm"></form>
   </clr-wizard-page>
 
-  <clr-wizard-page>
-    <ng-template clrPageTitle>Will you own this Project?</ng-template>
-    <form clrForm #formPageSeven="ngForm"></form>
-  </clr-wizard-page>
-
-  <clr-wizard-page>
-    <ng-template clrPageTitle>Finalizing</ng-template>
-    <form clrForm #formPageEight="ngForm"></form>
+  <clr-wizard-page #lastPage (clrWizardPageOnCommit)="onCommit()">
+    <ng-template clrPageTitle>Final Recap</ng-template>
   </clr-wizard-page>
 </clr-wizard>

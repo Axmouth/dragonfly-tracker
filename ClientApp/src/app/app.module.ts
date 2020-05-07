@@ -32,6 +32,7 @@ import { ViewOrgProjectIssueComponent } from './components/view-org-project-issu
 import { tokenGetter } from './constants';
 import { UserPreferencesComponent } from './components/user-preferences/user-preferences.component';
 import { CreateProjectWizardComponent } from './components/create-project-wizard/create-project-wizard.component';
+import { UpdateProjectWizardComponent } from './components/update-project-wizard/update-project-wizard.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { CreateProjectWizardComponent } from './components/create-project-wizard
     ViewOrgProjectIssueComponent,
     UserPreferencesComponent,
     CreateProjectWizardComponent,
+    UpdateProjectWizardComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
