@@ -1,1 +1,229 @@
-<p>update-project-wizard works!</p>
+<button class="btn btn-text btn-success" (click)="onCreateClick()">
+  Create Project <clr-icon shape="plus"></clr-icon>
+</button>
+
+<clr-wizard #wizardlg [(clrWizardOpen)]="wizardOpen" clrWizardSize="lg">
+  <clr-wizard-title>Create a New Project</clr-wizard-title>
+
+  <clr-wizard-button [type]="'cancel'">Cancel</clr-wizard-button>
+  <clr-wizard-button [type]="'previous'">Back</clr-wizard-button>
+  <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
+  <clr-wizard-button [type]="'finish'">Create</clr-wizard-button>
+
+  <clr-wizard-page
+    [clrWizardPageNextDisabled]="name.pristine || !formPageOne.valid || projectFound || queryingProjectName"
+  >
+    <ng-template clrPageTitle>What to call it?</ng-template>
+
+    <form clrForm #formPageOne="ngForm">
+      <clr-input-container>
+        <label>Project Name</label>
+        <input
+          clrInput
+          required
+          minlength="2"
+          [(ngModel)]="project.name"
+          name="name"
+          #name="ngModel"
+          (ngModelChange)="onProjectNameType($event)"
+        />
+        <clr-control-error>This field is required!</clr-control-error>
+      </clr-input-container>
+
+      <clr-textarea-container>
+        <label>Add a Project Description (optional)</label>
+        <textarea clrTextarea [(ngModel)]="project.description" name="description"></textarea>
+      </clr-textarea-container>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Some settings</ng-template>
+    <form clrForm #formPageTwo="ngForm">
+      <clr-checkbox-container>
+        <clr-checkbox-wrapper>
+          <label>Make Project Private</label>
+          <input
+            clrCheckbox
+            type="checkbox"
+            [(ngModel)]="project.private"
+            value="isPublic"
+            name="isPublic"
+          /> </clr-checkbox-wrapper
+      ></clr-checkbox-container>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>What issues will it address?</ng-template>
+    <form clrForm #formPageThree="ngForm">
+      <clr-input-container>
+        <label>New Issue Type</label>
+        <input clrInput required minlength="2" [(ngModel)]="newIssueType" name="name" #name="ngModel" />
+        <clr-control-error>This field is required!</clr-control-error>
+      </clr-input-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onNewIssueTypeSubmit()"
+        [disabled]="name.pristine || !formPageThree.valid"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Issue Types:</label>
+      </clr-input-container>
+      <a class="label label-blue clickable" *ngFor="let type of project.types"
+        >{{ type.name }} <clr-icon shape="close" (click)="onTypeLabelClick(type)"></clr-icon
+      ></a>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>What steps will it include?</ng-template>
+    <form clrForm #formPageFour="ngForm">
+      <clr-input-container>
+        <label>New Issue Stage</label>
+        <input clrInput required minlength="2" [(ngModel)]="newIssueStage" name="name" #name="ngModel" />
+        <clr-control-error>This field is required!</clr-control-error>
+      </clr-input-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onNewIssueStageSubmit()"
+        [disabled]="name.pristine || !formPageFour.valid"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Issue Stages:</label>
+      </clr-input-container>
+      <span class="label label-blue clickable" *ngFor="let stage of project.stages"
+        >{{ stage.name }}<clr-icon shape="close" (click)="onStageLabelClick(stage)"></clr-icon
+      ></span>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Who will be admins?</ng-template>
+    <form clrForm #formPageFive="ngForm">
+      <clr-datalist-container>
+        <label>Add users you want as Admins</label>
+        <input
+          clrDatalistInput
+          [(ngModel)]="newAdminName"
+          placeholder="Username here.."
+          name="name"
+          (ngModelChange)="onAdminType($event)"
+        />
+        <datalist *ngIf="adminSearch$ | async as adminSearch">
+          <option *ngFor="let user of adminSearch.data" [value]="user.userName"></option>
+        </datalist>
+      </clr-datalist-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onAdminSubmit()"
+        [disabled]="name.pristine || !formPageFive.valid || adminNotFound"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Admins:</label>
+      </clr-input-container>
+      <span class="label label-blue clickable" *ngFor="let admin of project.admins"
+        >{{ admin.userName }}<clr-icon shape="close" (click)="onAdminLabelClick(admin)"></clr-icon
+      ></span>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page>
+    <ng-template clrPageTitle>Add more participants?</ng-template>
+    <form clrForm #formPageSix="ngForm">
+      <clr-datalist-container>
+        <label>Add users you want as Maintainers</label>
+        <input
+          clrDatalistInput
+          [(ngModel)]="newMaintainerName"
+          placeholder="Username here.."
+          name="name"
+          (ngModelChange)="onMaintainerType($event)"
+        />
+        <datalist *ngIf="maintainerSearch$ | async as maintainerSearch">
+          <option *ngFor="let user of maintainerSearch.data" [value]="user.userName"></option>
+        </datalist>
+      </clr-datalist-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onMaintainerSubmit()"
+        [disabled]="name.pristine || !formPageFive.valid || maintainerNotFound"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Maintainers:</label>
+      </clr-input-container>
+      <span class="label label-blue clickable" *ngFor="let maintainer of project.maintainers"
+        >{{ maintainer.userName }}<clr-icon shape="close" (click)="onMaintainerLabelClick(maintainer)"></clr-icon
+      ></span>
+    </form>
+  </clr-wizard-page>
+
+  <clr-wizard-page #lastPage (clrWizardPageOnCommit)="onCommit()">
+    <ng-template clrPageTitle>Final Recap</ng-template>
+
+    <clr-input-container>
+      <label>Project Name</label>
+      <input
+        clrInput
+        required
+        minlength="2"
+        [(ngModel)]="project.name"
+        name="name"
+        #name="ngModel"
+        (ngModelChange)="onProjectNameType($event)"
+        disabled
+      />
+      <clr-control-error>This field is required!</clr-control-error>
+    </clr-input-container>
+
+    <clr-textarea-container>
+      <label>Add a Project Description (optional)</label>
+      <textarea clrTextarea [(ngModel)]="project.description" name="description" disabled></textarea>
+    </clr-textarea-container>
+
+    <clr-checkbox-container>
+      <clr-checkbox-wrapper>
+        <label>Make Project Private</label>
+        <input
+          clrCheckbox
+          type="checkbox"
+          [(ngModel)]="project.private"
+          value="isPublic"
+          name="isPublic"
+          disabled
+        /> </clr-checkbox-wrapper
+    ></clr-checkbox-container>
+
+    <clr-input-container>
+      <label>Issue Types:</label>
+    </clr-input-container>
+    <a class="label label-blue clickable" *ngFor="let type of project.types">{{ type.name }} </a>
+    <clr-input-container>
+      <label>Issue Stages:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let stage of project.stages">{{ stage.name }}</span>
+
+    <clr-input-container>
+      <label>Admins:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let admin of project.admins">{{ admin.userName }}</span>
+    <clr-input-container>
+      <label>Maintainers:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let maintainer of project.maintainers">{{
+      maintainer.userName
+    }}</span>
+  </clr-wizard-page>
+</clr-wizard>

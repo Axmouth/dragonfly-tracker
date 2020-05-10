@@ -1,11 +1,50 @@
-<h3>Username here</h3>
+<h3>{{ user.userName }}</h3>
 <clr-tabs>
   <clr-tab>
     <button clrTabLink id="link1">Edit My Profile</button>
-    <clr-tab-content id="content1" *clrIfActive> </clr-tab-content>
+    <clr-tab-content id="content1" *clrIfActive>
+      <form clrForm #formEditProfile="ngForm" *ngIf="user">
+        <clr-input-container>
+          <label>Username</label>
+          <input clrInput required minlength="2" [(ngModel)]="user.userName" name="name" #name="ngModel" />
+          <clr-control-error>This field is required!</clr-control-error>
+        </clr-input-container>
+        <clr-input-container>
+          <label>Title (optional)</label>
+          <input clrInput minlength="2" [(ngModel)]="user.title" name="title" #name="ngModel" />
+          <clr-control-error>Derp</clr-control-error>
+        </clr-input-container>
+
+        <clr-textarea-container>
+          <label>Description (optional)</label>
+          <textarea clrTextarea [(ngModel)]="user.description" name="description"></textarea>
+          <clr-control-error>Dorp</clr-control-error>
+        </clr-textarea-container>
+
+        <br />
+        <br />
+        <button class="btn btn-text btn-primary" (click)="onProfileSaveChangesClick()">
+          Save Changes <clr-icon shape="backup"></clr-icon>
+        </button>
+      </form>
+    </clr-tab-content>
   </clr-tab>
   <clr-tab>
-    <button clrTabLink id="link1">Account Settings</button>
-    <clr-tab-content id="content1" *clrIfActive></clr-tab-content
-  ></clr-tab>
+    <button clrTabLink id="link2">Account Settings</button>
+    <clr-tab-content id="content2" *clrIfActive>
+      <form clrForm #formAccountSettings="ngForm" *ngIf="user">
+        <clr-input-container>
+          <label>Email</label>
+          <input clrInput required minlength="2" [(ngModel)]="user.email" name="email" #name="ngModel" />
+          <clr-control-error>This field is required!</clr-control-error>
+        </clr-input-container>
+
+        <br />
+        <br />
+        <button class="btn btn-text btn-primary" (click)="onAccountSaveChangesClick()">
+          Save Changes <clr-icon shape="backup"></clr-icon>
+        </button>
+      </form>
+    </clr-tab-content>
+  </clr-tab>
 </clr-tabs>

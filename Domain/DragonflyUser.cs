@@ -13,7 +13,6 @@ namespace DragonflyTracker.Domain
         [MaxLength(30)]
         public string Title { get; set; }
 
-        [Required]
         [MaxLength(450)]
         [MinLength(2)]
         public string Description { get; set; }

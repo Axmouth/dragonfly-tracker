@@ -232,11 +232,17 @@
             public const string Register = Base + "/identity/register";
             
             public const string Refresh = Base + "/identity/refresh";
+
+            public const string PasswordReset = Base + "/identity/password-reset";
+
+            public const string PasswordResetEmail = Base + "/identity/password-reset-email";
+
+            public const string PasswordChange = Base + "/identity/password-change";
         }
 
         public static class Notifications
         {
-            public const string GetAll = "/notifications";
+            public const string GetAll = Base + "/notifications";
 
             public const string Update = Base + "/notifications/{Id}";
 

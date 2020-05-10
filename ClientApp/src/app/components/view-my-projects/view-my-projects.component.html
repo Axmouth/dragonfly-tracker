@@ -37,8 +37,8 @@
             </clr-dg-action-overflow>
             <clr-dg-cell
               ><a
-                href="/user/{{ project.creator.username }}/{{ project.name }}"
-                routerLink="/user/{{ project.creator.username }}/{{ project.name }}"
+                href="/user/{{ project.creator.userName }}/{{ project.name }}"
+                routerLink="/user/{{ project.creator.userName }}/{{ project.name }}"
                 >{{ project.name }}</a
               ></clr-dg-cell
             >
@@ -80,8 +80,8 @@
             </clr-dg-action-overflow>
             <clr-dg-cell
               ><a
-                href="/user/{{ project.creator.username }}/{{ project.name }}"
-                routerLink="/user/{{ project.creator.username }}/{{ project.name }}"
+                href="/user/{{ project.creator.userName }}/{{ project.name }}"
+                routerLink="/user/{{ project.creator.userName }}/{{ project.name }}"
                 >{{ project.name }}</a
               ></clr-dg-cell
             >
@@ -123,8 +123,8 @@
             </clr-dg-action-overflow>
             <clr-dg-cell
               ><a
-                href="/user/{{ project.creator.username }}/{{ project.name }}"
-                routerLink="/user/{{ project.creator.username }}/{{ project.name }}"
+                href="/user/{{ project.creator.userName }}/{{ project.name }}"
+                routerLink="/user/{{ project.creator.userName }}/{{ project.name }}"
                 >{{ project.name }}</a
               ></clr-dg-cell
             >
@@ -148,4 +148,4 @@
 <a [hidden]="true" class="btn btn-text btn-success" href="/my-projects/create" routerLink="/my-projects/create"
   >Create Project <clr-icon shape="plus"></clr-icon
 ></a>
-<app-create-project-wizard></app-create-project-wizard>
+<app-create-project-wizard (sendProject)="onNewProjectSubmit($event)"></app-create-project-wizard>

@@ -70,9 +70,103 @@
       </clr-datagrid>
     </clr-tab-content>
   </clr-tab>
+
   <clr-tab>
-    <button clrTabLink id="link1">Settings</button>
-    <clr-tab-content id="content1" *clrIfActive>
+    <button clrTabLink id="link2">Information</button>
+    <clr-tab-content id="content2" *clrIfActive>
+      <clr-input-container>
+        <label>Project Name</label>
+        <input
+          clrInput
+          required
+          minlength="2"
+          [(ngModel)]="project.name"
+          name="name"
+          #name="ngModel"
+          (ngModelChange)="onProjectNameType($event)"
+          disabled
+        />
+        <clr-control-error>This field is required!</clr-control-error>
+      </clr-input-container>
+
+      <clr-textarea-container>
+        <label>Add a Project Description (optional)</label>
+        <textarea clrTextarea [(ngModel)]="project.description" name="description" disabled></textarea>
+      </clr-textarea-container>
+
+      <clr-checkbox-container>
+        <clr-checkbox-wrapper>
+          <label>Make Project Private</label>
+          <input
+            clrCheckbox
+            type="checkbox"
+            [(ngModel)]="project.private"
+            value="isPublic"
+            name="isPublic"
+            disabled
+          /> </clr-checkbox-wrapper
+      ></clr-checkbox-container> </clr-tab-content
+  ></clr-tab>
+
+  <clr-tab>
+    <button clrTabLink id="link3">Settings</button>
+    <clr-tab-content id="content3" *clrIfActive>
+      <form clrForm #formSettings="ngForm">
+        <clr-input-container>
+          <label>Project Name</label>
+          <input
+            clrInput
+            required
+            minlength="2"
+            [(ngModel)]="project.name"
+            name="name"
+            #name="ngModel"
+            (ngModelChange)="onProjectNameType($event)"
+            disabled
+          />
+          <clr-control-error>This field is required!</clr-control-error>
+        </clr-input-container>
+
+        <clr-textarea-container>
+          <label>Add a Project Description (optional)</label>
+          <textarea clrTextarea [(ngModel)]="project.description" name="description" disabled></textarea>
+        </clr-textarea-container>
+
+        <clr-checkbox-container>
+          <clr-checkbox-wrapper>
+            <label>Make Project Private</label>
+            <input
+              clrCheckbox
+              type="checkbox"
+              [(ngModel)]="project.private"
+              value="isPublic"
+              name="isPublic"
+              disabled
+            /> </clr-checkbox-wrapper
+        ></clr-checkbox-container>
+
+        <clr-input-container>
+          <label>Issue Types:</label>
+        </clr-input-container>
+        <a class="label label-blue clickable" *ngFor="let type of project.types">{{ type.name }} </a>
+        <clr-input-container>
+          <label>Issue Stages:</label>
+        </clr-input-container>
+        <span class="label label-blue clickable" *ngFor="let stage of project.stages">{{ stage.name }}</span>
+
+        <clr-input-container>
+          <label>Admins:</label>
+        </clr-input-container>
+        <span class="label label-blue clickable" *ngFor="let admin of project.admins">{{ admin.userName }}</span>
+        <clr-input-container>
+          <label>Maintainers:</label>
+        </clr-input-container>
+        <span class="label label-blue clickable" *ngFor="let maintainer of project.maintainers">{{
+          maintainer.userName
+        }}</span>
+      </form>
+      <br />
+      <br />
       <button class="btn btn-text btn-danger" (click)="onProjectDeleteClick()">
         Delete Project <clr-icon shape="trash"></clr-icon>
       </button> </clr-tab-content

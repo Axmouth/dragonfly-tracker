@@ -33,9 +33,9 @@ namespace DragonflyTracker.Services
         
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
-            var existingUser = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
+            var existingUserWithEmail = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
 
-            if (existingUser != null)
+            if (existingUserWithEmail != null)
             {
                 return new AuthenticationResult
                 {
@@ -63,7 +63,50 @@ namespace DragonflyTracker.Services
             
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
-        
+
+
+        public async Task<AuthenticationResult> RegisterAsync(string username, string email, string password)
+        {
+            var existingUserWithEmail = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
+
+            if (existingUserWithEmail != null)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User with this email address already exists" }
+                };
+            }
+            var existingUserWithUsername = await _userManager.FindByNameAsync(username).ConfigureAwait(false);
+
+            if (existingUserWithUsername != null)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = new[] { "User with this Username already exists" }
+                };
+            }
+
+            var newUserId = Guid.NewGuid();
+            var newUser = new DragonflyUser
+            {
+                Id = newUserId.ToString(),
+                Email = email,
+                UserName = username
+            };
+
+            var createdUser = await _userManager.CreateAsync(newUser, password).ConfigureAwait(false);
+
+            if (!createdUser.Succeeded)
+            {
+                return new AuthenticationResult
+                {
+                    Errors = createdUser.Errors.Select(x => x.Description)
+                };
+            }
+
+            return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
+        }
+
         public async Task<AuthenticationResult> LoginAsync(string email, string password)
         {
             var user = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
@@ -247,7 +290,7 @@ namespace DragonflyTracker.Services
                 ExpiryDate = DateTime.UtcNow.AddMonths(6)
             };
 
-            await _pgMainDataContext.RefreshTokens.AddAsync(refreshToken);
+            await _pgMainDataContext.RefreshTokens.AddAsync(refreshToken).ConfigureAwait(false);
             await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
             
             return new AuthenticationResult
@@ -256,6 +299,36 @@ namespace DragonflyTracker.Services
                 Token = tokenHandler.WriteToken(token),
                 RefreshToken = refreshToken.Token
             };
+        }
+
+        public async Task<bool> UpdatePasswordAsync(DragonflyUser userToUpdate, string newPassword)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(userToUpdate).ConfigureAwait(false);
+            var passChangeResult = await _userManager.ResetPasswordAsync(userToUpdate, token, newPassword).ConfigureAwait(false);
+            return passChangeResult.Succeeded;
+        }
+
+        public async Task<bool> ResetPasswordEmailAsync(DragonflyUser user)
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> ResetPasswordAsync(DragonflyUser user, string token, string newPassword)
+        {
+            var passChangeResult = await _userManager.ResetPasswordAsync(user, token, newPassword).ConfigureAwait(false);
+            return passChangeResult.Succeeded;
+        }
+
+        public async Task<bool> CheckUserPasswordAsync(DragonflyUser user, string password)
+        {
+            var result =  await _userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+            return result;
+        }
+
+        public Task<bool> ValidatePasswordAsync(string password)
+        {
+            throw new NotImplementedException();
         }
     }
 }

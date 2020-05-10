@@ -1,4 +1,6 @@
 export class User {
-  username?: string;
+  userName?: string;
   email?: string;
+  title?: string;
+  description?: string;
 }

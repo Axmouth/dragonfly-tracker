@@ -8,6 +8,8 @@ using DragonflyTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using System;
+using DragonflyTracker.Extensions;
 
 namespace DragonflyTracker.Controllers.V1
 {
@@ -17,10 +19,12 @@ namespace DragonflyTracker.Controllers.V1
     {
         public const string refreshTokenCookieName = "dragonflyAuthRefreshToken";
         private readonly IIdentityService _identityService;
-        
-        public IdentityController(IIdentityService identityService)
+        private readonly IUserService _userService;
+
+        public IdentityController(IIdentityService identityService, IUserService userService)
         {
             _identityService = identityService;
+            _userService = userService;
         }
 
         [HttpPost(ApiRoutes.Identity.Register)]
@@ -34,7 +38,7 @@ namespace DragonflyTracker.Controllers.V1
                 });
             }
             
-            var authResponse = await _identityService.RegisterAsync(request.Email, request.Password).ConfigureAwait(false);
+            var authResponse = await _identityService.RegisterAsync( request.UserName,request.Email, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
@@ -145,6 +149,62 @@ namespace DragonflyTracker.Controllers.V1
             HttpContext.Response.Cookies.Delete(refreshTokenCookieName);
 
             return NoContent();
+        }
+
+
+        [HttpPost(ApiRoutes.Identity.PasswordChange)]
+        public async Task<IActionResult> PasswordChange([FromBody] PasswordChangeRequest request)
+        {
+            if (request == null)
+            {
+                return BadRequest(
+                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                    );
+            }
+            var oldUser = await _userService.GetUserAsync(request.UserName).ConfigureAwait(false);
+            if (oldUser == null)
+            {
+                return NotFound(
+                    new ErrorResponse(new ErrorModel { Message = "Could not find this User." })
+                    );
+            }
+            var userId = HttpContext.GetUserId();
+            var user = await _userService.GetUserByIdAsync(userId).ConfigureAwait(false);
+            if (user.UserName != request.UserName)
+            {
+                return Unauthorized(
+                    new ErrorResponse(new ErrorModel { Message = "You are not Authorized to edit this User." })
+                    );
+            }
+            var passCheck = await _identityService.CheckUserPasswordAsync(user, request.OldPassword);
+            if (!passCheck)
+            {
+                return Unauthorized(
+                    new ErrorResponse(new ErrorModel { Message = "Wrong Password/User combination." })
+                    );
+            }
+            var passUpdated = await _identityService.UpdatePasswordAsync(user, request.NewPassword).ConfigureAwait(false);
+            if (!passUpdated)
+            {
+                return StatusCode(500,
+                        new ErrorResponse(new ErrorModel { Message = "Failed to update Password." })
+                        );
+            }
+            return NotFound();
+        }
+
+
+        [HttpPost(ApiRoutes.Identity.PasswordReset)]
+        public async Task<IActionResult> PasswordReset([FromBody] PasswordResetRequest request)
+        {
+            throw new NotImplementedException();
+        }
+
+
+        [HttpPost(ApiRoutes.Identity.PasswordResetEmail)]
+        public async Task<IActionResult> PasswordResetEmail([FromBody] PasswordResetEmailRequest request)
+        {
+            throw new NotImplementedException();
         }
     }
 }

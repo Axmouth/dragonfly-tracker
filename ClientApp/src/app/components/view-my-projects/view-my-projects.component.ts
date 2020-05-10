@@ -33,7 +33,7 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   firstLoad = true;
 
   constructor(
-    private projectsService: ProjectsService,
+    private projectService: ProjectsService,
     private authService: AuthService,
     private tokenService: TokenService,
     private activatedRoute: ActivatedRoute,
@@ -103,8 +103,8 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   onProjectDeleteClick(project: Project) {
-    this.projectsService
-      .deleteUsersProject(project.creator.username, project.name)
+    this.projectService
+      .deleteUsersProject(project.creator.userName, project.name)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         this.refresh(this.state);
@@ -149,17 +149,30 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
     let $projects: Observable<PagedResponse<Project>>;
     if (this.myOwnProjectsActive) {
-      $projects = this.projectsService.getUsersProjects(this.username, state.page.current, state.page.size);
+      $projects = this.projectService.getUsersProjects(this.username, state.page.current, state.page.size);
     } else if (this.myAdminedProjectsActive) {
-      $projects = this.projectsService.getAllProjects(state.page.current, state.page.size, '', true, false);
+      $projects = this.projectService.getAllProjects(state.page.current, state.page.size, '', true, false);
     } else if (this.myMaintainedProjectsActive) {
-      $projects = this.projectsService.getAllProjects(state.page.current, state.page.size, '', false, true);
+      $projects = this.projectService.getAllProjects(state.page.current, state.page.size, '', false, true);
     }
     this.$projectSubscription = $projects.subscribe(async (projectsResult) => {
       this.projectsList = projectsResult['data'];
       this.total = projectsResult['total'];
       this.loading = false;
     });
+  }
+
+  async onNewProjectSubmit(project: Project) {
+    console.log(project);
+    const username = await this.authService.getUsername();
+    console.log(project);
+    this.projectService
+      .createUsersProject(username, project)
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((result) => {
+        console.log(result);
+        this.router.navigateByUrl(`/user/${username}/${result['data']['name']}`);
+      });
   }
 
   ngOnDestroy() {

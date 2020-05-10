@@ -16,7 +16,7 @@ namespace DragonflyTracker.Contracts.V1.Responses
         public int Number { get; set; }
         public bool Open { get; set; }
         public DateTime CreatedAt { get; set; }
-        public UserResponse Author { get; set; }
+        public DragonflyUserResponse Author { get; set; }
         public ProjectResponse ParentProject { get; set; }
         public IssueStageResponse CurrentStage { get; set; }
         [Ignore]

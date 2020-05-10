@@ -8,7 +8,12 @@ namespace DragonflyTracker.Services
 {
     public interface IUserService
     {
-        Task<DragonflyUser> GetUserAsync(string username);
         Task<(List<DragonflyUser> list, int count)> GetUsersAsync(GetAllUsersFilter filter, PaginationFilter paginationFilter = null);
+        Task<DragonflyUser> GetUserAsync(string username);
+        Task<DragonflyUser> GetUserByIdAsync(string userId);
+        Task<bool> DeleteUserAsync(string userId);
+        Task<bool> UpdateUserAsync(DragonflyUser userToUpdate);
+        Task<bool> UpdateEmailAsync(DragonflyUser userToUpdate, string oldEmail, string newEmail);
+
     }
 }

@@ -10,13 +10,23 @@
   <clr-wizard-button [type]="'next'">Next</clr-wizard-button>
   <clr-wizard-button [type]="'finish'">Create</clr-wizard-button>
 
-  <clr-wizard-page [clrWizardPageNextDisabled]="name.pristine || !formPageOne.valid">
+  <clr-wizard-page
+    [clrWizardPageNextDisabled]="name.pristine || !formPageOne.valid || projectFound || queryingProjectName"
+  >
     <ng-template clrPageTitle>What to call it?</ng-template>
 
     <form clrForm #formPageOne="ngForm">
       <clr-input-container>
         <label>Project Name</label>
-        <input clrInput required minlength="2" [(ngModel)]="newProject.name" name="name" #name="ngModel" />
+        <input
+          clrInput
+          required
+          minlength="2"
+          [(ngModel)]="newProject.name"
+          name="name"
+          #name="ngModel"
+          (ngModelChange)="onProjectNameType($event)"
+        />
         <clr-control-error>This field is required!</clr-control-error>
       </clr-input-container>
 
@@ -30,10 +40,17 @@
   <clr-wizard-page>
     <ng-template clrPageTitle>Some settings</ng-template>
     <form clrForm #formPageTwo="ngForm">
-      <clr-checkbox-wrapper>
-        <label>Make Project Public</label>
-        <input clrCheckbox type="checkbox" [(ngModel)]="newProject.isPublic" value="isPublic" name="isPublic" />
-      </clr-checkbox-wrapper>
+      <clr-checkbox-container>
+        <clr-checkbox-wrapper>
+          <label>Make Project Private</label>
+          <input
+            clrCheckbox
+            type="checkbox"
+            [(ngModel)]="newProject.private"
+            value="isPublic"
+            name="isPublic"
+          /> </clr-checkbox-wrapper
+      ></clr-checkbox-container>
     </form>
   </clr-wizard-page>
 
@@ -100,7 +117,7 @@
           (ngModelChange)="onAdminType($event)"
         />
         <datalist *ngIf="adminSearch$ | async as adminSearch">
-          <option *ngFor="let user of adminSearch.data" [value]="user.username"></option>
+          <option *ngFor="let user of adminSearch.data" [value]="user.userName"></option>
         </datalist>
       </clr-datalist-container>
       <button
@@ -115,17 +132,98 @@
         <label>Admins:</label>
       </clr-input-container>
       <span class="label label-blue clickable" *ngFor="let admin of newProject.admins"
-        >{{ admin.username }}<clr-icon shape="close" (click)="onAdminLabelClick(admin)"></clr-icon
+        >{{ admin.userName }}<clr-icon shape="close" (click)="onAdminLabelClick(admin)"></clr-icon
       ></span>
     </form>
   </clr-wizard-page>
 
   <clr-wizard-page>
     <ng-template clrPageTitle>Add more participants?</ng-template>
-    <form clrForm #formPageSix="ngForm"></form>
+    <form clrForm #formPageSix="ngForm">
+      <clr-datalist-container>
+        <label>Add users you want as Maintainers</label>
+        <input
+          clrDatalistInput
+          [(ngModel)]="newMaintainerName"
+          placeholder="Username here.."
+          name="name"
+          (ngModelChange)="onMaintainerType($event)"
+        />
+        <datalist *ngIf="maintainerSearch$ | async as maintainerSearch">
+          <option *ngFor="let user of maintainerSearch.data" [value]="user.userName"></option>
+        </datalist>
+      </clr-datalist-container>
+      <button
+        class="btn btn-primary"
+        type="submit"
+        (click)="onMaintainerSubmit()"
+        [disabled]="name.pristine || !formPageFive.valid || maintainerNotFound"
+      >
+        Add
+      </button>
+      <clr-input-container>
+        <label>Maintainers:</label>
+      </clr-input-container>
+      <span class="label label-blue clickable" *ngFor="let maintainer of newProject.maintainers"
+        >{{ maintainer.userName }}<clr-icon shape="close" (click)="onMaintainerLabelClick(maintainer)"></clr-icon
+      ></span>
+    </form>
   </clr-wizard-page>
 
   <clr-wizard-page #lastPage (clrWizardPageOnCommit)="onCommit()">
     <ng-template clrPageTitle>Final Recap</ng-template>
+
+    <clr-input-container>
+      <label>Project Name</label>
+      <input
+        clrInput
+        required
+        minlength="2"
+        [(ngModel)]="newProject.name"
+        name="name"
+        #name="ngModel"
+        (ngModelChange)="onProjectNameType($event)"
+        disabled
+      />
+      <clr-control-error>This field is required!</clr-control-error>
+    </clr-input-container>
+
+    <clr-textarea-container>
+      <label>Add a Project Description (optional)</label>
+      <textarea clrTextarea [(ngModel)]="newProject.description" name="description" disabled></textarea>
+    </clr-textarea-container>
+
+    <clr-checkbox-container>
+      <clr-checkbox-wrapper>
+        <label>Make Project Private</label>
+        <input
+          clrCheckbox
+          type="checkbox"
+          [(ngModel)]="newProject.private"
+          value="isPublic"
+          name="isPublic"
+          disabled
+        /> </clr-checkbox-wrapper
+    ></clr-checkbox-container>
+
+    <clr-input-container>
+      <label>Issue Types:</label>
+    </clr-input-container>
+    <a class="label label-blue clickable" *ngFor="let type of newProject.types">{{ type.name }} </a>
+    <clr-input-container>
+      <label>Issue Stages:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let stage of newProject.stages">{{ stage.name }}</span>
+
+    <clr-input-container>
+      <label>Admins:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let admin of newProject.admins">{{ admin.userName }}</span>
+    <clr-input-container>
+      <label>Maintainers:</label>
+    </clr-input-container>
+    <span class="label label-blue clickable" *ngFor="let maintainer of newProject.maintainers">{{
+      maintainer.userName
+    }}</span>
   </clr-wizard-page>
 </clr-wizard>

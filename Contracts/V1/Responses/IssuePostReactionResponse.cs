@@ -11,6 +11,6 @@ namespace DragonflyTracker.Contracts.V1.Responses
     public class IssuePostReactionResponse
     {
         public string Name { get; set; }
-        public UserResponse Creator { get; set; }
+        public DragonflyUserResponse Creator { get; set; }
     }
 }

@@ -22,7 +22,7 @@ namespace DragonflyTracker.Domain
         [MaxLength(350)]
         public string Description { get; set; }
 
-        public bool Public { get; set; }
+        public bool Private { get; set; }
 
         [Required]
         [Column(TypeName = "timestamp")]

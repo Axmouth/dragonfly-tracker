@@ -148,23 +148,23 @@ namespace DragonflyTracker.Controllers.V1
                 return new BadRequestResult();
             }
 
-            var newIssueId = Guid.NewGuid();
+            var newProjectId = Guid.NewGuid();
             var project = new Project
             {
-                Id = newIssueId,
+                Id = newProjectId,
                 Name = projectRequest.Name,
                 Description = projectRequest.Description,
                 CreatorId = user.Id,
                 OwnerId = user.Id,
                 CreatedAt = DateTime.UtcNow,
                 ParentOrganization = null,
-                Public = projectRequest.Public,
+                Private = projectRequest.Public,
             };
 
             await _projectService.CreateProjectAsync(project, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
 
             var locationUri = _uriService.GetUri(project.Name);
-            return Created(locationUri, new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(project)));
+            return Created(locationUri, new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(await _projectService.GetProjectByIdAsync(newProjectId).ConfigureAwait(false))));
         }
 
         // DELETE: api/v1/users/{username}/projects/{projectName}
@@ -222,8 +222,9 @@ namespace DragonflyTracker.Controllers.V1
             var updated = await _projectService.UpdateProjectAsync(updatedProject, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
 
             if (updated)
-                return Ok(new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(updatedProject)));
-
+            {
+                return Ok(new Response<ProjectResponse>(_mapper.Map<ProjectResponse>(updatedProject))); 
+            }
             return NotFound();
         }
     }

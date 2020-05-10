@@ -1,5 +1,6 @@
 ﻿using DragonflyTracker.Data;
 using DragonflyTracker.Domain;
+using DragonflyTracker.Migrations;
 using DragonflyTracker.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,11 @@ namespace DragonflyTracker.Services
         public async Task<DragonflyUser> GetUserAsync(string username)
         {
             return await _userManager.FindByNameAsync(username).ConfigureAwait(false);
+        }
+
+        public async Task<DragonflyUser> GetUserByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
         }
 
         public async Task<(List<DragonflyUser> list, int count)> GetUsersAsync(GetAllUsersFilter filter, PaginationFilter paginationFilter = null)
@@ -94,6 +100,31 @@ namespace DragonflyTracker.Services
                     .ConfigureAwait(false);
             }
             return (users, count);
+        }
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            var user = new DragonflyUser { Id = userId };
+            var result = await _userManager.DeleteAsync(user).ConfigureAwait(false);
+            var deleted = result.Succeeded;
+            return deleted;
+        }
+
+        public async Task<bool> UpdateUserAsync(DragonflyUser userToUpdate)
+        {
+            if (userToUpdate == null)
+            {
+                return false;
+            }
+            var result = await _userManager.UpdateAsync(userToUpdate).ConfigureAwait(false);
+            var updated = result.Succeeded;
+            return updated;
+        }
+
+        public async Task<bool> UpdateEmailAsync(DragonflyUser userToUpdate, string oldEmail, string newEmail)
+        {
+            var token = await _userManager.GenerateChangeEmailTokenAsync(userToUpdate, newEmail).ConfigureAwait(false);
+            var result = await _userManager.ChangeEmailAsync(userToUpdate, newEmail, token).ConfigureAwait(false);
+            return result.Succeeded;
         }
     }
 }

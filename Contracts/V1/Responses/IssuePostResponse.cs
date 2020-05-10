@@ -11,7 +11,7 @@ namespace DragonflyTracker.Contracts.V1.Responses
     public class IssuePostResponse
     {
         public DateTime CreatedAt { get; set; }
-        public UserResponse Author { get; set; }
+        public DragonflyUserResponse Author { get; set; }
         public IssueResponse ParentIssue { get; set; }
         public virtual List<IssuePostReactionResponse> Reactions { get; }
     }

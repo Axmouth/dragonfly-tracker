@@ -5,7 +5,7 @@ import { IssueType } from './issue-type';
 export class Project {
   name?: string;
   description?: string;
-  isPublic?: boolean;
+  private?: boolean;
   stages?: IssueStage[];
   types?: IssueType[];
   creator?: User;

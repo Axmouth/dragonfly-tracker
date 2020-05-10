@@ -13,7 +13,7 @@ import { User } from '../../models/Api/user';
 export class ProjectEditorComponent implements OnInit, OnDestroy {
   projectName: string;
   projectDescription: string;
-  isPublic = true;
+  private = true;
   projectMaintainers: User[];
   projectAdmins: User[];
   projectIssueStages: IssueStage[] = [{ name: 'test1' }, { name: 'name2' }];
@@ -30,7 +30,7 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
     if (this.oldProject) {
       this.projectName = this.oldProject.name;
       this.projectDescription = this.oldProject.name;
-      this.isPublic = this.oldProject.isPublic;
+      this.private = this.oldProject.private;
       this.projectMaintainers = this.oldProject.maintainers;
       this.projectAdmins = this.oldProject.admins;
       this.projectIssueStages = this.oldProject.stages;
@@ -46,7 +46,7 @@ export class ProjectEditorComponent implements OnInit, OnDestroy {
     const newProject: Project = {
       name: this.projectName,
       description: this.projectDescription,
-      isPublic: this.isPublic,
+      private: this.private,
       maintainers: this.projectMaintainers,
       admins: this.projectAdmins,
       stages: this.projectIssueStages,

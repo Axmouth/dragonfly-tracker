@@ -20,6 +20,10 @@ export class AuthService {
 
   constructor(private tokenService: TokenService, private http: HttpClient, private route: ActivatedRoute) {}
 
+  async getUsername() {
+    return (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+  }
+
   /**
    * Authenticates
    * Stores received token in the token storage
