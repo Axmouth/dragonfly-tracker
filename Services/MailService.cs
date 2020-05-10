@@ -1,4 +1,5 @@
 ﻿using DragonflyTracker.Domain;
+using DragonflyTracker.Options;
 using MailKit.Net.Smtp;
 using MimeKit;
 using System;
@@ -9,6 +10,26 @@ namespace DragonflyTracker.Services
 {
     public class MailService : IMailService
     {
+        private readonly string _fromName;
+        private readonly string _username;
+        private readonly string _password;
+        private readonly string _host;
+        private readonly int _port;
+        private readonly bool _useSsl;
+
+        public MailService(EmailSettings settings)
+        {
+            if (settings != null)
+            {
+                _fromName = settings.FromName;
+                _username = settings.UserName;
+                _password = settings.Password;
+                _host = settings.Host;
+                _port = settings.Port;
+                _useSsl = settings.UseSsl;
+            }
+        }
+
         public async Task<bool> SendAccountVerificationEmailAsync(DragonflyUser user)
         {
             var result = await SendEmailAsync(new List<string> { "from@example.com" }, "to@example.com", "Hello world", "testbody").ConfigureAwait(false);
@@ -21,16 +42,11 @@ namespace DragonflyTracker.Services
             {
                 return false;
             }
-            /*
-            var client = new SmtpClient("smtp.mailtrap.io", 2525)
+            foreach (string recipient in recipients)
             {
-                Credentials = new NetworkCredential("ef4c67a28812e2", "7d24b0f5420b5c"),
-                EnableSsl = true
-            };*/
-            foreach (string recipient in recipients) {
 
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Dragonfly", sender));
+                message.From.Add(new MailboxAddress(_fromName, sender));
                 message.To.Add(new MailboxAddress(recipient));
                 message.Subject = subject;
 
@@ -41,10 +57,10 @@ namespace DragonflyTracker.Services
 
                 using (var client = new SmtpClient())
                 {
-                    await client.ConnectAsync("smtp.mailtrap.io", 2525, true).ConfigureAwait(false);
+                    await client.ConnectAsync(_host, _port, MailKit.Security.SecureSocketOptions.StartTlsWhenAvailable).ConfigureAwait(false);
 
                     // Note: only needed if the SMTP server requires authentication
-                    await client.AuthenticateAsync("ef4c67a28812e2", "7d24b0f5420b5c").ConfigureAwait(false);
+                    await client.AuthenticateAsync(_username, _password).ConfigureAwait(false);
 
                     await client.SendAsync(message).ConfigureAwait(false);
                     client.Disconnect(true);

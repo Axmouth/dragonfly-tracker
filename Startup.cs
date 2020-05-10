@@ -148,7 +148,8 @@ namespace DragonflyTracker
                     {
                         // spa.UseAngularCliServer(npmScript: "start");
                         spa.UseProxyToSpaDevelopmentServer("http://localhost:4205");
-                    } else
+                    }
+                    else
                     {
                         // spa.UseAngularCliServer(npmScript: "start");
                     }

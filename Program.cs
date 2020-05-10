@@ -27,7 +27,7 @@ namespace DragonflyTracker
 
                 var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-                if (!await roleManager.RoleExistsAsync("Admin"))
+                if (!await roleManager.RoleExistsAsync("Admin").ConfigureAwait(false))
                 {
                     var adminRole = new IdentityRole("Admin");
                     await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
@@ -55,8 +55,19 @@ namespace DragonflyTracker
             await host.RunAsync().ConfigureAwait(false);
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    var env = hostingContext.HostingEnvironment;
+                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                          .AddJsonFile($"appsettings.Development.json", optional: true, reloadOnChange: true)
+                          .AddJsonFile($"appsettings.Local.json", optional: true, reloadOnChange: true)
+                          .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                    config.AddEnvironmentVariables();
+                })
                 .UseStartup<Startup>();
+        }
     }
 }

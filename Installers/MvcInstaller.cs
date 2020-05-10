@@ -81,6 +81,22 @@ namespace DragonflyTracker.Installers
                 var absoluteUri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent());
                 return new RestfulUriService(absoluteUri, accessor);
             });
+
+            services.AddSingleton<IMailService>(provider =>
+            {
+                EmailSettings emailSettings = new EmailSettings();
+                /*
+                {
+                    username = "ef4c67a28812e2",
+                    password = "7d24b0f5420b5c",
+                    host = "smtp.mailtrap.io",
+                    port = 2525,
+                    useSsl = true,
+                };
+                */
+                configuration.GetSection(nameof(EmailSettings)).Bind(emailSettings);
+                return new MailService(emailSettings);
+            });
         }
     }
 }
