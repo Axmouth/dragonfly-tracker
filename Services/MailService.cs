@@ -1,9 +1,8 @@
 ﻿using DragonflyTracker.Domain;
+using MailKit.Net.Smtp;
+using MimeKit;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace DragonflyTracker.Services
@@ -22,15 +21,35 @@ namespace DragonflyTracker.Services
             {
                 return false;
             }
+            /*
             var client = new SmtpClient("smtp.mailtrap.io", 2525)
             {
                 Credentials = new NetworkCredential("ef4c67a28812e2", "7d24b0f5420b5c"),
                 EnableSsl = true
-            };
+            };*/
             foreach (string recipient in recipients) {
-                await client.SendMailAsync(sender, recipient, subject, content).ConfigureAwait(false);
+
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Dragonfly", sender));
+                message.To.Add(new MailboxAddress(recipient));
+                message.Subject = subject;
+
+                message.Body = new TextPart("plain")
+                {
+                    Text = content
+                };
+
+                using (var client = new SmtpClient())
+                {
+                    await client.ConnectAsync("smtp.mailtrap.io", 2525, true).ConfigureAwait(false);
+
+                    // Note: only needed if the SMTP server requires authentication
+                    await client.AuthenticateAsync("ef4c67a28812e2", "7d24b0f5420b5c").ConfigureAwait(false);
+
+                    await client.SendAsync(message).ConfigureAwait(false);
+                    client.Disconnect(true);
+                }
             }
-            client.Dispose();
             return true;
         }
 
