@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
+using DragonflyTracker.Helpers;
 
 namespace DragonflyTracker.Installers
 {
@@ -82,20 +83,14 @@ namespace DragonflyTracker.Installers
                 return new RestfulUriService(absoluteUri, accessor);
             });
 
+            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+
             services.AddSingleton<IMailService>(provider =>
             {
+                var renderer = provider.GetRequiredService<IRazorViewToStringRenderer>();
                 EmailSettings emailSettings = new EmailSettings();
-                /*
-                {
-                    username = "ef4c67a28812e2",
-                    password = "7d24b0f5420b5c",
-                    host = "smtp.mailtrap.io",
-                    port = 2525,
-                    useSsl = true,
-                };
-                */
                 configuration.GetSection(nameof(EmailSettings)).Bind(emailSettings);
-                return new MailService(emailSettings);
+                return new MailService(emailSettings, renderer);
             });
         }
     }

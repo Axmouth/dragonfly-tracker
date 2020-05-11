@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using System;
 using DragonflyTracker.Extensions;
+using Org.BouncyCastle.Ocsp;
 
 namespace DragonflyTracker.Controllers.V1
 {
@@ -37,8 +38,11 @@ namespace DragonflyTracker.Controllers.V1
                     Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
                 });
             }
-            
-            var authResponse = await _identityService.RegisterAsync( request.UserName,request.Email, request.Password).ConfigureAwait(false);
+            if (request == null)
+            {
+                return BadRequest();
+            }
+            var authResponse = await _identityService.RegisterAsync( request.UserName, request.Email, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
@@ -58,6 +62,10 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Login)]
         public async Task<IActionResult> Login([FromBody] UserLoginRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest();
+            }
             var authResponse = await _identityService.LoginAsync(request.Email, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
@@ -151,7 +159,7 @@ namespace DragonflyTracker.Controllers.V1
             return NoContent();
         }
 
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost(ApiRoutes.Identity.PasswordChange)]
         public async Task<IActionResult> PasswordChange([FromBody] PasswordChangeRequest request)
         {
@@ -205,6 +213,23 @@ namespace DragonflyTracker.Controllers.V1
         public async Task<IActionResult> PasswordResetEmail([FromBody] PasswordResetEmailRequest request)
         {
             throw new NotImplementedException();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost(ApiRoutes.Identity.EmailConfirm)]
+        public async Task<IActionResult> EmailConfirm([FromBody] EmailConfirmRequest request)
+        {
+            var user = await _userService.GetUserByIdAsync(HttpContext.GetUserId()).ConfigureAwait(false);
+            var result = await _identityService.ConfirmEmailAsync(user, request.Token).ConfigureAwait(false);
+            if (!result)
+            {
+                return BadRequest(
+                    new ErrorResponse(new ErrorModel { Message = "Failed to confirm Email." })
+                    );
+            }
+            return Ok(
+                
+                );
         }
     }
 }

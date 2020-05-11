@@ -15,5 +15,6 @@ namespace DragonflyTracker.Services
         Task<bool> ResetPasswordAsync(DragonflyUser user, string token, string newPassword);
         Task<bool> CheckUserPasswordAsync(DragonflyUser user, string password);
         Task<bool> ValidatePasswordAsync(string password);
+        Task<bool> ConfirmEmailAsync(DragonflyUser user, string token);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using DragonflyTracker.Domain;
+using DragonflyTracker.EmailTemplates.ViewModels;
+using DragonflyTracker.Helpers;
 using DragonflyTracker.Options;
 using MailKit.Net.Smtp;
 using MimeKit;
@@ -11,13 +13,14 @@ namespace DragonflyTracker.Services
     public class MailService : IMailService
     {
         private readonly string _fromName;
+        private readonly string _fromAddress;
         private readonly string _username;
         private readonly string _password;
         private readonly string _host;
         private readonly int _port;
-        private readonly bool _useSsl;
+        private readonly IRazorViewToStringRenderer _renderer;
 
-        public MailService(EmailSettings settings)
+        public MailService(EmailSettings settings, IRazorViewToStringRenderer renderer)
         {
             if (settings != null)
             {
@@ -26,17 +29,64 @@ namespace DragonflyTracker.Services
                 _password = settings.Password;
                 _host = settings.Host;
                 _port = settings.Port;
-                _useSsl = settings.UseSsl;
+                _fromAddress = settings.FromAddress;
             }
+            _renderer = renderer;
         }
 
         public async Task<bool> SendAccountVerificationEmailAsync(DragonflyUser user)
         {
-            var result = await SendEmailAsync(new List<string> { "from@example.com" }, "to@example.com", "Hello world", "testbody").ConfigureAwait(false);
+            if (user == null)
+            {
+                return false;
+            }
+            var model = new HelloWorldViewModel("https://www.google.com");
+            var htmlBody = await _renderer.RenderViewToStringAsync("HelloWorldHtml.chtml", model).ConfigureAwait(false);
+            var textBody = await _renderer.RenderViewToStringAsync("HelloWorldText.chtml", model).ConfigureAwait(false);
+            var result = await SendEmailAsync(new List<string> { user.Email }, _fromAddress, "Verify your Dragonfly Account's Email", textBody, htmlBody).ConfigureAwait(false);
             return result;
         }
 
-        public async Task<bool> SendEmailAsync(List<string> recipients, string sender, string subject, string content)
+        public async Task<bool> SendEmailChangedEmailAsync(DragonflyUser user, string oldEmail, string newEmail)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            var model = new HelloWorldViewModel("https://www.google.com");
+            var htmlBody = await _renderer.RenderViewToStringAsync("HelloWorldHtml.chtml", model).ConfigureAwait(false);
+            var textBody = await _renderer.RenderViewToStringAsync("HelloWorldText.chtml", model).ConfigureAwait(false);
+            var result = await SendEmailAsync(new List<string> { user.Email }, _fromAddress, "Your Dragonfly Email was changed", textBody, htmlBody).ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<bool> SendPasswordChangedEmailAsync(DragonflyUser user)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            var model = new HelloWorldViewModel("https://www.google.com");
+            var htmlBody = await _renderer.RenderViewToStringAsync("HelloWorldHtml.chtml", model).ConfigureAwait(false);
+            var textBody = await _renderer.RenderViewToStringAsync("HelloWorldText.chtml", model).ConfigureAwait(false);
+            var result = await SendEmailAsync(new List<string> { user.Email }, _fromAddress, "Your Dragonfly Password was changed", textBody, htmlBody).ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<bool> SendPasswordResetEmailAsync(DragonflyUser user)
+        {
+            if (user == null)
+            {
+                return false;
+            }
+            var model = new HelloWorldViewModel("https://www.google.com");
+            var htmlBody = await _renderer.RenderViewToStringAsync("HelloWorldHtml.chtml", model).ConfigureAwait(false);
+            var textBody = await _renderer.RenderViewToStringAsync("HelloWorldText.chtml", model).ConfigureAwait(false);
+            var result = await SendEmailAsync(new List<string> { user.Email }, _fromAddress, "Dragonfly Password Reset Requested", textBody, htmlBody).ConfigureAwait(false);
+            return result;
+        }
+
+        public async Task<bool> SendEmailAsync(List<string> recipients, string sender, string subject, string textBody, string htmlBody)
         {
             if (recipients == null)
             {
@@ -50,10 +100,13 @@ namespace DragonflyTracker.Services
                 message.To.Add(new MailboxAddress(recipient));
                 message.Subject = subject;
 
-                message.Body = new TextPart("plain")
+                var bodyBuilder = new BodyBuilder
                 {
-                    Text = content
+                    HtmlBody = htmlBody,
+                    TextBody = textBody
                 };
+
+                message.Body = bodyBuilder.ToMessageBody();
 
                 using (var client = new SmtpClient())
                 {
@@ -67,24 +120,6 @@ namespace DragonflyTracker.Services
                 }
             }
             return true;
-        }
-
-        public async Task<bool> SendEmailChangedEmailAsync(DragonflyUser user, string oldEmail, string newEmail)
-        {
-            var result = await SendEmailAsync(new List<string> { "from@example.com" }, "to@example.com", "Hello world", "testbody").ConfigureAwait(false);
-            return result;
-        }
-
-        public async Task<bool> SendPasswordChangedEmailAsync(DragonflyUser user)
-        {
-            var result = await SendEmailAsync(new List<string> { "from@example.com" }, "to@example.com", "Hello world", "testbody").ConfigureAwait(false);
-            return result;
-        }
-
-        public async Task<bool> SendPasswordResetEmailAsync(DragonflyUser user)
-        {
-            var result = await SendEmailAsync(new List<string> { "from@example.com" }, "to@example.com", "Hello world", "testbody").ConfigureAwait(false);
-            return result;
         }
     }
 }

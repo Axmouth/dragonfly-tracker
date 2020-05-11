@@ -238,6 +238,8 @@
             public const string PasswordResetEmail = Base + "/identity/password-reset-email";
 
             public const string PasswordChange = Base + "/identity/password-change";
+
+            public const string EmailConfirm = Base + "/identity/email-confirm";
         }
 
         public static class Notifications

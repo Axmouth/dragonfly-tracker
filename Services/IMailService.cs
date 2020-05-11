@@ -12,6 +12,6 @@ namespace DragonflyTracker.Services
         Task<bool> SendPasswordResetEmailAsync(DragonflyUser user);
         Task<bool> SendPasswordChangedEmailAsync(DragonflyUser user);
         Task<bool> SendEmailChangedEmailAsync(DragonflyUser user, string oldEmail, string newEmail);
-        Task<bool> SendEmailAsync(List<string> recipients, string sender, string subject, string content);
+        Task<bool> SendEmailAsync(List<string> recipients, string sender, string subject, string textBody, string htmlBody);
     }
 }

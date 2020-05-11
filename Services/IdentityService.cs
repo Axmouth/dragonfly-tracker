@@ -104,6 +104,8 @@ namespace DragonflyTracker.Services
                 };
             }
 
+            var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(newUser).ConfigureAwait(false);
+
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
 
@@ -329,6 +331,12 @@ namespace DragonflyTracker.Services
         public Task<bool> ValidatePasswordAsync(string password)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> ConfirmEmailAsync(DragonflyUser user,string token)
+        {
+            var confirmResult = await _userManager.ConfirmEmailAsync(user, token).ConfigureAwait(false);
+            return confirmResult.Succeeded;
         }
     }
 }

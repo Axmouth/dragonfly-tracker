@@ -57,7 +57,6 @@ namespace DragonflyTracker.Controllers.V1
         public async Task<ActionResult> Get([FromRoute]string username)
         {
             var user = await _userService.GetUserAsync(username).ConfigureAwait(false);
-            await _mailService.SendEmailChangedEmailAsync(user, "user@example.com", "user@example.com").ConfigureAwait(false);
 
             if (user == null)
             {
