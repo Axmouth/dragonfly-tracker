@@ -1,29 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-logout-page',
   templateUrl: './logout-page.component.html',
   styleUrls: ['./logout-page.component.scss'],
 })
-export class LogoutPageComponent implements OnInit {
-  isSuccess = false;
-  isFailure = false;
-
+export class LogoutPageComponent implements OnInit, OnDestroy {
+  ngUnsubscribe = new Subject<void>();
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
-    this.authService.logout().subscribe((result) => {
-      console.log(result);
-      if (result.isSuccess) {
-        this.isFailure = false;
-        this.isSuccess = true;
-        this.router.navigateByUrl('');
-      } else {
-        this.isFailure = true;
-        this.isSuccess = false;
-      }
-    });
+    this.authService
+      .logout()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((result) => {
+        if (result.isSuccess()) {
+          this.router.navigateByUrl('');
+        } else {
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

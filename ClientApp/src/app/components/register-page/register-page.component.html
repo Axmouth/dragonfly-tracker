@@ -38,15 +38,11 @@
           type="password"
           name="password2"
           clrPassword
-          placeholder="Password"
+          placeholder="Repeat Password"
           [(ngModel)]="form.password2"
           required
         />
       </clr-password-container>
-      <clr-checkbox-wrapper>
-        <label>Remember me</label>
-        <input type="checkbox" name="rememberMe" clrCheckbox [(ngModel)]="form.rememberMe" />
-      </clr-checkbox-wrapper>
       <div class="error active" *ngIf="registerFailed">
         Registration failed
       </div>

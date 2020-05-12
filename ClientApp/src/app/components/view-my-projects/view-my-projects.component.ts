@@ -41,8 +41,13 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    // this.username = (await this.authService.getToken().toPromise()).getName();
-    this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+    this.authService
+      .getUsername()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((newUsername) => {
+        console.log(newUsername);
+        this.username = newUsername;
+      });
     this.$qParamsSub = this.activatedRoute.queryParams.subscribe((qParams) => {
       if (qParams.page !== undefined && qParams.page !== null) {
         this.currentPage = +qParams.page;
@@ -164,14 +169,12 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
   async onNewProjectSubmit(project: Project) {
     console.log(project);
-    const username = await this.authService.getUsername();
-    console.log(project);
     this.projectService
-      .createUsersProject(username, project)
+      .createUsersProject(this.username, project)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         console.log(result);
-        this.router.navigateByUrl(`/user/${username}/${result['data']['name']}`);
+        this.router.navigateByUrl(`/user/${this.username}/${result.data.name}`);
       });
   }
 

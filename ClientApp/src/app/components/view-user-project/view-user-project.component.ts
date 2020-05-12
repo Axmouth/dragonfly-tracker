@@ -48,6 +48,7 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     this.targetProjectName = params.get('projectname');
     this.projectSub$ = this.projectsService
       .getUsersProject(this.targetUsername, this.targetProjectName)
+      .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         this.project = result.data;
         console.log(this.project);
@@ -55,7 +56,6 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.projectSub$.unsubscribe();
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

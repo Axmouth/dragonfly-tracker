@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { TokenService } from '../../services/token.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-nav',
@@ -10,42 +11,47 @@ import { TokenService } from '../../services/token.service';
   styleUrls: ['./nav.component.scss'],
 })
 export class NavComponent implements OnInit, OnDestroy {
-  isAuthenticatedOrRefresh$: Subscription;
   onAuthenticationChange$: Subscription;
   routeChange$: Subscription;
   isLoggedIn = false;
   vertNavCollapsed = true;
-  username = 'username';
+  username = '{{ username }}';
+  ngUnsubscribe = new Subject<void>();
 
   constructor(protected authService: AuthService, private router: Router, private tokenService: TokenService) {}
 
   async ngOnInit() {
-    this.onAuthenticationChange$ = this.authService.onAuthenticationChange().subscribe(async (loggedIn) => {
-      if (!loggedIn) {
-        // tslint:disable-next-line:max-line-length
-        // const refresh$ = this.authService.refreshToken(myRefreshNbPasswordAuthStrategyOptions.name, { token: tokenGetter() }).subscribe(async (loggedIn) => { this.isLoggedIn = loggedIn.isSuccess() });
-        // refresh$.unsubscribe();
+    this.onAuthenticationChange$ = this.authService
+      .onAuthenticationChange()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(async (loggedIn) => {
+        if (!loggedIn) {
+        } else {
+        }
         this.isLoggedIn = loggedIn;
-      } else {
-        this.isLoggedIn = loggedIn;
-      }
-    });
+      });
+
+    this.authService
+      .getUsername()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((newUsername) => {
+        this.username = newUsername;
+      });
 
     this.routeChange$ = this.router.events.subscribe(async (val) => {
       if (val instanceof NavigationStart) {
-        const refresh$ = this.authService.isAuthenticatedOrRefresh().subscribe(async (loggedIn) => {
-          this.isLoggedIn = loggedIn;
-        });
+        const refresh$ = this.authService
+          .isAuthenticatedOrRefresh()
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(async (loggedIn) => {
+            this.isLoggedIn = loggedIn;
+          });
       }
     });
-
-    if (await (await this.tokenService.get().toPromise()).getPayload()) {
-      this.username = (await (await this.tokenService.get().toPromise()).getPayload()).sub;
-    }
   }
 
   ngOnDestroy(): void {
-    this.isAuthenticatedOrRefresh$.unsubscribe();
-    this.onAuthenticationChange$.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

@@ -25,14 +25,20 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    this.username = await this.authService.getUsername();
-    this.userService
-      .getUser(this.username)
+    this.authService
+      .getUsername()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((response) => {
-        this.user = response.data;
-        console.log(this.user);
-        console.log(this.user.userName);
+      .subscribe((newUsername) => {
+        console.log(newUsername);
+        this.username = newUsername;
+        this.userService
+          .getUser(this.username)
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe((response) => {
+            this.user = response.data;
+            console.log(this.user);
+            console.log(this.user.userName);
+          });
       });
   }
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { TokenService } from './token.service';
 import { map, switchMap, catchError } from 'rxjs/operators';
-import { Observable, of as observableOf, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
@@ -20,8 +20,16 @@ export class AuthService {
 
   constructor(private tokenService: TokenService, private http: HttpClient, private route: ActivatedRoute) {}
 
-  async getUsername() {
-    return (await (await this.tokenService.get().toPromise()).getPayload()).sub;
+  getUsername() {
+    return this.tokenService.get().pipe(
+      map((token) => {
+        const payload = token.getPayload();
+        if (payload) {
+          return payload.sub;
+        }
+        return null;
+      }),
+    );
   }
 
   /**
@@ -72,10 +80,10 @@ export class AuthService {
    */
   logout() {
     const url = `${apiRoot}/identity/logout`;
-    const result = observableOf({}).pipe(
+    const result = of({}).pipe(
       switchMap((res: any) => {
         if (!url) {
-          return observableOf(res);
+          return of(res);
         }
         return this.http.delete<EmptyResponse>(url, { observe: 'response' });
       }),
@@ -97,7 +105,7 @@ export class AuthService {
         if (authResult.isSuccess()) {
           this.tokenService.clear().pipe(map(() => authResult));
         }
-        return observableOf(authResult);
+        return of(authResult);
       }),
     );
   }
@@ -159,17 +167,17 @@ export class AuthService {
             switchMap((res) => {
               if (res === null) {
                 // For the case where there is an auth request in progress. Keep the status Quo
-                return observableOf(this.isAuthenticated());
+                return of(this.isAuthenticated());
               }
               if (res.isSuccess()) {
                 return this.isAuthenticated();
               } else {
-                return observableOf(false);
+                return of(false);
               }
             }),
           );
         } else {
-          return observableOf(token.isValid());
+          return of(token.isValid());
         }
       }),
     );
@@ -196,7 +204,7 @@ export class AuthService {
   refreshToken(data?: any): Observable<AuthResult> {
     if (this.authenticating) {
       // check if auth request is in progress and do nothing then
-      return observableOf(null);
+      return of(null);
     }
     // set the flag that there is an auth request in progress
     this.authenticating = true;
@@ -231,7 +239,7 @@ export class AuthService {
   }
 
   protected handleResponseError(res: any): Observable<AuthResult> {
-    return observableOf(new AuthResult(false, res, false, ''));
+    return of(new AuthResult(false, res, false, ''));
   }
 
   /**
@@ -315,7 +323,7 @@ export class AuthService {
       );
     }
 
-    return observableOf(result);
+    return of(result);
   }
 
   createToken(value: any, failWhenInvalidToken?: boolean): AuthJWTToken {

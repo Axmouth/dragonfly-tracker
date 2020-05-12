@@ -30,6 +30,7 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
   maintainerNotFound = true;
   projectFound = false;
   queryingProjectName = true;
+  username: string;
   @Output()
   sendProject: EventEmitter<Project> = new EventEmitter<Project>();
 
@@ -45,12 +46,20 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
     this.newProject.maintainers = [];
     this.newProject.types = [];
     this.newProject.stages = [];
+
+    this.authService
+      .getUsername()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((newUsername) => {
+        console.log(newUsername);
+        this.username = newUsername;
+      });
   }
 
   async onProjectNameType(event) {
     this.queryingProjectName = true;
     this.projectsService
-      .getUsersProject(await this.authService.getUsername(), this.newProject.name)
+      .getUsersProject(this.username, this.newProject.name)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         (result) => {

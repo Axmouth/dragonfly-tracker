@@ -31,6 +31,7 @@ export class UpdateProjectWizardComponent implements OnInit, OnDestroy {
   maintainerNotFound = true;
   projectFound = false;
   queryingProjectName = true;
+  username: string;
 
   constructor(
     private projectService: ProjectsService,
@@ -44,12 +45,20 @@ export class UpdateProjectWizardComponent implements OnInit, OnDestroy {
     this.project.maintainers = [];
     this.project.types = [];
     this.project.stages = [];
+
+    this.authService
+      .getUsername()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((newUsername) => {
+        console.log(newUsername);
+        this.username = newUsername;
+      });
   }
 
   async onProjectNameType(event) {
     this.queryingProjectName = true;
     this.projectService
-      .getUsersProject(await this.authService.getUsername(), this.project.name)
+      .getUsersProject(this.username, this.project.name)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         (result) => {
@@ -188,14 +197,12 @@ export class UpdateProjectWizardComponent implements OnInit, OnDestroy {
 
   async onCommit() {
     console.log(this.project);
-    const username = await this.authService.getUsername();
-    console.log(this.project);
     this.projectService
-      .updateUsersProject(username, this.oldProjectName, this.project)
+      .updateUsersProject(this.username, this.oldProjectName, this.project)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         console.log(result);
-        this.router.navigateByUrl(`/user/${username}/${result['data']['name']}`);
+        this.router.navigateByUrl(`/user/${this.username}/${result['data']['name']}`);
       });
   }
 

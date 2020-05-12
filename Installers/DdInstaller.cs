@@ -18,7 +18,11 @@ namespace DragonflyTracker.Installers
                 configuration.GetConnectionString("PgMainConnection")
                 )
             );
-            services.AddDefaultIdentity<DragonflyUser>()
+            services.AddDefaultIdentity<DragonflyUser>(options =>
+                {
+                    options.User.RequireUniqueEmail = true;
+                    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.";
+                })
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<PgMainDataContext>();
 
