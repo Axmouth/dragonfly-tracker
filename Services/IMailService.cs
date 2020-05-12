@@ -8,7 +8,7 @@ namespace DragonflyTracker.Services
 {
     public interface IMailService
     {
-        Task<bool> SendAccountVerificationEmailAsync(DragonflyUser user);
+        Task<bool> SendAccountVerificationEmailAsync(DragonflyUser user, string token);
         Task<bool> SendPasswordResetEmailAsync(DragonflyUser user);
         Task<bool> SendPasswordChangedEmailAsync(DragonflyUser user);
         Task<bool> SendEmailChangedEmailAsync(DragonflyUser user, string oldEmail, string newEmail);

@@ -21,14 +21,16 @@ namespace DragonflyTracker.Services
         private readonly JwtSettings _jwtSettings;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly PgMainDataContext _pgMainDataContext;
+        private readonly IMailService _mailService;
         
-        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole> roleManager)
+        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole> roleManager, IMailService mailService)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
             _tokenValidationParameters = tokenValidationParameters;
             _pgMainDataContext = pgMainDataContext;
             _roleManager = roleManager;
+            _mailService = mailService;
         }
         
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
@@ -105,6 +107,7 @@ namespace DragonflyTracker.Services
             }
 
             var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(newUser).ConfigureAwait(false);
+            var sent = await _mailService.SendAccountVerificationEmailAsync(newUser, emailConfirmationCode).ConfigureAwait(false);
 
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }

@@ -83,9 +83,9 @@ namespace DragonflyTracker.Installers
                 return new RestfulUriService(absoluteUri, accessor);
             });
 
-            services.AddTransient<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
+            services.AddScoped<IRazorViewToStringRenderer, RazorViewToStringRenderer>();
 
-            services.AddSingleton<IMailService>(provider =>
+            services.AddScoped<IMailService>(provider =>
             {
                 var renderer = provider.GetRequiredService<IRazorViewToStringRenderer>();
                 EmailSettings emailSettings = new EmailSettings();

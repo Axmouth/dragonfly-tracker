@@ -83,10 +83,6 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
-    <Folder Include="Views\Emails\AccountVerification\" />
-    <Folder Include="Views\Emails\EmailChanged\" />
-    <Folder Include="Views\Emails\PasswordReset\" />
-    <Folder Include="Views\Emails\PasswordChanged\" />
   </ItemGroup>
 
   <ItemGroup>

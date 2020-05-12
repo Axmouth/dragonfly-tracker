@@ -33,6 +33,9 @@ import { tokenGetter } from './constants';
 import { UserPreferencesComponent } from './components/user-preferences/user-preferences.component';
 import { CreateProjectWizardComponent } from './components/create-project-wizard/create-project-wizard.component';
 import { UpdateProjectWizardComponent } from './components/update-project-wizard/update-project-wizard.component';
+import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
+import { RequestPasswordResetComponent } from './components/request-password-reset/request-password-reset.component';
+import { PasswordResetComponent } from './components/password-reset/password-reset.component';
 
 @NgModule({
   declarations: [
@@ -61,6 +64,9 @@ import { UpdateProjectWizardComponent } from './components/update-project-wizard
     UserPreferencesComponent,
     CreateProjectWizardComponent,
     UpdateProjectWizardComponent,
+    VerifyEmailComponent,
+    RequestPasswordResetComponent,
+    PasswordResetComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
