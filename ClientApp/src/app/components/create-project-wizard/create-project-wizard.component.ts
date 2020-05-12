@@ -8,8 +8,9 @@ import { UserService } from '../../services/user.service';
 import { Observable, Subject } from 'rxjs';
 import { PagedResponse } from '../../models/Api/paged-response';
 import { AuthService } from '../../services/auth.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-create-project-wizard',
@@ -17,6 +18,22 @@ import { Router } from '@angular/router';
   styleUrls: ['./create-project-wizard.component.scss'],
 })
 export class CreateProjectWizardComponent implements OnInit, OnDestroy {
+  nameInfoForm = this.formBuilder.group({
+    name: [''],
+    description: [''],
+  });
+  adminForm = this.formBuilder.group({
+    admin: [''],
+  });
+  maintainerForm = this.formBuilder.group({
+    maintainer: [''],
+  });
+  issueTypeForm = this.formBuilder.group({
+    type: [''],
+  });
+  issueStageForm = this.formBuilder.group({
+    stage: [''],
+  });
   ngUnsubscribe = new Subject<void>();
   wizardOpen = false;
   newProject = new Project();
@@ -39,6 +56,7 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
+    private formBuilder: FormBuilder,
   ) {}
 
   ngOnInit() {
@@ -54,38 +72,89 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
         console.log(newUsername);
         this.username = newUsername;
       });
-  }
 
-  async onProjectNameType(event) {
-    this.queryingProjectName = true;
-    this.projectsService
-      .getUsersProject(this.username, this.newProject.name)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
-        (result) => {
-          this.projectFound = true;
-          this.queryingProjectName = false;
-        },
-        (err) => {
-          this.projectFound = false;
-          this.queryingProjectName = false;
-        },
-      );
-  }
+    this.nameInfoForm
+      .get('name')
+      .valueChanges.pipe(debounceTime(200))
+      .subscribe((name) => {
+        this.queryingProjectName = true;
+        this.newProject.name = name;
+        this.projectsService
+          .getUsersProject(this.username, name)
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(
+            (result) => {
+              this.projectFound = true;
+              this.queryingProjectName = false;
+            },
+            (err) => {
+              this.projectFound = false;
+              this.queryingProjectName = false;
+            },
+          );
+      });
 
-  onMaintainerType(event) {
-    this.maintainerSearch$ = this.userService.getAllUsers(1, 5, this.newMaintainerName);
-    this.userService
-      .getUser(this.newMaintainerName)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
-        (result) => {
-          this.maintainerNotFound = false;
-        },
-        (err) => {
+    this.nameInfoForm.get('description').valueChanges.subscribe((description) => {
+      this.newProject.description = description;
+    });
+
+    this.issueTypeForm.get('type').valueChanges.subscribe((type) => {
+      this.newIssueType = type;
+    });
+
+    this.issueStageForm.get('stage').valueChanges.subscribe((stage) => {
+      this.newIssueStage = stage;
+    });
+
+    this.adminForm
+      .get('admin')
+      .valueChanges.pipe(debounceTime(200))
+      .subscribe((admin) => {
+        if (!admin) {
+          this.adminNotFound = true;
+          this.newAdminName = admin;
+          return;
+        }
+        this.adminSearch$ = this.userService.getAllUsers(1, 5, admin).pipe(takeUntil(this.ngUnsubscribe));
+        this.userService
+          .getUser(admin)
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(
+            (result) => {
+              this.newAdminName = admin;
+              this.adminNotFound = false;
+            },
+            (err) => {
+              this.adminNotFound = true;
+              this.newAdminName = admin;
+            },
+          );
+      });
+
+    this.maintainerForm
+      .get('maintainer')
+      .valueChanges.pipe(debounceTime(200))
+      .subscribe((maintainer) => {
+        if (!maintainer) {
           this.maintainerNotFound = true;
-        },
-      );
+          this.newMaintainerName = maintainer;
+          return;
+        }
+        this.maintainerSearch$ = this.userService.getAllUsers(1, 5, maintainer);
+        this.userService
+          .getUser(maintainer)
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe(
+            (result) => {
+              this.newMaintainerName = maintainer;
+              this.maintainerNotFound = false;
+            },
+            (err) => {
+              this.maintainerNotFound = true;
+              this.newMaintainerName = maintainer;
+            },
+          );
+      });
   }
 
   onMaintainerSubmit() {
@@ -101,21 +170,6 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
       this.newProject.maintainers.push({ userName: this.newMaintainerName });
     }
     this.newMaintainerName = undefined;
-  }
-
-  onAdminType(event) {
-    this.adminSearch$ = this.userService.getAllUsers(1, 5, this.newAdminName).pipe(takeUntil(this.ngUnsubscribe));
-    this.userService
-      .getUser(this.newAdminName)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
-        (result) => {
-          this.adminNotFound = false;
-        },
-        (err) => {
-          this.adminNotFound = true;
-        },
-      );
   }
 
   onAdminSubmit() {

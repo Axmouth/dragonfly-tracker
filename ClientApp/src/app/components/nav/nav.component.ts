@@ -29,13 +29,13 @@ export class NavComponent implements OnInit, OnDestroy {
         } else {
         }
         this.isLoggedIn = loggedIn;
-      });
 
-    this.authService
-      .getUsername()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((newUsername) => {
-        this.username = newUsername;
+        this.authService
+          .getUsername()
+          .pipe(takeUntil(this.ngUnsubscribe))
+          .subscribe((newUsername) => {
+            this.username = newUsername;
+          });
       });
 
     this.routeChange$ = this.router.events.subscribe(async (val) => {

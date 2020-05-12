@@ -15,24 +15,16 @@
   >
     <ng-template clrPageTitle>What to call it?</ng-template>
 
-    <form clrForm #formPageOne="ngForm">
+    <form clrForm #formPageOne="ngForm" [formGroup]="nameInfoForm">
       <clr-input-container>
         <label>Project Name</label>
-        <input
-          clrInput
-          required
-          minlength="2"
-          [(ngModel)]="newProject.name"
-          name="name"
-          #name="ngModel"
-          (ngModelChange)="onProjectNameType($event)"
-        />
+        <input clrInput required minlength="2" formControlName="name" name="name" #name />
         <clr-control-error>This field is required!</clr-control-error>
       </clr-input-container>
 
       <clr-textarea-container>
         <label>Add a Project Description (optional)</label>
-        <textarea clrTextarea [(ngModel)]="newProject.description" name="description"></textarea>
+        <textarea clrTextarea formControlName="description" name="description"></textarea>
       </clr-textarea-container>
     </form>
   </clr-wizard-page>
@@ -56,10 +48,10 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>What issues will it address?</ng-template>
-    <form clrForm #formPageThree="ngForm">
+    <form clrForm #formPageThree="ngForm" [formGroup]="issueTypeForm">
       <clr-input-container>
         <label>New Issue Type</label>
-        <input clrInput required minlength="2" [(ngModel)]="newIssueType" name="name" #name="ngModel" />
+        <input clrInput required minlength="2" formControlName="type" name="name" #type />
         <clr-control-error>This field is required!</clr-control-error>
       </clr-input-container>
       <button
@@ -81,10 +73,10 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>What steps will it include?</ng-template>
-    <form clrForm #formPageFour="ngForm">
+    <form clrForm #formPageFour="ngForm" [formGroup]="issueStageForm">
       <clr-input-container>
         <label>New Issue Stage</label>
-        <input clrInput required minlength="2" [(ngModel)]="newIssueStage" name="name" #name="ngModel" />
+        <input clrInput required minlength="2" formControlName="stage" name="name" #stage />
         <clr-control-error>This field is required!</clr-control-error>
       </clr-input-container>
       <button
@@ -106,16 +98,10 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>Who will be admins?</ng-template>
-    <form clrForm #formPageFive="ngForm">
+    <form clrForm #formPageFive="ngForm" [formGroup]="adminForm">
       <clr-datalist-container>
         <label>Add users you want as Admins</label>
-        <input
-          clrDatalistInput
-          [(ngModel)]="newAdminName"
-          placeholder="Username here.."
-          name="name"
-          (ngModelChange)="onAdminType($event)"
-        />
+        <input clrDatalistInput formControlName="admin" placeholder="Username here.." name="admin" />
         <datalist *ngIf="adminSearch$ | async as adminSearch">
           <option *ngFor="let user of adminSearch.data" [value]="user.userName"></option>
         </datalist>
@@ -139,16 +125,10 @@
 
   <clr-wizard-page>
     <ng-template clrPageTitle>Add more participants?</ng-template>
-    <form clrForm #formPageSix="ngForm">
+    <form clrForm #formPageSix="ngForm" [formGroup]="maintainerForm">
       <clr-datalist-container>
         <label>Add users you want as Maintainers</label>
-        <input
-          clrDatalistInput
-          [(ngModel)]="newMaintainerName"
-          placeholder="Username here.."
-          name="name"
-          (ngModelChange)="onMaintainerType($event)"
-        />
+        <input clrDatalistInput formControlName="maintainer" placeholder="Username here.." name="maintainer" />
         <datalist *ngIf="maintainerSearch$ | async as maintainerSearch">
           <option *ngFor="let user of maintainerSearch.data" [value]="user.userName"></option>
         </datalist>
@@ -175,16 +155,7 @@
 
     <clr-input-container>
       <label>Project Name</label>
-      <input
-        clrInput
-        required
-        minlength="2"
-        [(ngModel)]="newProject.name"
-        name="name"
-        #name="ngModel"
-        (ngModelChange)="onProjectNameType($event)"
-        disabled
-      />
+      <input clrInput required minlength="2" [(ngModel)]="newProject.name" name="name" #name="ngModel" disabled />
       <clr-control-error>This field is required!</clr-control-error>
     </clr-input-container>
 

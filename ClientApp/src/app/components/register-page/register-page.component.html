@@ -1,5 +1,5 @@
 <div class="login-wrapper">
-  <form class="login">
+  <form class="login" [formGroup]="registerForm">
     <section class="title">
       <h3 class="welcome">Welcome to</h3>
       Dragonfly Tracker
@@ -8,29 +8,22 @@
     <div class="login-group">
       <clr-select-container hidden>
         <label class="clr-sr-only">User Role</label>
-        <select clrSelect name="type" [(ngModel)]="form.type">
+        <select clrSelect name="type" formControlName="type">
           <option value="local">Local Users</option>
           <option value="admin">Administrator</option>
         </select>
       </clr-select-container>
       <clr-input-container>
         <label class="clr-sr-only">Username</label>
-        <input type="text" name="username" clrInput placeholder="Username" [(ngModel)]="form.userName" required />
+        <input type="text" name="username" clrInput placeholder="Username" required formControlName="userName" />
       </clr-input-container>
       <clr-input-container>
         <label class="clr-sr-only">Email</label>
-        <input type="text" name="username" clrInput placeholder="Email" [(ngModel)]="form.email" required />
+        <input type="text" name="email" clrInput placeholder="Email" required formControlName="email" />
       </clr-input-container>
       <clr-password-container>
         <label class="clr-sr-only">Password</label>
-        <input
-          type="password"
-          name="password"
-          clrPassword
-          placeholder="Password"
-          [(ngModel)]="form.password"
-          required
-        />
+        <input type="password" name="password" clrPassword placeholder="Password" required formControlName="password" />
       </clr-password-container>
       <clr-password-container>
         <label class="clr-sr-only">Repeat Password</label>
@@ -39,8 +32,8 @@
           name="password2"
           clrPassword
           placeholder="Repeat Password"
-          [(ngModel)]="form.password2"
           required
+          formControlName="password2"
         />
       </clr-password-container>
       <div class="error active" *ngIf="registerFailed">

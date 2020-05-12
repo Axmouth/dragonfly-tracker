@@ -3,6 +3,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-register-page',
@@ -11,23 +12,31 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class RegisterPageComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
-  form = {
-    type: 'local',
-    userName: '',
-    email: '',
-    password: '',
-    password2: '',
-  };
+
+  registerForm = this.formBuilder.group({
+    type: ['local'],
+    userName: [''],
+    email: [''],
+    password: [''],
+    password2: [''],
+  });
   errors: String[] = [];
   registerFailed = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) {}
 
   ngOnInit() {}
 
   onRegisterClick() {
+    const form = {
+      type: 'local',
+      userName: this.registerForm.get('userName').value,
+      email: this.registerForm.get('email').value,
+      password: this.registerForm.get('password').value,
+    };
+
     this.authService
-      .register(this.form)
+      .register(form)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(
         (result) => {
