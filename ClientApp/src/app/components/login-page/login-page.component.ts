@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { catchError } from 'rxjs/operators';
+import { AuthResult } from '../../models/internal/auth-result';
 
 @Component({
   selector: 'app-login-page',
@@ -10,29 +12,33 @@ import { AuthService } from '../../services/auth.service';
 export class LoginPageComponent implements OnInit {
   form = {
     type: 'local',
-    username: '',
+    userName: '',
     password: '',
     rememberMe: false,
   };
-  isSuccess = false;
-  isFailure = false;
+  errors: String[] = [];
+  loginFailed = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {}
 
   onLoginClick() {
-    console.log({ email: this.form.username, password: this.form.password });
-    this.authService.authenticate({ email: this.form.username, password: this.form.password }).subscribe((result) => {
-      console.log(result);
-      if (result.isSuccess) {
-        this.isFailure = false;
-        this.isSuccess = true;
-        this.router.navigateByUrl('');
-      } else {
-        this.isFailure = true;
-        this.isSuccess = false;
-      }
-    });
+    this.authService.authenticate(this.form).subscribe(
+      (result: AuthResult) => {
+        console.log(result);
+        if (result.isSuccess()) {
+          this.loginFailed = false;
+          this.errors = [];
+          this.router.navigateByUrl('');
+        } else {
+          this.loginFailed = true;
+          this.errors = result.getResponse().error.errors;
+        }
+      },
+      (err) => {
+        // console.log(err);
+      },
+    );
   }
 }

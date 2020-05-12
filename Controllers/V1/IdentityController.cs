@@ -66,11 +66,15 @@ namespace DragonflyTracker.Controllers.V1
             {
                 return BadRequest();
             }
-            var authResponse = await _identityService.LoginAsync(request.Email, request.Password).ConfigureAwait(false);
+            if (request.UserName == null || request.Password == null)
+            {
+                return BadRequest();
+            }
+            var authResponse = await _identityService.LoginAsync(request.UserName, request.Password).ConfigureAwait(false);
 
             if (!authResponse.Success)
             {
-                return BadRequest(new AuthFailedResponse
+                return Unauthorized(new AuthFailedResponse
                 {
                     Errors = authResponse.Errors
                 });

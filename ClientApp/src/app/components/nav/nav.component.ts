@@ -14,7 +14,7 @@ export class NavComponent implements OnInit, OnDestroy {
   onAuthenticationChange$: Subscription;
   routeChange$: Subscription;
   isLoggedIn = false;
-  vertNavCollapsed = false;
+  vertNavCollapsed = true;
   username = 'username';
 
   constructor(protected authService: AuthService, private router: Router, private tokenService: TokenService) {}

@@ -112,9 +112,13 @@ namespace DragonflyTracker.Services
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
 
-        public async Task<AuthenticationResult> LoginAsync(string email, string password)
+        public async Task<AuthenticationResult> LoginAsync(string loginId, string password)
         {
-            var user = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
+            var user = await _userManager.FindByNameAsync(loginId).ConfigureAwait(false);
+            if (user == null)
+            {
+                user = await _userManager.FindByEmailAsync(loginId).ConfigureAwait(false);
+            }
 
             if (user == null)
             {
