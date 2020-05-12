@@ -3,7 +3,9 @@
     <section class="title">
       <h3 class="welcome">Welcome to</h3>
       Dragonfly Tracker
-      <h5 class="hint">Use your Dragonfly Account to sign in or create one now</h5>
+      <h5 class="hint">
+        Use your Dragonfly Account to sign in or <a href="/register" [routerLink]="['/register']">create one now</a>
+      </h5>
     </section>
     <div class="login-group">
       <clr-select-container hidden>
@@ -33,7 +35,7 @@
       </div>
       <button type="submit" class="btn btn-primary" (click)="onLoginClick()">NEXT</button>
       <a href="/register" [routerLink]="['/register']" routerLinkActive="router-link-active" class="signup"
-        >Sign up for a Dragonfly Account</a
+        >New here? Sign up for a Dragonfly Account</a
       >
       <a href="/request-password-reset" [routerLink]="['/request-password-reset']" class="signup"
         >Forgot your Username or Password?</a
