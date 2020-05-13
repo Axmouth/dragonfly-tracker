@@ -1,11 +1,12 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { filter, share } from 'rxjs/operators';
 import { AuthEmptyTokenError } from '../models/internal/auth-empty-token-error';
 import { AuthIllegalJWTTokenError } from '../models/internal/auth-illegal-jwt-token-error';
 import { AuthJWTToken, AuthCreateJWTToken } from '../models/internal/auth-jwt-token';
 import { TokenPack } from '../models/internal/token-pack';
 import { AuthToken } from '../models/internal/auth-token';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -15,8 +16,10 @@ export class TokenService {
 
   protected key = 'auth_app_token';
 
-  constructor() {
-    this.publishStoredToken();
+  constructor(@Inject(PLATFORM_ID) private platform: Object) {
+    if (isPlatformBrowser(platform)) {
+      this.publishStoredToken();
+    }
   }
 
   /**
@@ -25,9 +28,12 @@ export class TokenService {
    */
   get(): Observable<AuthToken> {
     // const token = this.tokenStorage.get();
+    if (isPlatformServer(this.platform)) {
+      return of(this.unwrap(''));
+    }
     const raw = localStorage.getItem(this.key);
     const token = this.unwrap(raw);
-    return observableOf(token);
+    return of(token);
   }
 
   /**
@@ -40,7 +46,7 @@ export class TokenService {
     const raw = this.wrap(token);
     localStorage.setItem(this.key, raw);
     this.publishStoredToken();
-    return observableOf(null);
+    return of(null);
   }
 
   /**
@@ -52,7 +58,7 @@ export class TokenService {
     // this.tokenStorage.clear();
     localStorage.removeItem(this.key);
     this.publishStoredToken();
-    return observableOf(null);
+    return of(null);
   }
 
   /**

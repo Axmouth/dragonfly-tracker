@@ -5,5 +5,6 @@ export const tokenGetter = () => {
   if (!storageItem) {
     return null;
   }
+  console.log(storageItem);
   return JSON.parse(storageItem)['value'];
 };

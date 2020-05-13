@@ -34,12 +34,14 @@ namespace DragonflyTracker
                                   builder =>
                                   {
                                       builder.WithOrigins(
-                                                          "*",
+                                                          "http://dragonflytracker.test",
                                                           "http://dragonflytracker.com",
                                                           "http://localhost:4201",
+                                                          "http://localhost:4205",
                                                           "https://api.dragonflytracker.com")
                                                   .AllowAnyHeader()
-                                                  .AllowAnyMethod();
+                                                  .AllowAnyMethod()
+                                                  .AllowCredentials();
                                   });
             });
             services.AddMvc();

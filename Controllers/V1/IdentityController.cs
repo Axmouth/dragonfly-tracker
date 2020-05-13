@@ -86,7 +86,9 @@ namespace DragonflyTracker.Controllers.V1
              new CookieOptions
              {
                  HttpOnly = true,
-                 //Domain = "localhost"
+                 Domain = getCookieDomain(),
+                 SameSite = SameSiteMode.None,
+                 Secure = false
              });
 
             return Ok(new AuthSuccessResponse
@@ -99,6 +101,12 @@ namespace DragonflyTracker.Controllers.V1
         [HttpPost(ApiRoutes.Identity.Refresh)]
         public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
         {
+            if (request == null)
+            {
+                return BadRequest(
+                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                    );
+            }
             var RefreshToken = Request.Cookies[refreshTokenCookieName];
 
             // var authResponse = await _identityService.RefreshTokenAsync(request.Token, request.RefreshToken).ConfigureAwait(false);
@@ -118,7 +126,9 @@ namespace DragonflyTracker.Controllers.V1
              new CookieOptions
              {
                  HttpOnly = true,
-                 // Domain = ".dragonflytracker.com"
+                 Domain = getCookieDomain(),
+                 SameSite = SameSiteMode.None,
+                 Secure = false
              });
 
             return Ok(new AuthSuccessResponse
@@ -126,6 +136,11 @@ namespace DragonflyTracker.Controllers.V1
                 Token = authResponse.Token,
                 RefreshToken = authResponse.RefreshToken
             });
+        }
+
+        private string getCookieDomain()
+        {
+            return "." + RemoveSubdomain(Request.Host.ToString());
         }
 
         private string RemoveSubdomain(string host)
@@ -188,7 +203,7 @@ namespace DragonflyTracker.Controllers.V1
                     new ErrorResponse(new ErrorModel { Message = "You are not Authorized to edit this User." })
                     );
             }
-            var passCheck = await _identityService.CheckUserPasswordAsync(user, request.OldPassword);
+            var passCheck = await _identityService.CheckUserPasswordAsync(user, request.OldPassword).ConfigureAwait(false);
             if (!passCheck)
             {
                 return Unauthorized(

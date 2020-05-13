@@ -81,12 +81,8 @@ import { PasswordResetComponent } from './components/password-reset/password-res
         whitelistedDomains: [
           'localhost:5001',
           'localhost:4200',
-          'localhost:3000',
-          'localhost',
-          'knowledgebase.network',
-          'giorgosnikolopoulos.ddns.net',
-          'giorgosnikolopoulos.ddns.net:4200',
-          'giorgosnikolopoulos.ddns.net:3000',
+          'api.dragonflytracker.test',
+          'api.dragonflytracker.com',
         ],
         blacklistedRoutes: [],
         // authScheme: ""

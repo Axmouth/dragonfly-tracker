@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { TokenService } from './token.service';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
@@ -11,6 +11,7 @@ import { AuthResult } from '../models/internal/auth-result';
 import { AuthToken } from '../models/internal/auth-token';
 import { AuthJWTToken, AuthCreateJWTToken } from '../models/internal/auth-jwt-token';
 import { AuthIllegalTokenError } from '../models/internal/auth-illegal-token-error';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -18,11 +19,19 @@ import { AuthIllegalTokenError } from '../models/internal/auth-illegal-token-err
 export class AuthService {
   authenticating = false;
 
-  constructor(private tokenService: TokenService, private http: HttpClient, private route: ActivatedRoute) {}
+  constructor(
+    private tokenService: TokenService,
+    private http: HttpClient,
+    private route: ActivatedRoute,
+    @Inject(PLATFORM_ID) private platform: Object,
+  ) {}
 
   getUsername() {
     return this.tokenService.get().pipe(
       map((token) => {
+        if (!isPlatformBrowser(this.platform)) {
+          return null;
+        }
         const payload = token.getPayload();
         if (payload) {
           return payload.sub;
@@ -46,6 +55,7 @@ export class AuthService {
     const result = this.http
       .post<AuthSuccessResponse>(`${apiRoot}/identity/login`, data, {
         observe: 'response',
+        withCredentials: true,
       })
       .pipe(
         map((res) => {
@@ -78,7 +88,7 @@ export class AuthService {
    *
    * @returns {Observable<AuthResult>}
    */
-  logout() {
+  logout(): Observable<AuthResult> {
     const url = `${apiRoot}/identity/logout`;
     const result = of({}).pipe(
       switchMap((res: any) => {
@@ -151,6 +161,9 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   isAuthenticated(): Observable<boolean> {
+    if (!isPlatformBrowser(this.platform)) {
+      return of(false);
+    }
     return this.getToken().pipe(map((token: AuthToken) => token.isValid()));
   }
 
@@ -160,6 +173,9 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   isAuthenticatedOrRefresh(): Observable<boolean> {
+    if (!isPlatformBrowser(this.platform)) {
+      return of(false);
+    }
     return this.getToken().pipe(
       switchMap((token) => {
         if (token.getValue() && !token.isValid()) {
@@ -188,6 +204,9 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   onAuthenticationChange(): Observable<boolean> {
+    if (!isPlatformBrowser(this.platform)) {
+      return of(false);
+    }
     return this.onTokenChange().pipe(map((token: AuthToken) => token.isValid()));
   }
 
@@ -211,7 +230,7 @@ export class AuthService {
 
     const url = `${apiRoot}/identity/refresh`;
     return this.http
-      .post<AuthSuccessResponse>(url, data, { observe: 'response' })
+      .post<AuthSuccessResponse>(url, data, { observe: 'response', withCredentials: true })
       .pipe(
         map((res) => {
           const token = AuthCreateJWTToken(res.body['token'], 'refreshToken');

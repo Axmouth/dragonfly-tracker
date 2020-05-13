@@ -11,8 +11,6 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./nav.component.scss'],
 })
 export class NavComponent implements OnInit, OnDestroy {
-  onAuthenticationChange$: Subscription;
-  routeChange$: Subscription;
   isLoggedIn = false;
   vertNavCollapsed = true;
   username = '{{ username }}';
@@ -21,7 +19,7 @@ export class NavComponent implements OnInit, OnDestroy {
   constructor(protected authService: AuthService, private router: Router, private tokenService: TokenService) {}
 
   async ngOnInit() {
-    this.onAuthenticationChange$ = this.authService
+    this.authService
       .onAuthenticationChange()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe(async (loggedIn) => {
@@ -37,8 +35,7 @@ export class NavComponent implements OnInit, OnDestroy {
             this.username = newUsername;
           });
       });
-
-    this.routeChange$ = this.router.events.subscribe(async (val) => {
+    this.router.events.subscribe(async (val) => {
       if (val instanceof NavigationStart) {
         const refresh$ = this.authService
           .isAuthenticatedOrRefresh()
