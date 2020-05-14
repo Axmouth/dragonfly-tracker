@@ -1,9 +1,9 @@
 
     netsh interface portproxy add v4tov4 listenport=443 listenaddress=127.65.43.21 connectport=5001 connectaddress=127.0.0.1
+netsh interface portproxy add v4tov4 listenport=80 listenaddress=127.65.43.21 connectport=5000 connectaddress=127.0.0.1
 
 netsh interface portproxy add v4tov4 listenport=80 listenaddress=127.65.43.22 connectport=4205 connectaddress=127.0.0.1
 netsh interface portproxy add v4tov4 listenport=443 listenaddress=127.65.43.22 connectport=4205 connectaddress=127.0.0.1
-
 
 	127.65.43.21    api.dragonflytracker.test
 	127.65.43.22       dragonflytracker.test

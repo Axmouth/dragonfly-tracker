@@ -1,9 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { catchError, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthResult } from 'src/app/auth/internal/auth-result';
-import { AuthService } from 'src/app/auth';
+import { AuthService, TokenService } from 'src/app/auth';
+import { RouteStateService } from '../../services/route-state.service';
+import { getBaseUrl } from '../../../main';
 
 @Component({
   selector: 'app-login-page',
@@ -21,7 +23,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   errors: String[] = [];
   loginFailed = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private routeStateService: RouteStateService,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {}
 
@@ -35,7 +42,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           if (result.isSuccess()) {
             this.loginFailed = false;
             this.errors = [];
-            await this.router.navigateByUrl('');
+            await this.router.navigateByUrl(this.routeStateService.getPreviousUrl());
           } else {
             this.loginFailed = true;
             this.errors = result.getResponse().error.errors;

@@ -32,10 +32,18 @@
   <clr-tab>
     <button clrTabLink id="link2">Account Settings</button>
     <clr-tab-content id="content2" *clrIfActive>
-      <form clrForm #formAccountSettings="ngForm" *ngIf="user">
+      <form clrForm #formEmailSettings="ngForm" *ngIf="user">
+        <button class="btn btn-text btn-primary" (click)="onResendEmailVerificationClick()">
+          Resend Email Verification <clr-icon shape="certificate"></clr-icon>
+        </button>
+        <app-message-area
+          [errors]="emailVerificationRequestErrors"
+          [messages]="emailVerificationRequestMessages"
+          [loading]="emailVerificationRequestLoading"
+        ></app-message-area>
         <clr-input-container>
           <label>Email</label>
-          <input clrInput required minlength="2" [(ngModel)]="user.email" name="email" #name="ngModel" />
+          <input clrInput required minlength="2" type="email" [(ngModel)]="email" name="email" #name="ngModel" />
           <clr-control-error>This field is required!</clr-control-error>
         </clr-input-container>
 

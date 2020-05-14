@@ -1,10 +1,9 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { TokenService } from './token.service';
 import { map, switchMap, catchError } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { apiRoot } from 'src/environments/environment';
 import { AuthSuccessResponse } from '../../models/api/auth-success-response';
 import { EmptyResponse } from '../../models/api/empty-response';
 import { AuthResult } from '../internal/auth-result';
@@ -12,24 +11,39 @@ import { AuthToken } from '../internal/auth-token';
 import { AuthJWTToken, AuthCreateJWTToken } from '../internal/auth-jwt-token';
 import { AuthIllegalTokenError } from '../internal/auth-illegal-token-error';
 import { isPlatformBrowser } from '@angular/common';
+import { AX_AUTH_OPTIONS } from '../auth-injection-token';
+import { AuthModuleOptionsConfig } from '../auth-module-options-config';
+import { User } from 'src/app/models/api/user';
+import { IsBrowserService } from '../../helpers/services/is-browser.service';
+import { Response } from 'src/app/models/api/response';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   authenticating = false;
+  authEndpointPrefix: string;
 
   constructor(
     private tokenService: TokenService,
     private http: HttpClient,
     private route: ActivatedRoute,
-    @Inject(PLATFORM_ID) private platform: Object,
-  ) {}
+    private isBrowserService: IsBrowserService,
+    @Inject(AX_AUTH_OPTIONS) config: AuthModuleOptionsConfig,
+  ) {
+    this.authEndpointPrefix = config.authEndpointPrefix;
+  }
 
-  getUsername() {
+  /**
+   * Retrieves the logged in user's username
+   * It is assumed it stored under sub inside the token
+   *
+   * @returns {Observable<string>}
+   */
+  getUsername(): Observable<string> {
     return this.tokenService.get().pipe(
       map((token) => {
-        if (!isPlatformBrowser(this.platform)) {
+        if (!this.isBrowserService.isInBrowser()) {
           return null;
         }
         const payload = token.getPayload();
@@ -42,18 +56,63 @@ export class AuthService {
   }
 
   /**
+   * Retrieves the logged in user's email
+   * It is assumed it stored under email inside the token
+   *
+   * @returns {Observable<string>}
+   */
+  getEmail(): Observable<string> {
+    return this.tokenService.get().pipe(
+      map((token) => {
+        if (!this.isBrowserService.isInBrowser()) {
+          return null;
+        }
+        const payload = token.getPayload();
+        if (payload) {
+          return payload.email;
+        }
+        return null;
+      }),
+    );
+  }
+
+  /**
+   * Retrieves the logged in user's email
+   * It is assumed it stored under email inside the token
+   *
+   * @returns {Observable<User>}
+   */
+  getProfile(): Observable<HttpResponse<Response<User>>> {
+    console.log(`${this.authEndpointPrefix}profile`);
+    const result = this.http
+      .get<Response<User>>(`${this.authEndpointPrefix}profile`, {
+        observe: 'response',
+        withCredentials: true,
+      })
+      .pipe(
+        map((res) => {
+          return res;
+        }),
+      );
+    return result;
+  }
+
+  /**
    * Authenticates
    * Stores received token in the token storage
    *
    * Example:
-   * authenticate('email', {email: 'email@example.com', password: 'test'})
+   * authenticate('{email: 'email@example.com', password: 'test'})
+   * authenticate( {userName: 'email@example.com', password: 'test'})
+   * authenticate( {userName: 'username', password: 'test'})
    *
    * @param data
    * @returns {Observable<AuthResult>}
    */
   authenticate(data?: any): Observable<AuthResult> {
+    console.log(`${this.authEndpointPrefix}login`);
     const result = this.http
-      .post<AuthSuccessResponse>(`${apiRoot}/identity/login`, data, {
+      .post<AuthSuccessResponse>(`${this.authEndpointPrefix}login`, data, {
         observe: 'response',
         withCredentials: true,
       })
@@ -63,7 +122,7 @@ export class AuthService {
             true,
             res.body,
             true,
-            ['Login/Email combination is not correct, please try again.'],
+            [], // ['Login/Email combination is not correct, please try again.'],
             ['You have been successfully logged in.'],
             this.createToken(res.body['token'], true),
           );
@@ -89,7 +148,7 @@ export class AuthService {
    * @returns {Observable<AuthResult>}
    */
   logout(): Observable<AuthResult> {
-    const url = `${apiRoot}/identity/logout`;
+    const url = `${this.authEndpointPrefix}logout`;
     const result = of({}).pipe(
       switchMap((res: any) => {
         if (!url) {
@@ -102,7 +161,7 @@ export class AuthService {
           true,
           res,
           true,
-          ['Something went wrong, please try again.'],
+          [], // ['Something went wrong, please try again.'],
           ['You have been successfully logged out.'],
         );
       }),
@@ -131,7 +190,7 @@ export class AuthService {
    * @returns {Observable<AuthResult>}
    */
   register(data?: any): Observable<AuthResult> {
-    const url = `${apiRoot}/identity/register`;
+    const url = `${this.authEndpointPrefix}register`;
     const result = this.http
       .post<AuthSuccessResponse>(url, data, { observe: 'response' })
       .pipe(
@@ -140,7 +199,7 @@ export class AuthService {
             true,
             res,
             true,
-            ['Something went wrong, please try again.'],
+            [], // ['Something went wrong, please try again.'],
             ['You have been successfully registered.'],
             this.createToken(res.body['token'], true),
           );
@@ -161,7 +220,7 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   isAuthenticated(): Observable<boolean> {
-    if (!isPlatformBrowser(this.platform)) {
+    if (!this.isBrowserService.isInBrowser()) {
       return of(false);
     }
     return this.getToken().pipe(map((token: AuthToken) => token.isValid()));
@@ -173,7 +232,7 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   isAuthenticatedOrRefresh(): Observable<boolean> {
-    if (!isPlatformBrowser(this.platform)) {
+    if (!this.isBrowserService.isInBrowser()) {
       return of(false);
     }
     return this.getToken().pipe(
@@ -183,7 +242,7 @@ export class AuthService {
             switchMap((res) => {
               if (res === null) {
                 // For the case where there is an auth request in progress. Keep the status Quo
-                return of(this.isAuthenticated());
+                return of(true);
               }
               if (res.isSuccess()) {
                 return this.isAuthenticated();
@@ -204,7 +263,7 @@ export class AuthService {
    * @returns {Observable<boolean>}
    */
   onAuthenticationChange(): Observable<boolean> {
-    if (!isPlatformBrowser(this.platform)) {
+    if (!this.isBrowserService.isInBrowser()) {
       return of(false);
     }
     return this.onTokenChange().pipe(map((token: AuthToken) => token.isValid()));
@@ -215,7 +274,7 @@ export class AuthService {
    * Stores received token in the token storage
    *
    * Example:
-   * refreshToken('email', {token: token})
+   * refreshToken({token: token})
    *
    * @param data
    * @returns {Observable<AuthResult>}
@@ -228,7 +287,7 @@ export class AuthService {
     // set the flag that there is an auth request in progress
     this.authenticating = true;
 
-    const url = `${apiRoot}/identity/refresh`;
+    const url = `${this.authEndpointPrefix}refresh`;
     return this.http
       .post<AuthSuccessResponse>(url, data, { observe: 'response', withCredentials: true })
       .pipe(
@@ -239,7 +298,7 @@ export class AuthService {
             true,
             res,
             true,
-            ['Something went wrong re-Authenticating'],
+            [], // ['Something went wrong re-Authenticating'],
             ['Your token has been successfully refreshed.'],
             token,
           );
@@ -281,21 +340,22 @@ export class AuthService {
    * Sends forgot password request
    *
    * Example:
-   * requestPassword('email', {email: 'email@example.com'})
+   * requestPasswordReset({email: 'email@example.com'})
+   * requestPasswordReset({userName: 'username'})
    *
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  requestPassword(data?: any): Observable<AuthResult> {
-    const url = `${apiRoot}/identity/request-pass`;
+  requestPasswordReset(data?: any): Observable<AuthResult> {
+    const url = `${this.authEndpointPrefix}password-reset-email`;
     return this.http.post(url, data, { observe: 'response' }).pipe(
       map((res) => {
         return new AuthResult(
           true,
           res,
           true,
-          ['Something went wrong, please try again.'],
-          ['Reset password instructions have been sent to your email.'],
+          [], // ['Something went wrong, please try again.'],
+          ['Reset password instructions have been sent to your email!'],
         );
       }),
       catchError((res) => {
@@ -308,23 +368,102 @@ export class AuthService {
    * Tries to reset password
    *
    * Example:
-   * resetPassword('email', {newPassword: 'test'})
+   * passwordReset({newPassword: 'test'})
    *
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  resetPassword(data?: any): Observable<AuthResult> {
-    const url = `${apiRoot}/identity/reset-pass`;
-    const tokenKey = 'reset_password_token';
-    data[tokenKey] = this.route.snapshot.queryParams[tokenKey];
+  passwordReset(data?: any): Observable<AuthResult> {
+    const url = `${this.authEndpointPrefix}password-reset`;
+    const tokenQueryKey = 'reset_password_token';
+    const userNameQueryKey = 'user_name';
+    const emailQueryKey = 'email';
+    const tokenKey = 'token';
+    const userNameKey = 'userName';
+    const emailKey = 'email';
+    data[tokenKey] = this.route.snapshot.queryParams[tokenQueryKey];
+    if (this.route.snapshot.queryParams[userNameQueryKey]) {
+      data[userNameKey] = this.route.snapshot.queryParams[userNameQueryKey];
+    }
+    if (this.route.snapshot.queryParams[emailQueryKey]) {
+      data[emailKey] = this.route.snapshot.queryParams[emailQueryKey];
+    }
     return this.http.post(url, data, { observe: 'response' }).pipe(
       map((res) => {
         return new AuthResult(
           true,
           res,
           true,
-          ['Something went wrong, please try again.'],
-          ['Your password has been successfully changed.'],
+          [], // ['Something went wrong, please try again.'],
+          ['Your password has been successfully changed!'],
+        );
+      }),
+      catchError((res) => {
+        return this.handleResponseError(res);
+      }),
+    );
+  }
+
+  /**
+   * Uses an email verification token to confirm you own the email address you used
+   *
+   * Example:
+   * verifyEmail()
+   *
+   * @param
+   * @returns {Observable<AuthResult>}
+   */
+  verifyEmail(): Observable<AuthResult> {
+    const data = {};
+    const url = `${this.authEndpointPrefix}email-confirm`;
+    const tokenQueryKey = 'email_confirm_token';
+    const userNameQueryKey = 'user_name';
+    const emailQueryKey = 'email';
+    const tokenKey = 'token';
+    const userNameKey = 'userName';
+    const emailKey = 'email';
+    data[tokenKey] = this.route.snapshot.queryParams[tokenQueryKey];
+    if (this.route.snapshot.queryParams[userNameQueryKey]) {
+      data[userNameKey] = this.route.snapshot.queryParams[userNameQueryKey];
+    }
+    if (this.route.snapshot.queryParams[emailQueryKey]) {
+      data[emailKey] = this.route.snapshot.queryParams[emailQueryKey];
+    }
+    return this.http.post(url, data, { observe: 'response' }).pipe(
+      map((res) => {
+        return new AuthResult(
+          true,
+          res,
+          true,
+          [], // ['Something went wrong, please try again.'],
+          ['Your Email has been successfully verified!'],
+        );
+      }),
+      catchError((res) => {
+        return this.handleResponseError(res);
+      }),
+    );
+  }
+
+  /**
+   * Requests an email for email verification
+   *
+   * Example:
+   * verifyEmail({email: 'user@example.com'})
+   *
+   * @param
+   * @returns {Observable<AuthResult>}
+   */
+  requestVerificationEmail(data?: any): Observable<AuthResult> {
+    const url = `${this.authEndpointPrefix}email-confirm-email`;
+    return this.http.post(url, data, { observe: 'response' }).pipe(
+      map((res) => {
+        return new AuthResult(
+          true,
+          res,
+          true,
+          [], // ['Something went wrong, please try again.'],
+          ['Your verification Email has been successfully sent!'],
         );
       }),
       catchError((res) => {

@@ -27,8 +27,8 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
   project = new Project();
   projectSub$: Subscription;
-  targetUsername: string;
-  targetProjectName: string;
+  targetUsername = '';
+  targetProjectName = '';
   loading = true;
   notFound = false;
   searchText: string;
@@ -51,7 +51,6 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         this.project = result.data;
-        console.log(this.project);
       });
   }
 
@@ -65,22 +64,17 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   }
 
   onIssueDeleteClick(issue: Issue) {
-    console.log(issue);
     this.issuesService
       .deleteUsersProjectIssue(this.targetUsername, this.targetProjectName, issue.number)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((result) => {
-        console.log(result);
-      });
+      .subscribe((result) => {});
     const index = this.issuesList.indexOf(issue);
-    console.log(index);
     this.issuesList = this.issuesList.slice(index, 1);
     // console.log(this.projectsList.filter((x: Project) => x.creator.username !== project.creator.username || x.name !== project.name));
   }
 
   onProjectDeleteClick() {
     this.projectsService.deleteUsersProject(this.targetUsername, this.targetProjectName).subscribe((result) => {
-      console.log(result);
       this.router.navigate(['my-projects']);
     });
   }
@@ -99,7 +93,6 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
       this.targetProjectName = params.get('projectname');
     }
     this.loadingIssues = true;
-    console.log(state);
 
     // We convert the filters from an array to a map,
     // because that's what our backend-calling service is expecting
@@ -129,10 +122,8 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
         openStatusMap[this.openStatus],
       )
       .subscribe(async (issuessResult) => {
-        console.log(issuessResult);
         this.issuesList = issuessResult['data'];
         this.total = issuessResult['total'];
-        console.log(this.issuesList);
         this.loadingIssues = false;
       });
   }

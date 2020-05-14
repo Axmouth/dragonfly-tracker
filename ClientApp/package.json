@@ -10,7 +10,7 @@
     "e2e": "ng e2e",
     "prerender": "ng run dragonfly_bug_tracker:prerender",
     "dev:ssr": "ng run dragonfly_bug_tracker:serve-ssr --port 4205",
-    "serve:ssr": "node dist/server/main.js",
+    "serve:ssr": "node dist/dragonfly_bug_tracker/server/main.js",
     "build:ssr": "ng build --prod && ng run dragonfly_bug_tracker:server:production"
   },
   "private": true,

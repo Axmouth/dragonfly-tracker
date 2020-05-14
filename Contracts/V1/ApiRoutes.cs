@@ -233,6 +233,8 @@
             
             public const string Refresh = Base + "/identity/refresh";
 
+            public const string Profile = Base + "/identity/profile";
+
             public const string PasswordReset = Base + "/identity/password-reset";
 
             public const string PasswordResetEmail = Base + "/identity/password-reset-email";
@@ -240,6 +242,8 @@
             public const string PasswordChange = Base + "/identity/password-change";
 
             public const string EmailConfirm = Base + "/identity/email-confirm";
+
+            public const string EmailConfirmEmail = Base + "/identity/email-confirm-email";
         }
 
         public static class Notifications

@@ -4,18 +4,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from '.';
 import { AX_AUTH_OPTIONS } from './auth-injection-token';
 import { AuthService } from './services/auth.service';
-
-export interface AuthModuleOptions {
-  jwtOptionsProvider?: Provider;
-  config?: {
-    headerName?: string;
-    authScheme?: string;
-    whitelistedDomains?: Array<string | RegExp>;
-    blacklistedRoutes?: Array<string | RegExp>;
-    throwNoTokenError?: boolean;
-    skipWhenExpired?: boolean;
-  };
-}
+import { AuthModuleOptions } from './auth-module-options';
 
 @NgModule({
   declarations: [],

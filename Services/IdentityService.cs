@@ -106,8 +106,7 @@ namespace DragonflyTracker.Services
                 };
             }
 
-            var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(newUser).ConfigureAwait(false);
-            var sent = await _mailService.SendAccountVerificationEmailAsync(newUser, emailConfirmationCode).ConfigureAwait(false);
+            var sent = await SendConfirmationEmailAsync(newUser).ConfigureAwait(false);
 
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
@@ -320,7 +319,8 @@ namespace DragonflyTracker.Services
         public async Task<bool> ResetPasswordEmailAsync(DragonflyUser user)
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
-            throw new NotImplementedException();
+            var result = await _mailService.SendPasswordResetEmailAsync(user, token).ConfigureAwait(false);
+            return result;
         }
 
         public async Task<bool> ResetPasswordAsync(DragonflyUser user, string token, string newPassword)
@@ -344,6 +344,13 @@ namespace DragonflyTracker.Services
         {
             var confirmResult = await _userManager.ConfirmEmailAsync(user, token).ConfigureAwait(false);
             return confirmResult.Succeeded;
+        }
+
+        public async Task<bool> SendConfirmationEmailAsync(DragonflyUser user)
+        {
+            var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(user).ConfigureAwait(false);
+            var sent = await _mailService.SendAccountVerificationEmailAsync(user, emailConfirmationCode).ConfigureAwait(false);
+            return sent;
         }
     }
 }

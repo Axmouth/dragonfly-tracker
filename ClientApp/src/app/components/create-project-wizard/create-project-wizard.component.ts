@@ -69,7 +69,6 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
       .getUsername()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((newUsername) => {
-        console.log(newUsername);
         this.username = newUsername;
       });
 
@@ -251,7 +250,6 @@ export class CreateProjectWizardComponent implements OnInit, OnDestroy {
   }
 
   async onCommit() {
-    // console.log(this.newProject);
     this.sendProject.next(this.newProject);
   }
 

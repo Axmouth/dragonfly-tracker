@@ -19,44 +19,42 @@ const DEFAULT_TAB = 'owned';
 })
 export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   projectsList: any[] = [];
-  $projectSubscription: Subscription;
-  $qParamsSub: Subscription;
   total: number;
   loading = true;
   username: string;
   ngUnsubscribe = new Subject<void>();
   state: ClrDatagridStateInterface;
   currentPage: number;
-  myOwnProjectsActive: boolean;
-  myAdminedProjectsActive: boolean;
-  myMaintainedProjectsActive: boolean;
+  myOwnProjectsActive = true;
+  myAdminedProjectsActive = false;
+  myMaintainedProjectsActive = false;
   tab = DEFAULT_TAB;
   firstLoad = true;
 
   constructor(
     private projectService: ProjectsService,
     private authService: AuthService,
-    private tokenService: TokenService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
     @Inject(PLATFORM_ID) private platform: Object,
   ) {}
 
   async ngOnInit() {
-    if (isPlatformBrowser(this.platform)) {
-      this.authService
-        .getUsername()
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe((newUsername) => {
-          this.username = newUsername;
-        });
-      this.$qParamsSub = this.activatedRoute.queryParams.subscribe((qParams) => {
-        if (qParams.page !== undefined && qParams.page !== null) {
-          this.currentPage = +qParams.page;
-        }
-        this.setTab(qParams.tab);
-      });
+    if (!isPlatformBrowser(this.platform)) {
+      return;
     }
+    this.authService
+      .getUsername()
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe((newUsername) => {
+        this.username = newUsername;
+      });
+    this.activatedRoute.queryParams.pipe(takeUntil(this.ngUnsubscribe)).subscribe((qParams) => {
+      if (qParams.page !== undefined && qParams.page !== null) {
+        this.currentPage = +qParams.page;
+      }
+      this.setTab(qParams.tab);
+    });
   }
 
   setTab(tabName: string) {
@@ -94,7 +92,7 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
   onTabChange(tabName: string) {
     if (!this.firstLoad) {
-      this.$projectSubscription.unsubscribe();
+      // this.$projectSubscription.unsubscribe();
     }
     const queryParams: Params = {};
     if (this.tab !== tabName) {
@@ -121,9 +119,8 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
   async refresh(state: ClrDatagridStateInterface) {
     if (!this.firstLoad) {
-      this.$projectSubscription.unsubscribe();
+      // this.$projectSubscription.unsubscribe();
     }
-    this.username = await (await this.tokenService.get().toPromise()).getPayload().sub;
     this.state = state;
     if (!this.firstLoad) {
       const queryParams: Params = { page: state.page.current };
@@ -157,13 +154,19 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
 
     let $projects: Observable<PagedResponse<Project>>;
     if (this.myOwnProjectsActive) {
-      $projects = this.projectService.getUsersProjects(this.username, state.page.current, state.page.size);
+      $projects = this.projectService
+        .getUsersProjects(this.username, state.page.current, state.page.size)
+        .pipe(takeUntil(this.ngUnsubscribe));
     } else if (this.myAdminedProjectsActive) {
-      $projects = this.projectService.getAllProjects(state.page.current, state.page.size, '', true, false);
+      $projects = this.projectService
+        .getAllProjects(state.page.current, state.page.size, '', true, false)
+        .pipe(takeUntil(this.ngUnsubscribe));
     } else if (this.myMaintainedProjectsActive) {
-      $projects = this.projectService.getAllProjects(state.page.current, state.page.size, '', false, true);
+      $projects = this.projectService
+        .getAllProjects(state.page.current, state.page.size, '', false, true)
+        .pipe(takeUntil(this.ngUnsubscribe));
     }
-    this.$projectSubscription = $projects.subscribe(async (projectsResult) => {
+    $projects.subscribe(async (projectsResult) => {
       this.projectsList = projectsResult['data'];
       this.total = projectsResult['total'];
       this.loading = false;
@@ -171,19 +174,15 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   async onNewProjectSubmit(project: Project) {
-    console.log(project);
     this.projectService
       .createUsersProject(this.username, project)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
-        console.log(result);
         this.router.navigateByUrl(`/user/${this.username}/${result.data.name}`);
       });
   }
 
   ngOnDestroy() {
-    this.$qParamsSub.unsubscribe();
-    this.$projectSubscription.unsubscribe();
     this.ngUnsubscribe.next();
     this.ngUnsubscribe.complete();
   }

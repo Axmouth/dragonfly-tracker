@@ -1,4 +1,4 @@
-import { Injectable, Inject, OnDestroy } from '@angular/core';
+import { Injectable, Inject, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { AX_AUTH_OPTIONS } from '../auth-injection-token';
 import { TokenService } from '../services/token.service';
 import { HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
@@ -7,6 +7,9 @@ import { AuthService } from '../services/auth.service';
 import { Subject, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
+import { isPlatformBrowser } from '@angular/common';
+import { AuthModuleOptions } from '../auth-module-options';
+import { AuthModuleOptionsConfig } from '../auth-module-options-config';
 
 @Injectable()
 export class JwtInterceptor implements OnDestroy {
@@ -22,14 +25,22 @@ export class JwtInterceptor implements OnDestroy {
   /**
    *
    */
-  constructor(@Inject(AX_AUTH_OPTIONS) config: any, private authService: AuthService) {
-    authService
-      .getToken()
+  constructor(
+    private tokenService: TokenService,
+    @Inject(AX_AUTH_OPTIONS) config: AuthModuleOptionsConfig,
+    private authService: AuthService,
+    @Inject(PLATFORM_ID) private platform: Object,
+  ) {
+    tokenService
+      .tokenChange()
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((token) => {
-        this.token = token;
+        if (token && token.getValue()) {
+          this.token = new AuthJWTToken(token.getValue(), 'refreshToken', token.getCreatedAt());
+        } else {
+          this.token = null;
+        }
       });
-
     this.headerName = config.headerName || 'Authorization';
     this.authScheme = config.authScheme || config.authScheme === '' ? config.authScheme : 'Bearer ';
     this.whitelistedDomains = config.whitelistedDomains || [];
@@ -75,7 +86,11 @@ export class JwtInterceptor implements OnDestroy {
   handleInterception(token: AuthJWTToken | null, request: HttpRequest<any>, next: HttpHandler) {
     let tokenIsExpired = false;
 
-    tokenIsExpired = token.getTokenExpDate() < new Date();
+    if (!isPlatformBrowser(this.platform)) {
+      tokenIsExpired = true;
+    } else if (token) {
+      tokenIsExpired = token.getTokenExpDate() < new Date();
+    }
 
     if (token && tokenIsExpired && this.skipWhenExpired) {
       request = request.clone();

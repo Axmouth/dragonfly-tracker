@@ -17,7 +17,7 @@
       </a>
       <a
         class="nav-link nav-icon-text"
-        *ngIf="isLoggedIn"
+        *ngIf="isLoggedIn === authenticatedStates.True"
         href="/my-projects"
         routerLink="/my-projects"
         routerLinkActive="active"
@@ -27,13 +27,22 @@
       </a>
     </div>
     <div class="header-actions">
-      <a *ngIf="!isLoggedIn" class="nav-link nav-icon-text" href="/login" routerLink="/login" routerLinkActive="active">
+      <span class="spinner spinner-inline1" *ngIf="isLoggedIn === authenticatedStates.Loading">
+        Loading...
+      </span>
+      <a
+        *ngIf="isLoggedIn === authenticatedStates.False"
+        class="nav-link nav-icon-text"
+        href="/login"
+        routerLink="/login"
+        routerLinkActive="active"
+      >
         <clr-icon shape="login"></clr-icon>
         Login
       </a>
       <a
         class="nav-link nav-icon-text"
-        *ngIf="!isLoggedIn"
+        *ngIf="isLoggedIn === authenticatedStates.False"
         href="/register"
         routerLink="/register"
         routerLinkActive="active"
@@ -42,7 +51,7 @@
         Register
       </a>
       <a
-        *ngIf="isLoggedIn"
+        *ngIf="isLoggedIn === authenticatedStates.True"
         href="/notifications"
         routerLink="/notifications"
         class="nav-link nav-icon-text"
@@ -51,7 +60,7 @@
         <clr-icon shape="bell"></clr-icon>
         <span class="badge badge-info">99+</span>
       </a>
-      <clr-dropdown *ngIf="isLoggedIn">
+      <clr-dropdown *ngIf="isLoggedIn === authenticatedStates.True">
         <button class="nav-icon-text" clrDropdownTrigger aria-label="toggle settings menu">
           <clr-icon shape="user"></clr-icon>
           <span class="nav-text">{{ username }}</span>

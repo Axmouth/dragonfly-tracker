@@ -56,7 +56,7 @@ namespace DragonflyTracker.Controllers.V1
         [HttpGet(ApiRoutes.Users.Get)]
         public async Task<ActionResult> Get([FromRoute]string username)
         {
-            var user = await _userService.GetUserAsync(username).ConfigureAwait(false);
+            var user = await _userService.GetUserByUserNameAsync(username).ConfigureAwait(false);
 
             if (user == null)
             {
@@ -82,7 +82,7 @@ namespace DragonflyTracker.Controllers.V1
                     new ErrorResponse(new ErrorModel { Message = "Empty Request." })
                     );
             }
-            var oldUser = await _userService.GetUserAsync(username).ConfigureAwait(false);
+            var oldUser = await _userService.GetUserByUserNameAsync(username).ConfigureAwait(false);
             if (oldUser == null)
             {
                 return NotFound(
@@ -98,7 +98,7 @@ namespace DragonflyTracker.Controllers.V1
                     new ErrorResponse(new ErrorModel { Message = "You are not Authorized to edit this User." })
                     );
             }
-            var usernameOwned = _userService.GetUserAsync(request.UserName);
+            var usernameOwned = _userService.GetUserByUserNameAsync(request.UserName);
             if (usernameOwned == null)
             {
                 user.UserName = request.UserName;

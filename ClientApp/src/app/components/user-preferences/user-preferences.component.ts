@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { User } from '../../models/api/user';
 import { takeUntil } from 'rxjs/operators';
+import { IsBrowserService } from '../../helpers/services/is-browser.service';
+import { AuthResult } from '../../auth/internal/auth-result';
 
 @Component({
   selector: 'app-user-preferences',
@@ -15,35 +17,62 @@ import { takeUntil } from 'rxjs/operators';
 export class UserPreferencesComponent implements OnInit, OnDestroy {
   ngUnsubscribe = new Subject<void>();
   username: string;
+  email: string;
   user: User = new User();
+  emailVerificationRequestResult: AuthResult;
+  emailVerificationRequestLoading = false;
+  emailVerificationRequestSuccess = false;
+  emailVerificationRequestErrors: string[] = [];
+  emailVerificationRequestMessages: string[] = [];
 
   constructor(
     private projectsService: ProjectsService,
     private userService: UserService,
     private authService: AuthService,
     private router: Router,
+    private isBrowserService: IsBrowserService,
   ) {}
 
   async ngOnInit() {
+    if (!this.isBrowserService.isInBrowser()) {
+      return;
+    }
     this.authService
-      .getUsername()
+      .getProfile()
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((newUsername) => {
-        console.log(newUsername);
-        this.username = newUsername;
-        this.userService
-          .getUser(this.username)
-          .pipe(takeUntil(this.ngUnsubscribe))
-          .subscribe((response) => {
-            this.user = response.data;
-            console.log(this.user);
-            console.log(this.user.userName);
-          });
+      .subscribe((userResponse) => {
+        this.user = userResponse.body.data;
+        this.username = this.user.userName;
+        this.email = this.user.email;
       });
   }
 
   onProfileSaveChangesClick() {}
   onAccountSaveChangesClick() {}
+
+  onResendEmailVerificationClick() {
+    this.emailVerificationRequestLoading = true;
+    this.authService
+      .requestVerificationEmail({ email: this.email })
+      .pipe(takeUntil(this.ngUnsubscribe))
+      .subscribe(
+        (result) => {
+          this.emailVerificationRequestResult = result;
+          if (result.isSuccess()) {
+            this.emailVerificationRequestSuccess = true;
+            this.emailVerificationRequestErrors = [];
+            this.emailVerificationRequestMessages = result.getMessages();
+          } else {
+            this.emailVerificationRequestSuccess = false;
+            this.emailVerificationRequestErrors = result.getResponse().error.errors;
+          }
+          this.emailVerificationRequestLoading = false;
+        },
+        (err) => {
+          console.log(err);
+        },
+      );
+  }
 
   ngOnDestroy(): void {
     this.ngUnsubscribe.next();

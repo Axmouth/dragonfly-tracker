@@ -46,7 +46,7 @@ namespace DragonflyTracker.Services
             }
 
             var host = "http://dragonflytracker.com/";
-            var verificationLink = $"{host}verify-email?token={token}&username={user.UserName}";
+            var verificationLink = $"{host}verify-email?email_confirm_token={token}&user_name={user.UserName}";
             var model = new AccountVerificationViewModel(verificationLink, user.UserName);
             var name = "AccountVerification";
             var htmlBody = await _renderer.RenderViewToStringAsync($"{templateBaseDir}/{name}/{name}Html.cshtml", model).ConfigureAwait(false);
@@ -83,14 +83,16 @@ namespace DragonflyTracker.Services
             return result;
         }
 
-        public async Task<bool> SendPasswordResetEmailAsync(DragonflyUser user)
+        public async Task<bool> SendPasswordResetEmailAsync(DragonflyUser user, string token)
         {
             if (user == null)
             {
                 return false;
             }
-            var model = new HelloWorldViewModel("https://www.google.com");
-            var name = "HelloWorld";
+            var host = "http://dragonflytracker.com/";
+            var resetLink = $"{host}password-reset?reset_password_token={token}&user_name={user.UserName}";
+            var model = new PasswordResetViewModel(resetLink, user.UserName);
+            var name = "PasswordReset";
             var htmlBody = await _renderer.RenderViewToStringAsync($"{templateBaseDir}/{name}/{name}Html.cshtml", model).ConfigureAwait(false);
             var textBody = await _renderer.RenderViewToStringAsync($"{templateBaseDir}/{name}/{name}Text.cshtml", model).ConfigureAwait(false);
             var result = await SendEmailAsync(new List<string> { user.Email }, _fromAddress, "Dragonfly Password Reset Requested", textBody, htmlBody).ConfigureAwait(false);

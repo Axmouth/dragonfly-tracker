@@ -7,7 +7,7 @@ export const environment = {
 };
 
 // export const apiRoot = 'https://localhost:5001/api/v1';
-export const apiRoot = 'https://api.dragonflytracker.test/api/v1';
+export const apiRoot = 'http://api.dragonflytracker.test/api/v1';
 // export const apiRoute = 'https://api.dragonflytracker.com:5001/api/v1';
 
 /*

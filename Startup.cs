@@ -36,12 +36,13 @@ namespace DragonflyTracker
                                       builder.WithOrigins(
                                                           "http://dragonflytracker.test",
                                                           "http://dragonflytracker.com",
-                                                          "http://localhost:4201",
                                                           "http://localhost:4205",
                                                           "https://api.dragonflytracker.com")
                                                   .AllowAnyHeader()
                                                   .AllowAnyMethod()
-                                                  .AllowCredentials();
+                                                  .AllowCredentials()
+                                                  .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                                  ;
                                   });
             });
             services.AddMvc();
@@ -107,7 +108,10 @@ namespace DragonflyTracker
 
             // app.UseMvc();
 
-            app.UseHttpsRedirection();
+            if (!env.IsDevelopment())
+            {
+                app.UseHttpsRedirection();
+            }
             app.UseStaticFiles();
             if (!env.IsDevelopment())
             {
