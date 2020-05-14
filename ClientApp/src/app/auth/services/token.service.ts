@@ -1,12 +1,10 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { filter, share } from 'rxjs/operators';
-import { AuthEmptyTokenError } from '../models/internal/auth-empty-token-error';
-import { AuthIllegalJWTTokenError } from '../models/internal/auth-illegal-jwt-token-error';
-import { AuthJWTToken, AuthCreateJWTToken } from '../models/internal/auth-jwt-token';
-import { TokenPack } from '../models/internal/token-pack';
-import { AuthToken } from '../models/internal/auth-token';
-import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { TokenPack } from '../internal/token-pack';
+import { AuthToken } from '../internal/auth-token';
+import { isPlatformBrowser } from '@angular/common';
+import { AuthCreateJWTToken } from '../internal/auth-jwt-token';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +26,7 @@ export class TokenService {
    */
   get(): Observable<AuthToken> {
     // const token = this.tokenStorage.get();
-    if (isPlatformServer(this.platform)) {
+    if (!isPlatformBrowser(this.platform)) {
       return of(this.unwrap(''));
     }
     const raw = localStorage.getItem(this.key);
@@ -43,6 +41,9 @@ export class TokenService {
    * @returns {Observable<any>}
    */
   set(token: AuthToken): Observable<null> {
+    if (!isPlatformBrowser(this.platform)) {
+      return of(null);
+    }
     const raw = this.wrap(token);
     localStorage.setItem(this.key, raw);
     this.publishStoredToken();
@@ -56,6 +57,9 @@ export class TokenService {
    */
   clear(): Observable<null> {
     // this.tokenStorage.clear();
+    if (!isPlatformBrowser(this.platform)) {
+      return of(null);
+    }
     localStorage.removeItem(this.key);
     this.publishStoredToken();
     return of(null);
@@ -73,6 +77,9 @@ export class TokenService {
   }
 
   protected publishStoredToken() {
+    if (!isPlatformBrowser(this.platform)) {
+      return of(null);
+    }
     const raw = localStorage.getItem(this.key);
     const token = this.unwrap(raw);
     this.token$.next(token);

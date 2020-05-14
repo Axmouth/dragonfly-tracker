@@ -5,12 +5,12 @@ import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { apiRoot } from 'src/environments/environment';
-import { AuthSuccessResponse } from '../models/api/auth-success-response';
-import { EmptyResponse } from '../models/api/empty-response';
-import { AuthResult } from '../models/internal/auth-result';
-import { AuthToken } from '../models/internal/auth-token';
-import { AuthJWTToken, AuthCreateJWTToken } from '../models/internal/auth-jwt-token';
-import { AuthIllegalTokenError } from '../models/internal/auth-illegal-token-error';
+import { AuthSuccessResponse } from '../../models/api/auth-success-response';
+import { EmptyResponse } from '../../models/api/empty-response';
+import { AuthResult } from '../internal/auth-result';
+import { AuthToken } from '../internal/auth-token';
+import { AuthJWTToken, AuthCreateJWTToken } from '../internal/auth-jwt-token';
+import { AuthIllegalTokenError } from '../internal/auth-illegal-token-error';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({

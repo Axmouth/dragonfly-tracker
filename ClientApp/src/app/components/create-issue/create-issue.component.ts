@@ -4,8 +4,8 @@ import { ProjectsService } from '../../services/projects.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { IssuesService } from '../../services/issues.service';
 import { takeUntil } from 'rxjs/operators';
-import { AuthService } from '../../services/auth.service';
-import { TokenService } from '../../services/token.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { TokenService } from '../../auth/services/token.service';
 
 @Component({
   selector: 'app-create-issue',

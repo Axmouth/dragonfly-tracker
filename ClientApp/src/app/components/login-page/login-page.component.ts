@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
 import { catchError, takeUntil } from 'rxjs/operators';
-import { AuthResult } from '../../models/internal/auth-result';
 import { Subject } from 'rxjs';
+import { AuthResult } from 'src/app/auth/internal/auth-result';
+import { AuthService } from 'src/app/auth';
 
 @Component({
   selector: 'app-login-page',

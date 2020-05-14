@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/services/auth.service';
 import { pageSizeConst } from '../constants';
 import { Observable } from 'rxjs';
 import { PagedResponse } from '../models/api/paged-response';

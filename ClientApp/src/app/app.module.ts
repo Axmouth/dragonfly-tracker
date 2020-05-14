@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RoutingModule } from './app-routing.module';
-import { JwtModule } from '@auth0/angular-jwt';
 
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
@@ -36,6 +35,9 @@ import { UpdateProjectWizardComponent } from './components/update-project-wizard
 import { VerifyEmailComponent } from './components/verify-email/verify-email.component';
 import { RequestPasswordResetComponent } from './components/request-password-reset/request-password-reset.component';
 import { PasswordResetComponent } from './components/password-reset/password-reset.component';
+import { BrowserOnlyComponent } from './components/browser-only/browser-only.component';
+import { ServerOnlyComponent } from './components/server-only/server-only.component';
+import { AuthModule } from './auth/auth.module';
 
 @NgModule({
   declarations: [
@@ -67,6 +69,8 @@ import { PasswordResetComponent } from './components/password-reset/password-res
     VerifyEmailComponent,
     RequestPasswordResetComponent,
     PasswordResetComponent,
+    BrowserOnlyComponent,
+    ServerOnlyComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -75,9 +79,8 @@ import { PasswordResetComponent } from './components/password-reset/password-res
     ReactiveFormsModule,
     RoutingModule,
     BrowserAnimationsModule,
-    JwtModule.forRoot({
+    AuthModule.forRoot({
       config: {
-        tokenGetter: tokenGetter,
         whitelistedDomains: [
           'localhost:5001',
           'localhost:4200',

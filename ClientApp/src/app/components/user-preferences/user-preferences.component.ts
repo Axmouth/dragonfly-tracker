@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectsService } from 'src/app/services/projects.service';
 import { UserService } from 'src/app/services/user.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/auth/services/auth.service';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { User } from '../../models/api/user';

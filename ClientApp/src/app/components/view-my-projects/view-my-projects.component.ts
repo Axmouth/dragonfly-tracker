@@ -1,13 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { ProjectsService } from '../../services/projects.service';
 import { Subscription, pipe, Subject, Observable } from 'rxjs';
 import { ClrDatagridStateInterface } from '@clr/angular';
 import { takeUntil, first } from 'rxjs/operators';
-import { AuthService } from '../../services/auth.service';
-import { TokenService } from '../../services/token.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { TokenService } from '../../auth/services/token.service';
 import { Project } from 'src/app/models/api/project';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { PagedResponse } from '../../models/Api/paged-response';
+import { isPlatformBrowser } from '@angular/common';
 
 const DEFAULT_TAB = 'owned';
 
@@ -38,22 +39,24 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
+    @Inject(PLATFORM_ID) private platform: Object,
   ) {}
 
   async ngOnInit() {
-    this.authService
-      .getUsername()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((newUsername) => {
-        console.log(newUsername);
-        this.username = newUsername;
+    if (isPlatformBrowser(this.platform)) {
+      this.authService
+        .getUsername()
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe((newUsername) => {
+          this.username = newUsername;
+        });
+      this.$qParamsSub = this.activatedRoute.queryParams.subscribe((qParams) => {
+        if (qParams.page !== undefined && qParams.page !== null) {
+          this.currentPage = +qParams.page;
+        }
+        this.setTab(qParams.tab);
       });
-    this.$qParamsSub = this.activatedRoute.queryParams.subscribe((qParams) => {
-      if (qParams.page !== undefined && qParams.page !== null) {
-        this.currentPage = +qParams.page;
-      }
-      this.setTab(qParams.tab);
-    });
+    }
   }
 
   setTab(tabName: string) {
@@ -181,5 +184,7 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$qParamsSub.unsubscribe();
     this.$projectSubscription.unsubscribe();
+    this.ngUnsubscribe.next();
+    this.ngUnsubscribe.complete();
   }
 }

@@ -7,7 +7,7 @@ import { User } from '../../models/Api/user';
 import { UserService } from '../../services/user.service';
 import { Observable, Subject } from 'rxjs';
 import { PagedResponse } from '../../models/Api/paged-response';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { FormBuilder } from '@angular/forms';

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { pageSizeConst } from '../constants';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/services/auth.service';
 import { apiRoot } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { Project } from '../models/api/project';

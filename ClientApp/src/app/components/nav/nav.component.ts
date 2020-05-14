@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription, Subject } from 'rxjs';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
-import { TokenService } from '../../services/token.service';
+import { AuthService } from '../../auth/services/auth.service';
+import { TokenService } from '../../auth/services/token.service';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({

@@ -5,7 +5,7 @@ import { PagedResponse } from 'src/app/models/api/paged-response';
 import { User } from 'src/app/models/api/user';
 import { ProjectsService } from 'src/app/services/projects.service';
 import { UserService } from 'src/app/services/user.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { AuthService } from 'src/app/auth/services/auth.service';
 import { Router } from '@angular/router';
 import { takeUntil } from 'rxjs/operators';
 import { IssueStage } from 'src/app/models/api/issue-stage';

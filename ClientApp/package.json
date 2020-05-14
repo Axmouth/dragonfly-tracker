@@ -25,7 +25,6 @@
     "@angular/platform-browser-dynamic": "9.1.4",
     "@angular/platform-server": "9.1.4",
     "@angular/router": "9.1.4",
-    "@auth0/angular-jwt": "^3.0.1",
     "@clr/angular": "^3.1.2",
     "@clr/core": "^3.1.2",
     "@clr/icons": "^3.1.2",
