@@ -46,7 +46,7 @@ namespace DragonflyTracker.Services
             }
 
             var host = "http://dragonflytracker.com/";
-            var verificationLink = $"{host}verify-email?email_confirm_token={token}&user_name={user.UserName}";
+            var verificationLink = $"{host}verify-email?email_confirm_token={Uri.EscapeDataString(token)}&user_name={user.UserName}";
             var model = new AccountVerificationViewModel(verificationLink, user.UserName);
             var name = "AccountVerification";
             var htmlBody = await _renderer.RenderViewToStringAsync($"{templateBaseDir}/{name}/{name}Html.cshtml", model).ConfigureAwait(false);
@@ -90,7 +90,7 @@ namespace DragonflyTracker.Services
                 return false;
             }
             var host = "http://dragonflytracker.com/";
-            var resetLink = $"{host}password-reset?reset_password_token={token}&user_name={user.UserName}";
+            var resetLink = $"{host}password-reset?reset_password_token={Uri.EscapeDataString(token)}&user_name={user.UserName}";
             var model = new PasswordResetViewModel(resetLink, user.UserName);
             var name = "PasswordReset";
             var htmlBody = await _renderer.RenderViewToStringAsync($"{templateBaseDir}/{name}/{name}Html.cshtml", model).ConfigureAwait(false);

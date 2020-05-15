@@ -1,20 +1,19 @@
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
 using DragonflyTracker.Contracts.V1;
 using DragonflyTracker.Contracts.V1.Requests;
 using DragonflyTracker.Contracts.V1.Responses;
-using DragonflyTracker.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
-using System;
-using DragonflyTracker.Extensions;
-using Org.BouncyCastle.Ocsp;
 using DragonflyTracker.Domain;
-using DragonflyTracker.Contracts.V1.Requests.Queries;
-using Org.BouncyCastle.Bcpg;
-using AutoMapper;
+using DragonflyTracker.Extensions;
+using DragonflyTracker.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DragonflyTracker.Controllers.V1
 {
@@ -42,7 +41,10 @@ namespace DragonflyTracker.Controllers.V1
             if (HttpContext.User.Identity.IsAuthenticated)
             {
                 return Conflict(
-                    new ErrorResponse(new ErrorModel { Message = "You are already logged in." }));
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "You are already logged in." }
+                });
             }
             if (!ModelState.IsValid)
             {
@@ -79,12 +81,18 @@ namespace DragonflyTracker.Controllers.V1
             if (HttpContext.User.Identity.IsAuthenticated)
             {
                 return Conflict(
-                    new ErrorResponse(new ErrorModel { Message = "You are already logged in." }));
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "You are already logged in." }
+                });
             }
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             if (request.UserName == null || request.Password == null)
@@ -126,7 +134,10 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             var RefreshToken = Request.Cookies[refreshTokenCookieName];
@@ -216,37 +227,50 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             var oldUser = await _userService.GetUserByUserNameAsync(request.UserName).ConfigureAwait(false);
             if (oldUser == null)
             {
                 return NotFound(
-                    new ErrorResponse(new ErrorModel { Message = "Could not find this User." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Could not find this User." }
+                }
+               );
             }
             var userId = HttpContext.GetUserId();
             var user = await _userService.GetUserByIdAsync(userId).ConfigureAwait(false);
             if (user.UserName != request.UserName)
             {
                 return Unauthorized(
-                    new ErrorResponse(new ErrorModel { Message = "You are not Authorized to edit this User." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "You are not Authorized to edit this User." }
+                }
                     );
             }
             var passCheck = await _identityService.CheckUserPasswordAsync(user, request.OldPassword).ConfigureAwait(false);
-            if (!passCheck)
+            if (!passCheck.Success)
             {
                 return Unauthorized(
-                    new ErrorResponse(new ErrorModel { Message = "Wrong Password/User combination." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
+                });
             }
             var passUpdated = await _identityService.UpdatePasswordAsync(user, request.NewPassword).ConfigureAwait(false);
-            if (!passUpdated)
+            if (!passUpdated.Success)
             {
                 return StatusCode(500,
-                        new ErrorResponse(new ErrorModel { Message = "Failed to update Password." })
-                        );
+                new AuthFailedResponse
+                {
+                    Errors = passUpdated.Errors
+                });
             }
             return NotFound();
         }
@@ -259,13 +283,19 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             if (string.IsNullOrEmpty(request.Token))
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "No password change token included." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "No password change token included." }
+                }
                     );
             }
             DragonflyUser user;
@@ -276,7 +306,10 @@ namespace DragonflyTracker.Controllers.V1
                 if (user != null && ((!string.IsNullOrEmpty(request.Email) && user.Email != request.Email) || (!string.IsNullOrEmpty(request.UserName) && user.UserName != request.UserName)))
                 {
                     return BadRequest(
-                        new ErrorResponse(new ErrorModel { Message = "Mismatched user data." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Mismatched user data." }
+                }
                         );
                 }
             }
@@ -291,25 +324,35 @@ namespace DragonflyTracker.Controllers.V1
             else
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "No user data included." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "No user data included." }
+                }
                     );
             }
             if (user == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Could not find user." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Could not find user." }
+                }
                     );
             }
-            var sent = await _identityService.ResetPasswordAsync(user, request.Token, request.NewPassword).ConfigureAwait(false);
-            if (!sent)
+            var sentResult = await _identityService.ResetPasswordAsync(user, request.Token, request.NewPassword).ConfigureAwait(false);
+            if (!sentResult.Success)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Failed to reset your password." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = sentResult.Errors
+                });
             }
             return Ok(
-
-                );
+                new AuthenticationResult
+                {
+                    Success = true
+                });
         }
 
         [AllowAnonymous]
@@ -319,7 +362,10 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             DragonflyUser user;
@@ -330,7 +376,10 @@ namespace DragonflyTracker.Controllers.V1
                 if (user != null && ((!string.IsNullOrEmpty(request.Email) && user.Email != request.Email) || (!string.IsNullOrEmpty(request.UserName) && user.UserName != request.UserName)))
                 {
                     return BadRequest(
-                        new ErrorResponse(new ErrorModel { Message = "Mismatched user data." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Mismatched user data." }
+                }
                         );
                 }
             }
@@ -345,25 +394,35 @@ namespace DragonflyTracker.Controllers.V1
             else
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "No user data included." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "No user data included." }
+                }
                     );
             }
             if (user == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Could not find user." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Could not find user." }
+                }
                     );
             }
-            var sent = await _identityService.ResetPasswordEmailAsync(user).ConfigureAwait(false);
-            if (!sent)
+            var sentResult = await _identityService.ResetPasswordEmailAsync(user).ConfigureAwait(false);
+            if (!sentResult.Success)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Failed to send Email." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = sentResult.Errors
+                });
             }
             return Ok(
-
-                );
+                new AuthenticationResult
+                {
+                    Success = true
+                });
         }
 
         [AllowAnonymous]
@@ -373,7 +432,10 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Empty Request." }
+                }
                     );
             }
             DragonflyUser user;
@@ -384,7 +446,10 @@ namespace DragonflyTracker.Controllers.V1
                 if (user != null && ((!string.IsNullOrEmpty(request.Email) && user.Email != request.Email) || (!string.IsNullOrEmpty(request.UserName) && user.UserName != request.UserName)))
                 {
                     return BadRequest(
-                        new ErrorResponse(new ErrorModel { Message = "Mismatched user data." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Mismatched user data." }
+                }
                         );
                 }
             }
@@ -399,25 +464,35 @@ namespace DragonflyTracker.Controllers.V1
             else
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "No user data included." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "No user data included." }
+                }
                     );
             }
             if (user == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Could not find user." })
+                new AuthFailedResponse
+                {
+                    Errors = new List<string>() { "Could not find user." }
+                }
                     );
             }
-            var sent = await _identityService.SendConfirmationEmailAsync(user).ConfigureAwait(false);
-            if (!sent)
+            var sentResult = await _identityService.SendConfirmationEmailAsync(user).ConfigureAwait(false);
+            if (!sentResult.Success)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Failed to send Email." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = sentResult.Errors
+                });
             }
             return Ok(
-
-                );
+                new AuthenticationResult
+                {
+                    Success = true
+                });
         }
 
         [AllowAnonymous]
@@ -427,8 +502,11 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Empty Request." })
-                    );
+                new AuthFailedResponse
+                    {
+                        Errors = new List<string>() { "Empty Request." }
+                    }
+                 );
             }
             DragonflyUser user;
             if (HttpContext.User.Identity.IsAuthenticated)
@@ -446,25 +524,35 @@ namespace DragonflyTracker.Controllers.V1
             else
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "No user data included." })
-                    );
+                    new AuthFailedResponse
+                    {
+                        Errors = new List<string>() { "No user data included." }
+                    }
+               );
             }
             if (user == null)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Could not find user." })
-                    );
+                    new AuthFailedResponse
+                    {
+                        Errors = new List<string>() { "Could not find user." }
+                    }
+                );
             }
             var result = await _identityService.ConfirmEmailAsync(user, request.Token).ConfigureAwait(false);
-            if (!result)
+            if (!result.Success)
             {
                 return BadRequest(
-                    new ErrorResponse(new ErrorModel { Message = "Failed to confirm Email." })
-                    );
+                new AuthFailedResponse
+                {
+                    Errors = result.Errors
+                });
             }
             return Ok(
-
-                );
+                new AuthenticationResult
+                {
+                    Success = true
+                });
         }
     }
 }

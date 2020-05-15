@@ -22,7 +22,7 @@ namespace DragonflyTracker.Services
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly PgMainDataContext _pgMainDataContext;
         private readonly IMailService _mailService;
-        
+
         public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole> roleManager, IMailService mailService)
         {
             _userManager = userManager;
@@ -32,7 +32,7 @@ namespace DragonflyTracker.Services
             _roleManager = roleManager;
             _mailService = mailService;
         }
-        
+
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
             var existingUserWithEmail = await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
@@ -41,7 +41,7 @@ namespace DragonflyTracker.Services
             {
                 return new AuthenticationResult
                 {
-                    Errors = new[] {"User with this email address already exists"}
+                    Errors = new[] { "User with this email address already exists" }
                 };
             }
 
@@ -62,7 +62,7 @@ namespace DragonflyTracker.Services
                     Errors = createdUser.Errors.Select(x => x.Description)
                 };
             }
-            
+
             return await GenerateAuthenticationResultForUserAsync(newUser).ConfigureAwait(false);
         }
 
@@ -123,7 +123,7 @@ namespace DragonflyTracker.Services
             {
                 return new AuthenticationResult
                 {
-                    Errors = new[] {"User does not exist"}
+                    Errors = new[] { "User does not exist" }
                 };
             }
 
@@ -133,10 +133,10 @@ namespace DragonflyTracker.Services
             {
                 return new AuthenticationResult
                 {
-                    Errors = new[] {"User/password combination is wrong"}
+                    Errors = new[] { "User/password combination is wrong" }
                 };
             }
-            
+
             return await GenerateAuthenticationResultForUserAsync(user).ConfigureAwait(false);
         }
 
@@ -167,18 +167,18 @@ namespace DragonflyTracker.Services
 
             if (validatedToken == null)
             {
-                return new AuthenticationResult {Errors = new[] {"Invalid Token"}};
+                return new AuthenticationResult { Errors = new[] { "Invalid Token" } };
             }
 
             var expiryDateUnix =
                 long.Parse(validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
-            
+
             var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 .AddSeconds(expiryDateUnix);
 
             if (expiryDateTimeUtc > DateTime.UtcNow)
             {
-                return new AuthenticationResult {Errors = new[] {"This token hasn't expired yet"}};
+                return new AuthenticationResult { Errors = new[] { "This token hasn't expired yet" } };
             }
 
             var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
@@ -187,27 +187,27 @@ namespace DragonflyTracker.Services
 
             if (storedRefreshToken == null)
             {
-                return new AuthenticationResult {Errors = new[] {"This refresh token does not exist"}};
+                return new AuthenticationResult { Errors = new[] { "This refresh token does not exist" } };
             }
 
             if (DateTime.UtcNow > storedRefreshToken.ExpiryDate)
             {
-                return new AuthenticationResult {Errors = new[] {"This refresh token has expired"}};
+                return new AuthenticationResult { Errors = new[] { "This refresh token has expired" } };
             }
 
             if (storedRefreshToken.Invalidated)
             {
-                return new AuthenticationResult {Errors = new[] {"This refresh token has been invalidated"}};
+                return new AuthenticationResult { Errors = new[] { "This refresh token has been invalidated" } };
             }
 
             if (storedRefreshToken.Used)
             {
-                return new AuthenticationResult {Errors = new[] {"This refresh token has been used"}};
+                return new AuthenticationResult { Errors = new[] { "This refresh token has been used" } };
             }
 
             if (storedRefreshToken.JwtId != jti)
             {
-                return new AuthenticationResult {Errors = new[] {"This refresh token does not match this JWT"}};
+                return new AuthenticationResult { Errors = new[] { "This refresh token does not match this JWT" } };
             }
 
             storedRefreshToken.Used = true;
@@ -268,18 +268,18 @@ namespace DragonflyTracker.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, userRole));
                 var role = await _roleManager.FindByNameAsync(userRole).ConfigureAwait(false);
-                if(role == null) continue;
+                if (role == null) continue;
                 var roleClaims = await _roleManager.GetClaimsAsync(role).ConfigureAwait(false);
 
                 foreach (var roleClaim in roleClaims)
                 {
-                    if(claims.Contains(roleClaim))
+                    if (claims.Contains(roleClaim))
                         continue;
 
                     claims.Add(roleClaim);
                 }
             }
-            
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
@@ -300,7 +300,7 @@ namespace DragonflyTracker.Services
 
             await _pgMainDataContext.RefreshTokens.AddAsync(refreshToken).ConfigureAwait(false);
             await _pgMainDataContext.SaveChangesAsync().ConfigureAwait(false);
-            
+
             return new AuthenticationResult
             {
                 Success = true,
@@ -309,48 +309,78 @@ namespace DragonflyTracker.Services
             };
         }
 
-        public async Task<bool> UpdatePasswordAsync(DragonflyUser userToUpdate, string newPassword)
+        public async Task<AuthenticationResult> UpdatePasswordAsync(DragonflyUser userToUpdate, string newPassword)
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(userToUpdate).ConfigureAwait(false);
             var passChangeResult = await _userManager.ResetPasswordAsync(userToUpdate, token, newPassword).ConfigureAwait(false);
-            return passChangeResult.Succeeded;
+
+            return new AuthenticationResult
+            {
+                Success = passChangeResult.Succeeded,
+                Errors = passChangeResult.Errors.Select(x => x.Description)
+            };
         }
 
-        public async Task<bool> ResetPasswordEmailAsync(DragonflyUser user)
+        public async Task<AuthenticationResult> ResetPasswordEmailAsync(DragonflyUser user)
         {
             var token = await _userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
             var result = await _mailService.SendPasswordResetEmailAsync(user, token).ConfigureAwait(false);
-            return result;
+
+            return new AuthenticationResult
+            {
+                Success = result,
+                Errors = new List<string>() { "Failed to send Email." }
+            };
         }
 
-        public async Task<bool> ResetPasswordAsync(DragonflyUser user, string token, string newPassword)
+        public async Task<AuthenticationResult> ResetPasswordAsync(DragonflyUser user, string token, string newPassword)
         {
             var passChangeResult = await _userManager.ResetPasswordAsync(user, token, newPassword).ConfigureAwait(false);
-            return passChangeResult.Succeeded;
+
+            return new AuthenticationResult
+            {
+                Success = passChangeResult.Succeeded,
+                Errors = passChangeResult.Errors.Select(x => x.Description)
+            };
         }
 
-        public async Task<bool> CheckUserPasswordAsync(DragonflyUser user, string password)
+        public async Task<AuthenticationResult> CheckUserPasswordAsync(DragonflyUser user, string password)
         {
-            var result =  await _userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
-            return result;
+            var result = await _userManager.CheckPasswordAsync(user, password).ConfigureAwait(false);
+
+            return new AuthenticationResult
+            {
+                Success = result,
+                Errors = new List<string>() { "Failed password check." }
+            };
         }
 
-        public Task<bool> ValidatePasswordAsync(string password)
+        public Task<AuthenticationResult> ValidatePasswordAsync(string password)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> ConfirmEmailAsync(DragonflyUser user,string token)
+        public async Task<AuthenticationResult> ConfirmEmailAsync(DragonflyUser user, string token)
         {
             var confirmResult = await _userManager.ConfirmEmailAsync(user, token).ConfigureAwait(false);
-            return confirmResult.Succeeded;
+
+            return new AuthenticationResult
+            {
+                Success = confirmResult.Succeeded,
+                Errors = confirmResult.Errors.Select(x => x.Description)
+            };
         }
 
-        public async Task<bool> SendConfirmationEmailAsync(DragonflyUser user)
+        public async Task<AuthenticationResult> SendConfirmationEmailAsync(DragonflyUser user)
         {
             var emailConfirmationCode = await _userManager.GenerateEmailConfirmationTokenAsync(user).ConfigureAwait(false);
             var sent = await _mailService.SendAccountVerificationEmailAsync(user, emailConfirmationCode).ConfigureAwait(false);
-            return sent;
+
+            return new AuthenticationResult
+            {
+                Success = sent,
+                Errors = new List<string>(){"Failed to send Email."}
+            };
         }
     }
 }

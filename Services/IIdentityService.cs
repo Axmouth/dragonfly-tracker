@@ -10,12 +10,12 @@ namespace DragonflyTracker.Services
         Task<AuthenticationResult> LoginAsync(string email, string password);
         Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken);
         Task<AuthenticationResult> LogoutAsync(string refreshToken);
-        Task<bool> UpdatePasswordAsync(DragonflyUser userToUpdate, string newPassword);
-        Task<bool> ResetPasswordEmailAsync(DragonflyUser user);
-        Task<bool> ResetPasswordAsync(DragonflyUser user, string token, string newPassword);
-        Task<bool> CheckUserPasswordAsync(DragonflyUser user, string password);
-        Task<bool> ValidatePasswordAsync(string password);
-        Task<bool> ConfirmEmailAsync(DragonflyUser user, string token);
-        Task<bool> SendConfirmationEmailAsync(DragonflyUser user);
+        Task<AuthenticationResult> UpdatePasswordAsync(DragonflyUser userToUpdate, string newPassword);
+        Task<AuthenticationResult> ResetPasswordEmailAsync(DragonflyUser user);
+        Task<AuthenticationResult> ResetPasswordAsync(DragonflyUser user, string token, string newPassword);
+        Task<AuthenticationResult> CheckUserPasswordAsync(DragonflyUser user, string password);
+        Task<AuthenticationResult> ValidatePasswordAsync(string password);
+        Task<AuthenticationResult> ConfirmEmailAsync(DragonflyUser user, string token);
+        Task<AuthenticationResult> SendConfirmationEmailAsync(DragonflyUser user);
     }
 }
