@@ -207,7 +207,7 @@ namespace DragonflyTracker.Services
             return deleted > 0;
         }
 
-        public async Task<bool> UserOwnsIssueAsync(Guid issueId, string userId)
+        public async Task<bool> UserOwnsIssueAsync(Guid issueId, Guid userId)
         {
             var issue = await _issueRepository
                 .FindByCondition(x => x.Id == issueId)
@@ -359,7 +359,7 @@ namespace DragonflyTracker.Services
 
         }
 
-        public async Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(Guid authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueRepository
                     .FindByCondition(x => x.AuthorId == authortId);
@@ -447,7 +447,7 @@ namespace DragonflyTracker.Services
 
         }
 
-        public async Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null)
+        public async Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(Guid authortId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueRepository
                 .FindByCondition(x => x.AuthorId == authortId)

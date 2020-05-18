@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DragonflyTracker.Domain
 {
-    public class DragonflyUser : IdentityUser
+    public class DragonflyUser : IdentityUser<Guid>
     {
         [MaxLength(30)]
         public string Title { get; set; }

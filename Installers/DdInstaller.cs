@@ -3,28 +3,35 @@ using DragonflyTracker.Domain;
 using DragonflyTracker.Repositories;
 using DragonflyTracker.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using System;
 namespace DragonflyTracker.Installers
 {
     public class DdInstaller : IInstaller
     {
         public void InstallServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<PgMainDataContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("PgMainConnection")
-                )
-            );
-            services.AddDefaultIdentity<DragonflyUser>(options =>
+            services.AddDbContext<PgMainDataContext>(options =>{
+
+                options.UseNpgsql(
+                    configuration.GetConnectionString("PgMainConnection")
+                    );
+                } 
+            )
+            ;
+
+            services.AddIdentity<DragonflyUser, IdentityRole<Guid>>(options =>
                 {
                     options.User.RequireUniqueEmail = true;
                     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-.";
                 })
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<PgMainDataContext>();
+                .AddEntityFrameworkStores<PgMainDataContext>()
+                .AddDefaultTokenProviders()
+                ;
 
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<IIssueService, IssueService>();

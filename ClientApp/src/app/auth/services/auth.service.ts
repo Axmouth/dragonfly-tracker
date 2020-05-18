@@ -83,7 +83,6 @@ export class AuthService {
    * @returns {Observable<User>}
    */
   getProfile(): Observable<HttpResponse<Response<User>>> {
-    console.log(`${this.authEndpointPrefix}profile`);
     const result = this.http
       .get<Response<User>>(`${this.authEndpointPrefix}profile`, {
         observe: 'response',
@@ -247,6 +246,7 @@ export class AuthService {
               if (res.isSuccess()) {
                 return this.isAuthenticated();
               } else {
+                this.tokenService.clear();
                 return of(false);
               }
             }),

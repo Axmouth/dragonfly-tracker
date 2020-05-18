@@ -1,6 +1,5 @@
 ﻿using DragonflyTracker.Data;
 using DragonflyTracker.Domain;
-using DragonflyTracker.Migrations;
 using DragonflyTracker.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,14 +13,12 @@ namespace DragonflyTracker.Services
 {
     public class UserService : IUserService
     {
-        private readonly PgMainDataContext _dataContext;
         private readonly UserManager<DragonflyUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly IUserRepository _userRepository;
 
-        public UserService(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole> roleManager, PgMainDataContext dataContext, IUserRepository userRepository)
+        public UserService(UserManager<DragonflyUser> userManager, RoleManager<IdentityRole<Guid>> roleManager, IUserRepository userRepository)
         {
-            _dataContext = dataContext;
             _userManager = userManager;
             _roleManager = roleManager;
             _userRepository = userRepository;
@@ -43,9 +40,9 @@ namespace DragonflyTracker.Services
             return await _userManager.FindByEmailAsync(email).ConfigureAwait(false);
         }
 
-        public async Task<DragonflyUser> GetUserByIdAsync(string userId)
+        public async Task<DragonflyUser> GetUserByIdAsync(Guid userId)
         {
-            return await _userManager.FindByIdAsync(userId).ConfigureAwait(false);
+            return await _userManager.FindByIdAsync(userId.ToString()).ConfigureAwait(false);
         }
 
         public async Task<(List<DragonflyUser> list, int count)> GetUsersAsync(GetAllUsersFilter filter, PaginationFilter paginationFilter = null)
@@ -105,7 +102,7 @@ namespace DragonflyTracker.Services
             }
             return (users, count);
         }
-        public async Task<bool> DeleteUserAsync(string userId)
+        public async Task<bool> DeleteUserAsync(Guid userId)
         {
             var user = new DragonflyUser { Id = userId };
             var result = await _userManager.DeleteAsync(user).ConfigureAwait(false);

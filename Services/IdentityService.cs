@@ -17,13 +17,13 @@ namespace DragonflyTracker.Services
     public class IdentityService : IIdentityService
     {
         private readonly UserManager<DragonflyUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
         private readonly JwtSettings _jwtSettings;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly PgMainDataContext _pgMainDataContext;
         private readonly IMailService _mailService;
 
-        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole> roleManager, IMailService mailService)
+        public IdentityService(UserManager<DragonflyUser> userManager, JwtSettings jwtSettings, TokenValidationParameters tokenValidationParameters, PgMainDataContext pgMainDataContext, RoleManager<IdentityRole<Guid>> roleManager, IMailService mailService)
         {
             _userManager = userManager;
             _jwtSettings = jwtSettings;
@@ -48,7 +48,7 @@ namespace DragonflyTracker.Services
             var newUserId = Guid.NewGuid();
             var newUser = new DragonflyUser
             {
-                Id = newUserId.ToString(),
+                Id = newUserId,
                 Email = email,
                 UserName = email
             };
@@ -91,7 +91,7 @@ namespace DragonflyTracker.Services
             var newUserId = Guid.NewGuid();
             var newUser = new DragonflyUser
             {
-                Id = newUserId.ToString(),
+                Id = newUserId,
                 Email = email,
                 UserName = username
             };
@@ -257,7 +257,7 @@ namespace DragonflyTracker.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("id", user.Id)
+                new Claim("id", user.Id.ToString())
             };
 
             var userClaims = await _userManager.GetClaimsAsync(user).ConfigureAwait(false);

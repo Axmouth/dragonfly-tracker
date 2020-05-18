@@ -219,7 +219,7 @@ namespace DragonflyTracker.Services
             return updated > 0;
         }
 
-        public async Task<bool> UserOwnsProjectAsync(Guid projectId, string userId)
+        public async Task<bool> UserOwnsProjectAsync(Guid projectId, Guid userId)
         {
             var project = await _projectRepository.FindByCondition(x => x.Id == projectId).SingleOrDefaultAsync().ConfigureAwait(false);
 

@@ -38,7 +38,7 @@ namespace DragonflyTracker.Services
 
         public Task<bool> DeleteIssueTypeAsync(Guid issueTypeId);
 
-        public Task<bool> UserOwnsIssueAsync(Guid issueId, string userId);
+        public Task<bool> UserOwnsIssueAsync(Guid issueId, Guid userId);
 
         public Task<(List<Issue> list, int count)> GetIssuesByProjectIdAsync(Guid projectId, PaginationFilter paginationFilter = null);
 
@@ -46,13 +46,13 @@ namespace DragonflyTracker.Services
 
         public Task<(List<Issue> list, int count)> GetIssuesByOrganizationAndProjectNameAsync(string organizationName, string projectName, PaginationFilter paginationFilter = null);
 
-        public Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(string authortId, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByAuthorIdAsync(Guid authortId, PaginationFilter paginationFilter = null);
 
         public Task<(List<Issue> list, int count)> GetIssuesByAuthorUsernameAsync(string authortName, PaginationFilter paginationFilter = null);
 
         public Task<(List<IssueUpdate> list, int count)> GetIssueUpdatesInTimePeriodAsync(Guid issueId, DateTime start, DateTime end, PaginationFilter paginationFilter = null);
 
-        public Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(string authortId, PaginationFilter paginationFilter = null);
+        public Task<(List<Issue> list, int count)> GetIssuesByProjectIdByTextSearchAsync(Guid authortId, PaginationFilter paginationFilter = null);
 
 
 

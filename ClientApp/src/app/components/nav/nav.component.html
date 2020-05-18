@@ -27,9 +27,9 @@
       </a>
     </div>
     <div class="header-actions">
-      <span class="spinner spinner-inline1" *ngIf="isLoggedIn === authenticatedStates.Loading">
-        Loading...
-      </span>
+      <div class="progress loop" [style.width]="'10rem'" *ngIf="isLoggedIn === authenticatedStates.Loading">
+        <progress max="100" value="0" data-displayval="0%"></progress>
+      </div>
       <a
         *ngIf="isLoggedIn === authenticatedStates.False"
         class="nav-link nav-icon-text"
@@ -61,16 +61,16 @@
         <span class="badge badge-info">99+</span>
       </a>
       <clr-dropdown *ngIf="isLoggedIn === authenticatedStates.True">
-        <button class="nav-icon-text" clrDropdownTrigger aria-label="toggle settings menu">
+        <button class="nav-icon-text" clrDropdownTrigger>
           <clr-icon shape="user"></clr-icon>
           <span class="nav-text">{{ username }}</span>
           <clr-icon shape="caret down"></clr-icon>
         </button>
         <clr-dropdown-menu *clrIfOpen clrPosition="bottom-right">
-          <label class="dropdown-header" aria-hidden="true">Profile Links</label>
+          <label class="dropdown-header">Profile Links</label>
           <a href="..." routerLink="/..." clrDropdownItem>About</a>
           <a href="/preferences" routerLink="/preferences" clrDropdownItem>Preferences</a>
-          <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+          <div class="dropdown-divider" role="separator"></div>
           <a href="/logout" routerLink="/logout" clrDropdownItem>Log out</a>
         </clr-dropdown-menu>
       </clr-dropdown>

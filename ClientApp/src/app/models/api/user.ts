@@ -3,4 +3,8 @@ export class User {
   email?: string;
   title?: string;
   description?: string;
+  twoFactorEnabled?: boolean;
+  phoneNumberConfirmed?: boolean;
+  phoneNumber?: string;
+  emailConfirmed?: boolean;
 }

@@ -25,9 +25,9 @@ namespace DragonflyTracker.Domain
         public bool Invalidated { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
+        public DragonflyUser User { get; set; }
     }
 }

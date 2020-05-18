@@ -45,7 +45,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             await this.router.navigateByUrl(this.routeStateService.getPreviousUrl());
           } else {
             this.loginFailed = true;
-            this.errors = result.getResponse().error.errors;
+            this.errors = result.getResponse().errors;
           }
         },
         (err) => {

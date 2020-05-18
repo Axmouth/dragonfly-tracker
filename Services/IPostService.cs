@@ -18,7 +18,7 @@ namespace DragonflyTracker.Services
 
         Task<bool> DeletePostAsync(Guid postId);
 
-        Task<bool> UserOwnsPostAsync(Guid postId, string userId);
+        Task<bool> UserOwnsPostAsync(Guid postId, Guid userId);
 
         Task<List<Tag>> GetAllTagsAsync();
 

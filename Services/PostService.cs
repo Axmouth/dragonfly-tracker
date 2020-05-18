@@ -74,7 +74,7 @@ namespace DragonflyTracker.Services
             return deleted > 0;
         }
 
-        public async Task<bool> UserOwnsPostAsync(Guid postId, string userId)
+        public async Task<bool> UserOwnsPostAsync(Guid postId, Guid userId)
         {
             var post = await _pgMainDataContext.Posts.AsNoTracking().SingleOrDefaultAsync(x => x.Id == postId).ConfigureAwait(false);
 
@@ -146,7 +146,7 @@ namespace DragonflyTracker.Services
 
         private static IQueryable<Post> AddFiltersOnQuery(GetAllPostsFilter filter, IQueryable<Post> queryable)
         {
-            if (!string.IsNullOrEmpty(filter?.UserId))
+            if (filter?.UserId != Guid.Empty)
             {
                 queryable = queryable.Where(x => x.UserId == filter.UserId);
             }

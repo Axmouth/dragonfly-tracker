@@ -48,9 +48,10 @@ namespace DragonflyTracker.Controllers.V1
             }
             if (!ModelState.IsValid)
             {
+                Console.WriteLine(ModelState.Values.SelectMany(err => err.Errors.Select(errm => errm.ErrorMessage)).ToString());
                 return BadRequest(new AuthFailedResponse
                 {
-                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
+                    Errors = ModelState.Values.SelectMany(err => err.Errors.Select(errm => errm.ErrorMessage))
                 });
             }
             if (request == null)
@@ -260,7 +261,7 @@ namespace DragonflyTracker.Controllers.V1
                 return Unauthorized(
                 new AuthFailedResponse
                 {
-                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(xx => xx.ErrorMessage))
+                    Errors = passCheck.Errors
                 });
             }
             var passUpdated = await _identityService.UpdatePasswordAsync(user, request.NewPassword).ConfigureAwait(false);

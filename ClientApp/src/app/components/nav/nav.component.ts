@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription, Subject } from 'rxjs';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
@@ -34,35 +34,49 @@ export class NavComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
-    const log = this.isLoggedIn === AuthenticatedState.False;
     if (isPlatformBrowser(this.platform)) {
       this.authService
         .onAuthenticationChange()
         .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(async (loggedIn) => {
-          if (!loggedIn) {
-            this.isLoggedIn = AuthenticatedState.False;
-          } else {
-            this.isLoggedIn = AuthenticatedState.True;
-          }
+        .subscribe(
+          async (loggedIn) => {
+            if (!loggedIn) {
+              this.isLoggedIn = AuthenticatedState.False;
+            } else {
+              this.isLoggedIn = AuthenticatedState.True;
+            }
 
-          this.authService
-            .getUsername()
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe((newUsername) => {
-              this.username = newUsername;
-            });
-        });
+            this.authService
+              .getUsername()
+              .pipe(takeUntil(this.ngUnsubscribe))
+              .subscribe(
+                (newUsername) => {
+                  this.username = newUsername;
+                },
+                (err) => {
+                  console.log(err);
+                },
+              );
+          },
+          (err) => {
+            console.log(err);
+          },
+        );
       this.authService
         .isAuthenticatedOrRefresh()
         .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(async (loggedIn) => {
-          if (!loggedIn) {
-            this.isLoggedIn = AuthenticatedState.False;
-          } else {
-            this.isLoggedIn = AuthenticatedState.True;
-          }
-        });
+        .subscribe(
+          async (loggedIn) => {
+            if (!loggedIn) {
+              this.isLoggedIn = AuthenticatedState.False;
+            } else {
+              this.isLoggedIn = AuthenticatedState.True;
+            }
+          },
+          (err) => {
+            console.log(err);
+          },
+        );
       this.router.events.subscribe(async (val) => {
         if (val instanceof NavigationStart) {
           const refresh$ = this.authService

@@ -19,7 +19,7 @@ namespace DragonflyTracker.Services
 
         public Task<bool> DeleteIssuePostReactionAsync(Guid issuePostReactionId);
 
-        public Task<bool> UserOwnsIssuePostAsync(Guid issuePostId, string userId);
+        public Task<bool> UserOwnsIssuePostAsync(Guid issuePostId, Guid userId);
 
         public Task<(List<IssuePost> list, int count)> GetIssuePostsByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null);
 

@@ -1,13 +1,17 @@
 ﻿using DragonflyTracker.Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
+using Npgsql.NameTranslation;
+using System;
 
 namespace DragonflyTracker.Data
 {
-    public class PgMainDataContext : IdentityDbContext
+    public class PgMainDataContext : IdentityDbContext<DragonflyUser, IdentityRole<Guid>, Guid>
     {
-        public PgMainDataContext(DbContextOptions<PgMainDataContext> options) :base(options)
+        public PgMainDataContext(DbContextOptions<PgMainDataContext> options) : base(options)
         {
 
         }
@@ -50,70 +54,56 @@ namespace DragonflyTracker.Data
                 o => o.UseTrigrams());
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(builder);
+            base.OnModelCreating(modelBuilder);
 
-            if (builder == null)
+            if (modelBuilder == null)
             {
                 return;
             }
 
-            builder.Entity<Project>()
-                .HasOne(p => p.Creator).WithMany(du => du.CreatedProjects);
+            var mapper = new NpgsqlSnakeCaseNameTranslator();
+            foreach (var entity in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entity.GetProperties())
+                {
+                    modelBuilder.Entity(entity.Name).Property(property.Name).HasColumnName(mapper.TranslateMemberName(property.Name)); //.ToTable(mapper.TranslateMemberName(entity.Name));
+                    //property.Relational().ColumnName = mapper.TranslateMemberName(property.Name);
+                }
 
-            builder.Entity<Project>()
-                .HasOne(p => p.Owner).WithMany(du => du.OwnedProjects);
+                //entity.Relational().TableName = mapper.TranslateMemberName(entity.Relational().TableName);
+                modelBuilder.Entity(entity.Name).ToTable(mapper.TranslateMemberName(entity.GetTableName()));
+            }
 
-            builder.Entity<PostTag>().Ignore(x => x.Post).HasKey(x => new { x.PostId, x.TagName });
-
-            builder.Entity<Project>(p => {
+            modelBuilder.Entity<Project>(p =>
+            {
+                p.HasOne(p => p.Creator).WithMany(du => du.CreatedProjects);
+                p.HasOne(p => p.Owner).WithMany(du => du.OwnedProjects);
                 p.HasIndex(p => new { p.Name, p.CreatorId }).IsUnique();
             });
 
+            modelBuilder.Entity<PostTag>().Ignore(x => x.Post).HasKey(x => new { x.PostId, x.TagName });
 
-            builder.Entity<ProjectAdmin>()
-                .HasKey(t => new { t.ProjectId, t.AdminId });
+            modelBuilder.Entity<ProjectAdmin>(pa =>
+            {
+                pa.HasKey(t => new { t.ProjectId, t.AdminId });
+                pa.HasOne(pa => pa.Project).WithMany(a => a.Admins).HasForeignKey(pa => pa.ProjectId);
+                pa.HasOne(pa => pa.Admin).WithMany(p => p.AdminedProjects).HasForeignKey(pa => pa.AdminId);
+            });
 
-            builder.Entity<ProjectAdmin>()
-               .HasOne(pa => pa.Project)
-               .WithMany(a => a.Admins)
-               .HasForeignKey(pa => pa.ProjectId);
-
-            builder.Entity<ProjectAdmin>()
-                .HasOne(pa => pa.Admin)
-                .WithMany(p => p.AdminedProjects)
-                .HasForeignKey(pa => pa.AdminId);
-
-
-
-            builder.Entity<ProjectMaintainer>()
-                .HasKey(t => new { t.ProjectId, t.MaintainerId });
-
-            builder.Entity<ProjectMaintainer>()
-               .HasOne(pm => pm.Project)
-               .WithMany(a => a.Maintainers)
-               .HasForeignKey(pm => pm.ProjectId);
-
-            builder.Entity<ProjectMaintainer>()
-                .HasOne(pm => pm.Maintainer)
-                .WithMany(p => p.MaintainedProjects)
-                .HasForeignKey(pm => pm.MaintainerId);
-
-
-
-            builder.Entity<IssueIssueType>()
-                .HasKey(t => new { t.IssueId, t.IssueTypeId });
-
-            builder.Entity<IssueIssueType>()
-               .HasOne(pi => pi.Issue)
-               .WithMany(i => i.Types)
-               .HasForeignKey(pi => pi.IssueId);
-
-            builder.Entity<IssueIssueType>()
-                .HasOne(pi => pi.IssueType)
-                .WithMany(it => it.Issues)
-                .HasForeignKey(pi => pi.IssueTypeId);
+            modelBuilder.Entity<ProjectMaintainer>(pm =>
+            {
+                pm.HasKey(t => new { t.ProjectId, t.MaintainerId });
+                pm.HasOne(pm => pm.Project).WithMany(a => a.Maintainers).HasForeignKey(pm => pm.ProjectId);
+                pm.HasOne(pm => pm.Maintainer).WithMany(p => p.MaintainedProjects).HasForeignKey(pm => pm.MaintainerId);
+            });
+            modelBuilder.Entity<IssueIssueType>(iit =>
+            {
+                iit.HasKey(t => new { t.IssueId, t.IssueTypeId });
+                iit.HasOne(pi => pi.Issue).WithMany(i => i.Types).HasForeignKey(pi => pi.IssueId);
+                iit.HasOne(pi => pi.IssueType).WithMany(it => it.Issues).HasForeignKey(pi => pi.IssueTypeId);
+            });
         }
     }
 }

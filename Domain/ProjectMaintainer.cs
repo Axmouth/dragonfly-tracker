@@ -13,7 +13,7 @@ namespace DragonflyTracker.Domain
         public virtual Project Project { get; set; }
 
         [Required]
-        public string MaintainerId { get; set; }
+        public Guid MaintainerId { get; set; }
         public virtual DragonflyUser Maintainer { get; set; }
     }
 }

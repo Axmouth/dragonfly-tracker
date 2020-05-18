@@ -13,7 +13,7 @@ namespace DragonflyTracker.Domain
 
         public string ProjectName { get; set; }
 
-        public string OrganizationId { get; set; }
+        public Guid OrganizationId { get; set; }
 
         public string OrganizationName { get; set; }
     }

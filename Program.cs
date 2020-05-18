@@ -25,29 +25,30 @@ namespace DragonflyTracker
 
                 await dbContext.Database.MigrateAsync().ConfigureAwait(false);
 
-                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                
 
                 if (!await roleManager.RoleExistsAsync("Admin").ConfigureAwait(false))
                 {
-                    var adminRole = new IdentityRole("Admin");
+                    var adminRole = new IdentityRole<Guid>("Admin");
                     await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
                 }
 
                 if (!await roleManager.RoleExistsAsync("Poster").ConfigureAwait(false))
                 {
-                    var posterRole = new IdentityRole("Poster");
+                    var posterRole = new IdentityRole<Guid>("Poster");
                     await roleManager.CreateAsync(posterRole).ConfigureAwait(false);
                 }
 
                 if (!await roleManager.RoleExistsAsync("Member").ConfigureAwait(false))
                 {
-                    var memberRole = new IdentityRole("Member");
+                    var memberRole = new IdentityRole<Guid>("Member");
                     await roleManager.CreateAsync(memberRole).ConfigureAwait(false);
                 }
 
                 if (!await roleManager.RoleExistsAsync("Ghost").ConfigureAwait(false))
                 {
-                    var ghostRole = new IdentityRole("Ghost");
+                    var ghostRole = new IdentityRole<Guid>("Ghost");
                     await roleManager.CreateAsync(ghostRole).ConfigureAwait(false);
                 }
             }

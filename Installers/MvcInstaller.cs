@@ -28,18 +28,45 @@ namespace DragonflyTracker.Installers
             services.AddSingleton(jwtSettings);
 
             services.AddScoped<IIdentityService, IdentityService>();
-            
+            /*
             services
                 .AddMvc(options =>
                 {
                     // options.EnableEndpointRouting = false;
-                    options.Filters.Add<ValidationFilter>();
+                    // options.Filters.Add<ValidationFilter>();
                 })
                  .AddJsonOptions(options => {
                      options.JsonSerializerOptions.IgnoreNullValues = true;
                  })
                 .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);*/
+            // services.AddMvc();
+            // services.AddDbContextPool<>
+            services.AddControllersWithViews(options =>
+                {
+                    options.Filters.Add(new ValidationFilter());
+                })
+                 .AddJsonOptions(options =>
+                 {
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                 })
+                // .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+            services.AddRouting(options =>
+            {
+            });
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                // ...
+                options.SuppressModelStateInvalidFilter = true;
+            });
+            // In production, the Angular files will be served from this directory
+            services.AddSpaStaticFiles(configuration =>
+            {
+                configuration.RootPath = "ClientApp/dist";
+            });
 
             var tokenValidationParameters = new TokenValidationParameters
             {

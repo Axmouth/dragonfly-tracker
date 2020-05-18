@@ -12,7 +12,7 @@ namespace DragonflyTracker.Domain
     public class GetAllProjectsFilter
     {
         [Ignore]
-        public string OrganizationId { get; set; }
+        public Guid OrganizationId { get; set; }
 
         public string OrganizationName { get; set; }
 
@@ -25,7 +25,7 @@ namespace DragonflyTracker.Domain
         public string AuthorEmail { get; set; }
 
         [Ignore]
-        public string CurrentUserId { get; set; }
+        public Guid CurrentUserId { get; set; }
 
         public string SearchText { get; set; }
         public string Admin { get; set; }

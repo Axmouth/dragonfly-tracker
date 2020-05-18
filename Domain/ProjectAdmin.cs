@@ -14,7 +14,7 @@ namespace DragonflyTracker.Domain
         public Project Project { get; set; }
 
         [Required]
-        public string AdminId { get; set; }
+        public Guid AdminId { get; set; }
         public DragonflyUser Admin { get; set; }
     }
 }

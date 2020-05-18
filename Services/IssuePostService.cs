@@ -67,7 +67,7 @@ namespace DragonflyTracker.Services
             return deleted > 0;
         }
 
-        public async Task<bool> UserOwnsIssuePostAsync(Guid issuePostId, string userId)
+        public async Task<bool> UserOwnsIssuePostAsync(Guid issuePostId, Guid userId)
         {
             var issue = await _issuePostRepository
                 .FindByCondition(x => x.Id == issuePostId)

@@ -29,7 +29,7 @@ namespace DragonflyTracker.Domain
         public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string AuthorId { get; set; }
+        public Guid AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
         public DragonflyUser Author { get; set; }
 

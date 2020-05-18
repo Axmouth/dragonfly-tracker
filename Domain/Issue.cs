@@ -19,11 +19,12 @@ namespace DragonflyTracker.Domain
 
         [Required]
         [MaxLength(150)]
-        [MinLength(2)]
+        [MinLength(3)]
         public string Title { get; set; }
 
         [Required]
         [MaxLength(2500)]
+        [MinLength(15)]
         [Column(TypeName = "text")]
         public string Content { get; set; }
 
@@ -40,7 +41,7 @@ namespace DragonflyTracker.Domain
         public DateTime UpdatedAt { get; set; }
 
         [Required]
-        public string AuthorId { get; set; }
+        public Guid AuthorId { get; set; }
         [ForeignKey(nameof(AuthorId))]
         public DragonflyUser Author { get; set; }
 

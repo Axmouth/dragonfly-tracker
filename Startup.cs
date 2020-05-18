@@ -11,6 +11,9 @@ using DragonflyTracker.Contracts.HealthChecks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using AutoMapper;
+using DragonflyTracker.Filters;
+using Microsoft.AspNetCore.Mvc;
+using FluentValidation.AspNetCore;
 
 namespace DragonflyTracker
 {
@@ -44,14 +47,6 @@ namespace DragonflyTracker
                                                   .SetIsOriginAllowedToAllowWildcardSubdomains()
                                                   ;
                                   });
-            });
-            services.AddMvc();
-            // services.AddDbContextPool<>
-            services.AddControllersWithViews();
-            // In production, the Angular files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/dist";
             });
             services.InstallServicesInAssembly(Configuration);
             services.AddAutoMapper(typeof(Startup));
@@ -137,7 +132,8 @@ namespace DragonflyTracker
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}/{id?}")
-                .RequireCors(MyAllowSpecificOrigins); ;
+                .RequireCors(MyAllowSpecificOrigins)
+                ;
             });
 
             // if (!env.IsDevelopment())

@@ -36,12 +36,12 @@ namespace DragonflyTracker.Domain
         public Organization ParentOrganization { get; set; }
 
         [Required]
-        public string CreatorId { get; set; }
+        public Guid CreatorId { get; set; }
         [ForeignKey(nameof(CreatorId))]
         public DragonflyUser Creator { get; set; }
 
         [Required]
-        public string OwnerId { get; set; }
+        public Guid OwnerId { get; set; }
         [ForeignKey(nameof(OwnerId))]
         public DragonflyUser Owner { get; set; }
 
