@@ -31,25 +31,49 @@ namespace DragonflyTracker.Controllers.V1
         private readonly IUriService _uriService;
         private readonly IIssueService _issueService;
         private readonly IProjectService _projectService;
+        private readonly IUserService _userService;
 
-        public IssuesController(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService)
+        public IssuesController(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService, IUserService userService)
         {
             //_pgMainDataContext = pgMainDataContext;
             _mapper = mapper;
             _uriService = uriService;
             _issueService = issueService;
             _projectService = projectService;
+            _userService = userService;
         }
 
         // GET: api/Issues
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Issues.GetAllByUser)]
+        [HttpGet(ApiRoutes.Issues.GetAllByUserProject)]
         // [Cached(600)]
-        public async Task<ActionResult> GetAllIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
+        public async Task<ActionResult> GetAllProjectIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                return NotFound(new Response<string>()
+                {
+                    Errors = new List<string> { "No username" }
+                });
+            }
+            var user = await _userService.GetUserByUserNameAsync(username).ConfigureAwait(false);
+            if (user == null)
+            {
+                return NotFound(new Response<string>()
+                {
+                    Errors = new List<string> { "User not found" }
+                });
+            }
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllIssuesFilter>(query);
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
+            if (project == null)
+            {
+                return NotFound(new Response<string>()
+                {
+                    Errors = new List<string> { "Project not found" }
+                });
+            }
             // filter.ProjectName = projectName;
             // filter.AuthorUsername = username;
             filter.ProjectId = project.Id;
@@ -66,7 +90,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Issues.GetAllByOrg)]
+        [HttpGet(ApiRoutes.Issues.GetAllByOrgProject)]
         // [Cached(600)]
         public async Task<ActionResult> GetAllIssuesByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
@@ -88,11 +112,11 @@ namespace DragonflyTracker.Controllers.V1
 
         // GET: api/Issues/5
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Issues.GetByUser)]
+        [HttpGet(ApiRoutes.Issues.GetByUserProject)]
         // [Cached(600)]
         public async Task<ActionResult<Issue>> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
-            var issue = await _issueService.GetIssueByUserAsync( username, projectName,issueNumber).ConfigureAwait(false);
+            var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
 
             if (issue == null)
             {
@@ -104,7 +128,7 @@ namespace DragonflyTracker.Controllers.V1
 
         // GET: api/Issues/5
         [AllowAnonymous]
-        [HttpGet(ApiRoutes.Issues.GetByOrg)]
+        [HttpGet(ApiRoutes.Issues.GetByOrgProject)]
         // [Cached(600)]
         public async Task<ActionResult<Issue>> GetIssueByOrgr([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
@@ -121,7 +145,7 @@ namespace DragonflyTracker.Controllers.V1
         // POST: api/Issues
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPost(ApiRoutes.Issues.CreateByUser)]
+        [HttpPost(ApiRoutes.Issues.CreateByUserProject)]
         public async Task<IActionResult> CreateByUser([FromRoute]string username, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
         {
             if (issueRequest == null)
@@ -145,7 +169,7 @@ namespace DragonflyTracker.Controllers.V1
             return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
-        [HttpPost(ApiRoutes.Issues.CreateByOrg)]
+        [HttpPost(ApiRoutes.Issues.CreateByOrgProject)]
         public async Task<IActionResult> CreateByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromBody] CreateIssueRequest issueRequest)
         {
             if (issueRequest == null)
@@ -172,7 +196,7 @@ namespace DragonflyTracker.Controllers.V1
         // PUT: api/Issues/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-        [HttpPut(ApiRoutes.Issues.UpdateByUser)]
+        [HttpPut(ApiRoutes.Issues.UpdateByUserProject)]
         public async Task<ActionResult<Issue>> PostIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
@@ -197,7 +221,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         // DELETE: api/Issues/5
-        [HttpDelete(ApiRoutes.Issues.DeleteByUser)]
+        [HttpDelete(ApiRoutes.Issues.DeleteByUserProject)]
         public async Task<ActionResult<Issue>> DeleteIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);

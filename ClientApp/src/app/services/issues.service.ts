@@ -9,12 +9,14 @@ import { Observable } from 'rxjs';
 import { Response } from '../models/api/response';
 import { IssuePost } from '../models/api/issue-post';
 import { IssuePostReaction } from '../models/api/issue-post-reaction';
+import { AntiForgeryService } from './anti-forgery.service';
+import { PrepareTokensService } from '../helpers/services/prepare-tokens.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssuesService {
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private prepareTokensService: PrepareTokensService) {}
 
   getUsersProjectsIssues(
     username: string,
@@ -50,14 +52,16 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
-    return this.http.delete(url, { headers });
+    const result$ = this.http.delete(url, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   createUsersProjectIssue(username: string, projectName: string, newIssue: object): Observable<Response<Issue>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues`;
-    return this.http.post<Response<Issue>>(url, newIssue, { headers });
+    const result$ = this.http.post<Response<Issue>>(url, newIssue, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   updateUsersProjectIssue(
@@ -69,7 +73,8 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}`;
-    return this.http.put<Response<Issue>>(url, updatedIssue, { headers });
+    const result$ = this.http.put<Response<Issue>>(url, updatedIssue, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   getUsersProjectsIssuePosts(
@@ -85,7 +90,7 @@ export class IssuesService {
     if (page) {
       url = url + `&PageNumber=${page}`;
     }
-    return this.http.get<PagedResponse<IssuePost>>(url, { headers });
+    return this.http.get<PagedResponse<IssuePost>>(url, { headers, withCredentials: true });
   }
 
   getUsersProjectIssuePost(
@@ -104,7 +109,8 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
-    return this.http.delete(url, { headers });
+    const result$ = this.http.delete(url, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   createUsersProjectIssuePost(
@@ -116,7 +122,8 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
-    return this.http.post<Response<IssuePost>>(url, newIssuePost, { headers });
+    const result$ = this.http.post<Response<IssuePost>>(url, newIssuePost, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   updateUsersProjectIssuePost(
@@ -129,7 +136,8 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}`;
-    return this.http.put<Response<IssuePost>>(url, updatedIssuePost, { headers });
+    const result$ = this.http.put<Response<IssuePost>>(url, updatedIssuePost, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   deleteUsersProjectIssuePostReaction(
@@ -143,7 +151,8 @@ export class IssuesService {
     headers.append('Content-Type', 'application/json');
     // tslint:disable-next-line: max-line-length
     const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions/${reactionID}`;
-    return this.http.delete(url, { headers });
+    const result$ = this.http.delete(url, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   createUsersProjectIssuePostReaction(
@@ -157,6 +166,10 @@ export class IssuesService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts/${issuePostNumber}/issue-reactions`;
-    return this.http.post<Response<IssuePostReaction>>(url, newIssuePostReaction, { headers });
+    const result$ = this.http.post<Response<IssuePostReaction>>(url, newIssuePostReaction, {
+      headers,
+      withCredentials: true,
+    });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 }

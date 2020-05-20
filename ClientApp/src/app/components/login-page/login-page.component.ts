@@ -1,11 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { catchError, takeUntil } from 'rxjs/operators';
+import { catchError, takeUntil, map } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AuthResult } from 'src/app/auth/internal/auth-result';
 import { AuthService, TokenService } from 'src/app/auth';
 import { RouteStateService } from '../../services/route-state.service';
 import { getBaseUrl } from '../../../main';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
+import { PrepareTokensService } from 'src/app/helpers/services/prepare-tokens.service';
 
 @Component({
   selector: 'app-login-page',
@@ -28,17 +30,16 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     private router: Router,
     private routeStateService: RouteStateService,
     private route: ActivatedRoute,
+    private antiForgeryService: AntiForgeryService,
+    private prepareTokensService: PrepareTokensService,
   ) {}
 
   ngOnInit() {}
 
-  onLoginClick() {
-    this.authService
-      .authenticate(this.form)
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
+  async onLoginClick() {
+    const result$ = this.authService.authenticate(this.form).pipe(
+      map(
         async (result: AuthResult) => {
-          console.log(result);
           if (result.isSuccess()) {
             this.loginFailed = false;
             this.errors = [];
@@ -51,7 +52,9 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         (err) => {
           console.log(err);
         },
-      );
+      ),
+    );
+    this.antiForgeryService.getAntiForgeryTokenBeforeAndAfter$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

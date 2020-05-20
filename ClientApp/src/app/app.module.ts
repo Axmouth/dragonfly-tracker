@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, Injector, Inject, PLATFORM_ID } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RoutingModule } from './app-routing.module';
@@ -39,6 +39,7 @@ import { ServerOnlyComponent } from './helpers/server-only/server-only.component
 import { AuthModule } from './auth/auth.module';
 import { apiRoot } from 'src/environments/environment';
 import { MessageAreaComponent } from './components/message-area/message-area.component';
+import { AddCsrfHeaderInterceptor } from './helpers/interceptors/add-csrf-header-interceptor';
 
 @NgModule({
   declarations: [
@@ -96,7 +97,7 @@ import { MessageAreaComponent } from './components/message-area/message-area.com
     }),
     ClarityModule,
   ],
-  providers: [],
+  providers: [{ provide: HTTP_INTERCEPTORS, useClass: AddCsrfHeaderInterceptor, multi: true }],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

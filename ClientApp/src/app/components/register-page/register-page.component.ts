@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from 'src/app/auth/services/auth.service';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { FormBuilder, FormGroup, FormControl } from '@angular/forms';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Component({
   selector: 'app-register-page',
@@ -23,37 +24,46 @@ export class RegisterPageComponent implements OnInit, OnDestroy {
   errors: String[] = [];
   registerFailed = false;
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private formBuilder: FormBuilder,
+    private antiForgeryService: AntiForgeryService,
+  ) {}
 
   ngOnInit() {}
 
-  onRegisterClick() {
+  async onRegisterClick() {
     const form = {
       type: 'local',
       userName: this.registerForm.get('userName').value,
       email: this.registerForm.get('email').value,
       password: this.registerForm.get('password').value,
     };
+    // await this.antiForgeryService.getAntiForgeryToken();
 
-    this.authService
+    const result$ = this.authService
       .register(form)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
-        (result) => {
-          console.log(result);
-          if (result.isSuccess()) {
-            this.registerFailed = false;
-            this.errors = [];
-            this.router.navigateByUrl('');
-          } else {
-            this.registerFailed = true;
-            this.errors = result.getResponse().error.errors;
-          }
-        },
-        (err) => {
-          console.log(err);
-        },
+      .pipe(
+        map(
+          (result) => {
+            console.log(result);
+            if (result.isSuccess()) {
+              this.registerFailed = false;
+              this.errors = [];
+              this.router.navigateByUrl('');
+            } else {
+              this.registerFailed = true;
+              this.errors = result.getResponse().error.errors;
+            }
+          },
+          (err) => {
+            console.log(err);
+          },
+        ),
       );
+    this.antiForgeryService.getAntiForgeryTokenBeforeAndAfter$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

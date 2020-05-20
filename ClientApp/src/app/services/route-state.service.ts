@@ -12,6 +12,9 @@ export class RouteStateService {
 
   constructor(router: Router, private route: ActivatedRoute) {
     router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((e: any) => {
+      if (e?.url?.includes && e.url.includes('logout')) {
+        return;
+      }
       this.previousUrl = this.currentUrl;
       this.currentUrl = e.url;
       this.history.push(e.url);

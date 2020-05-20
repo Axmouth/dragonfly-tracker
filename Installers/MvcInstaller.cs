@@ -42,15 +42,31 @@ namespace DragonflyTracker.Installers
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);*/
             // services.AddMvc();
             // services.AddDbContextPool<>
+
+            services.AddAntiforgery(options =>
+            {
+                var cookieBuilder = new CookieBuilder()
+                {
+                    HttpOnly = false,
+                    SameSite = SameSiteMode.None,
+                    Name = "X-XSRF-TOKEN"
+                    
+                };
+                // options.Cookie = cookieBuilder;
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.SuppressXFrameOptionsHeader = false;
+            });
+
             services.AddControllersWithViews(options =>
                 {
                     options.Filters.Add(new ValidationFilter());
+                    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
                 })
                  .AddJsonOptions(options =>
                  {
-                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                     options.JsonSerializerOptions.IgnoreNullValues = true;
                  })
-                // .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             services.AddRouting(options =>
@@ -79,7 +95,7 @@ namespace DragonflyTracker.Installers
             };
 
             services.AddSingleton(tokenValidationParameters);
-            
+
             services.AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

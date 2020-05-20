@@ -22,7 +22,6 @@ export class GuestGuard implements CanActivate, OnDestroy {
       .isAuthenticatedOrRefresh()
       .pipe(
         map((auth) => {
-          console.log(auth);
           if (auth) {
             this.router.navigate(['']);
           }

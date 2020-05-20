@@ -14,6 +14,8 @@ using AutoMapper;
 using DragonflyTracker.Filters;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Antiforgery;
+using System;
 
 namespace DragonflyTracker
 {
@@ -53,7 +55,7 @@ namespace DragonflyTracker
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMapper mapper)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMapper mapper, IAntiforgery antiforgery)
         {
             mapper.ConfigurationProvider.AssertConfigurationIsValid();
             if (env.IsDevelopment())
@@ -119,13 +121,37 @@ namespace DragonflyTracker
                 builder.WithOrigins("http://*.dragonflytracker.com", "https://*.dragonflytracker.com", "http://localhost")
                             .SetIsOriginAllowedToAllowWildcardSubdomains()
                             .AllowCredentials()
-                            //.AllowAnyOrigin()
                             .SetIsOriginAllowed((host) => true)
                             .AllowAnyHeader()
                             .AllowAnyMethod();
             });
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.Use(next => context =>
+            {
+                return next(context);
+                string path = context.Request.Path.Value;
+                if (string.Equals("POST", context.Request.Method, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("PUT", context.Request.Method, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("PATCH", context.Request.Method, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals("DELETE", context.Request.Method, StringComparison.OrdinalIgnoreCase) || true)
+                {
+                    var tokens = antiforgery.GetAndStoreTokens(context);
+                    context.Response.Cookies.Append(
+                    "X-XSRF-TOKEN",
+                    tokens.RequestToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = false,
+                        Domain = "." + string.Join(".", context.Request.Host.ToString().Split('.').TakeLast(2)),
+                        SameSite = SameSiteMode.None,
+                        Secure = false
+                    });
+                }
+                return next(context);
+            });
 
             app.UseEndpoints(endpoints =>
             {

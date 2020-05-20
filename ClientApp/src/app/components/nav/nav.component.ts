@@ -6,6 +6,7 @@ import { TokenService } from '../../auth/services/token.service';
 import { takeUntil } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 import { RouteStateService } from 'src/app/services/route-state.service';
+import { AntiForgeryService } from '../../services/anti-forgery.service';
 
 export enum AuthenticatedState {
   Loading = 1,
@@ -31,10 +32,12 @@ export class NavComponent implements OnInit, OnDestroy {
     private tokenService: TokenService,
     @Inject(PLATFORM_ID) private platform: Object,
     private routeStateService: RouteStateService,
+    private antiForgeryService: AntiForgeryService,
   ) {}
 
   async ngOnInit() {
     if (isPlatformBrowser(this.platform)) {
+      await this.antiForgeryService.getAntiForgeryToken();
       this.authService
         .onAuthenticationChange()
         .pipe(takeUntil(this.ngUnsubscribe))
@@ -63,7 +66,7 @@ export class NavComponent implements OnInit, OnDestroy {
           },
         );
       this.authService
-        .isAuthenticatedOrRefresh()
+        .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
         .pipe(takeUntil(this.ngUnsubscribe))
         .subscribe(
           async (loggedIn) => {
@@ -79,8 +82,11 @@ export class NavComponent implements OnInit, OnDestroy {
         );
       this.router.events.subscribe(async (val) => {
         if (val instanceof NavigationStart) {
+          if (val?.url?.includes && val.url.includes('logout')) {
+            return;
+          }
           const refresh$ = this.authService
-            .isAuthenticatedOrRefresh()
+            .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
             .pipe(takeUntil(this.ngUnsubscribe))
             .subscribe(async (loggedIn) => {
               if (!loggedIn) {

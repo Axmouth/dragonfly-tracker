@@ -183,7 +183,7 @@ namespace DragonflyTracker.Controllers.V1
             //if not localhost
             if (splitHostname.Length > 1)
             {
-                return string.Join(".", splitHostname.Skip(1));
+                return string.Join(".", splitHostname.TakeLast(2));
             }
             else
             {

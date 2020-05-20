@@ -7,12 +7,13 @@ import { Observable } from 'rxjs';
 import { Project } from '../models/api/project';
 import { Response } from '../models/api/response';
 import { PagedResponse } from '../models/api/paged-response';
+import { PrepareTokensService } from '../helpers/services/prepare-tokens.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProjectsService {
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(private http: HttpClient, private prepareTokensService: PrepareTokensService) {}
 
   getAllProjects(
     page: number = 1,
@@ -57,20 +58,23 @@ export class ProjectsService {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.delete(url, { headers });
+    const result$ = this.http.delete(url, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   createUsersProject(username: string, newProject: object): Observable<Response<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects`;
-    return this.http.post<Response<Project>>(url, newProject, { headers });
+    const result$ = this.http.post<Response<Project>>(url, newProject, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 
   updateUsersProject(username: string, projectName: string, newProject: object): Observable<Response<Project>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
     const url = `${apiRoot}/users/${username}/projects/${projectName}`;
-    return this.http.put<Response<Project>>(url, newProject, { headers });
+    const result$ = this.http.put<Response<Project>>(url, newProject, { headers, withCredentials: true });
+    return this.prepareTokensService.applyTokenChain$(result$);
   }
 }

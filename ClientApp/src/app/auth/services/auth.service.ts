@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { TokenService } from './token.service';
-import { map, switchMap, catchError } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { map, switchMap, catchError, mergeMap, concatMap, concatMapTo, switchMapTo, flatMap } from 'rxjs/operators';
+import { Observable, of, observable } from 'rxjs';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AuthSuccessResponse } from '../../models/api/auth-success-response';
@@ -109,7 +109,6 @@ export class AuthService {
    * @returns {Observable<AuthResult>}
    */
   authenticate(data?: any): Observable<AuthResult> {
-    console.log(`${this.authEndpointPrefix}login`);
     const result = this.http
       .post<AuthSuccessResponse>(`${this.authEndpointPrefix}login`, data, {
         observe: 'response',
@@ -153,7 +152,7 @@ export class AuthService {
         if (!url) {
           return of(res);
         }
-        return this.http.delete<EmptyResponse>(url, { observe: 'response' });
+        return this.http.delete<EmptyResponse>(url, { observe: 'response', withCredentials: true });
       }),
       map((res) => {
         return new AuthResult(
@@ -171,9 +170,8 @@ export class AuthService {
     return result.pipe(
       switchMap((authResult: AuthResult) => {
         if (authResult.isSuccess()) {
-          this.tokenService.clear().pipe(map(() => authResult));
         }
-        return of(authResult);
+        return this.tokenService.clear().pipe(map(() => authResult));
       }),
     );
   }
@@ -191,7 +189,7 @@ export class AuthService {
   register(data?: any): Observable<AuthResult> {
     const url = `${this.authEndpointPrefix}register`;
     const result = this.http
-      .post<AuthSuccessResponse>(url, data, { observe: 'response' })
+      .post<AuthSuccessResponse>(url, data, { observe: 'response', withCredentials: true })
       .pipe(
         map((res) => {
           return new AuthResult(
@@ -230,14 +228,14 @@ export class AuthService {
    * If not, calls refreshToken, and returns isAuthenticated() if success, false otherwise
    * @returns {Observable<boolean>}
    */
-  isAuthenticatedOrRefresh(): Observable<boolean> {
+  isAuthenticatedOrRefresh(callback?: Observable<any>): Observable<boolean> {
     if (!this.isBrowserService.isInBrowser()) {
       return of(false);
     }
     return this.getToken().pipe(
       switchMap((token) => {
         if (token.getValue() && !token.isValid()) {
-          return this.refreshToken(token).pipe(
+          return this.refreshToken(token, callback).pipe(
             switchMap((res) => {
               if (res === null) {
                 // For the case where there is an auth request in progress. Keep the status Quo
@@ -246,8 +244,13 @@ export class AuthService {
               if (res.isSuccess()) {
                 return this.isAuthenticated();
               } else {
-                this.tokenService.clear();
-                return of(false);
+                // this.tokenService.clear();
+                return this.logout().pipe(
+                  map((result) => {
+                    return !result.isSuccess();
+                  }),
+                );
+                // return of(false);
               }
             }),
           );
@@ -279,7 +282,7 @@ export class AuthService {
    * @param data
    * @returns {Observable<AuthResult>}
    */
-  refreshToken(data?: any): Observable<AuthResult> {
+  refreshToken(data?: any, callback$?: Observable<any>): Observable<AuthResult> {
     if (this.authenticating) {
       // check if auth request is in progress and do nothing then
       return of(null);
@@ -288,7 +291,7 @@ export class AuthService {
     this.authenticating = true;
 
     const url = `${this.authEndpointPrefix}refresh`;
-    return this.http
+    const refresh$ = this.http
       .post<AuthSuccessResponse>(url, data, { observe: 'response', withCredentials: true })
       .pipe(
         map((res) => {
@@ -314,6 +317,14 @@ export class AuthService {
           return this.processResultToken(result);
         }),
       );
+    if (callback$ === undefined) {
+      callback$ = of(null);
+    }
+    return callback$.pipe(
+      mergeMap(() => {
+        return refresh$;
+      }),
+    );
   }
 
   protected handleResponseError(res: any): Observable<AuthResult> {
@@ -348,7 +359,7 @@ export class AuthService {
    */
   requestPasswordReset(data?: any): Observable<AuthResult> {
     const url = `${this.authEndpointPrefix}password-reset-email`;
-    return this.http.post(url, data, { observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response', withCredentials: true }).pipe(
       map((res) => {
         return new AuthResult(
           true,
@@ -388,7 +399,7 @@ export class AuthService {
     if (this.route.snapshot.queryParams[emailQueryKey]) {
       data[emailKey] = this.route.snapshot.queryParams[emailQueryKey];
     }
-    return this.http.post(url, data, { observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response', withCredentials: true }).pipe(
       map((res) => {
         return new AuthResult(
           true,
@@ -429,7 +440,7 @@ export class AuthService {
     if (this.route.snapshot.queryParams[emailQueryKey]) {
       data[emailKey] = this.route.snapshot.queryParams[emailQueryKey];
     }
-    return this.http.post(url, data, { observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response', withCredentials: true }).pipe(
       map((res) => {
         return new AuthResult(
           true,
@@ -456,7 +467,7 @@ export class AuthService {
    */
   requestVerificationEmail(data?: any): Observable<AuthResult> {
     const url = `${this.authEndpointPrefix}email-confirm-email`;
-    return this.http.post(url, data, { observe: 'response' }).pipe(
+    return this.http.post(url, data, { observe: 'response', withCredentials: true }).pipe(
       map((res) => {
         return new AuthResult(
           true,
