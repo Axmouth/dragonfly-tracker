@@ -12,4 +12,7 @@ export class Issue {
   author?: User;
   stage?: IssueStage;
   types?: IssueType[];
+  createdAt?: string;
+  updatedAt?: string;
+  open?: boolean;
 }

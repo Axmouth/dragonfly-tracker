@@ -9,6 +9,9 @@ export class Project {
   stages?: IssueStage[];
   types?: IssueType[];
   creator?: User;
+  owner?: User;
   admins?: User[];
   maintainers?: User[];
+  createdAt?: string;
+  updatedAt?: string;
 }

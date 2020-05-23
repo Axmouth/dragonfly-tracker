@@ -135,11 +135,11 @@ namespace DragonflyTracker.Controllers.V1
             if (request == null)
             {
                 return BadRequest(
-                new AuthFailedResponse
-                {
-                    Errors = new List<string>() { "Empty Request." }
-                }
-                    );
+                    new AuthFailedResponse
+                    {
+                        Errors = new List<string>() { "Empty Request." }
+                    }
+                );
             }
             var RefreshToken = Request.Cookies[refreshTokenCookieName];
 
@@ -434,10 +434,10 @@ namespace DragonflyTracker.Controllers.V1
             {
                 return BadRequest(
                 new AuthFailedResponse
-                {
-                    Errors = new List<string>() { "Empty Request." }
-                }
-                    );
+                    {
+                        Errors = new List<string>() { "Empty Request." }
+                    }
+                );
             }
             DragonflyUser user;
             if (HttpContext.User.Identity.IsAuthenticated)

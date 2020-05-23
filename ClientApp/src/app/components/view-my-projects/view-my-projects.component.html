@@ -149,4 +149,15 @@
     >Create Project <clr-icon shape="plus"></clr-icon
   ></a>
   <app-create-project-wizard (sendProject)="onNewProjectSubmit($event)"></app-create-project-wizard>
+
+  <clr-modal [(clrModalOpen)]="showDeleteProjectDialog" [clrModalStaticBackdrop]="false">
+    <h3 class="modal-title">Are you sure you want to delete this Project?</h3>
+    <div class="modal-body">
+      <p>Confirm your action</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showDeleteProjectDialog = false">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="deleteProject()">Delete Project</button>
+    </div>
+  </clr-modal>
 </app-browser-only>

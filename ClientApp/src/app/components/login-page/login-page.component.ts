@@ -54,7 +54,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
         },
       ),
     );
-    this.antiForgeryService.getAntiForgeryTokenBeforeAndAfter$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
+    this.antiForgeryService.getAntiForgeryTokenBeforeAndAfter$(result$).subscribe(() => {});
   }
 
   ngOnDestroy(): void {

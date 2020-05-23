@@ -4,7 +4,8 @@ import { AuthResult } from 'src/app/auth/internal/auth-result';
 import { AuthService } from 'src/app/auth';
 import { IsBrowserService } from 'src/app/helpers/services/is-browser.service';
 import { RouteStateService } from 'src/app/services/route-state.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Component({
   selector: 'app-request-password-reset',
@@ -12,7 +13,6 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./request-password-reset.component.scss'],
 })
 export class RequestPasswordResetComponent implements OnInit, OnDestroy {
-  previousUrl: string;
   ngUnsubscribe = new Subject<void>();
   result: AuthResult;
   errors: string[] = [];
@@ -24,11 +24,10 @@ export class RequestPasswordResetComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private isBrowserService: IsBrowserService,
-    private routeStateService: RouteStateService,
+    private antiForgeryService: AntiForgeryService,
   ) {}
 
   ngOnInit() {
-    this.previousUrl = this.routeStateService.getPreviousUrl();
     if (!this.isBrowserService.isInBrowser()) {
       return;
     }
@@ -36,10 +35,8 @@ export class RequestPasswordResetComponent implements OnInit, OnDestroy {
 
   onPasswordResetRequestSubmit() {
     this.loading = true;
-    this.authService
-      .requestPasswordReset({ email: this.email })
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
+    const result$ = this.authService.requestPasswordReset({ email: this.email }).pipe(
+      map(
         (result) => {
           this.result = result;
           if (result.isSuccess()) {
@@ -56,7 +53,9 @@ export class RequestPasswordResetComponent implements OnInit, OnDestroy {
         (err) => {
           console.log(err);
         },
-      );
+      ),
+    );
+    this.antiForgeryService.getAntiForgeryTokenBefore$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

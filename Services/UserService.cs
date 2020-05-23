@@ -24,12 +24,6 @@ namespace DragonflyTracker.Services
             _userRepository = userRepository;
         }
 
-        public async Task<DragonflyUser> GetProjectByUserAsync(string username)
-        {
-            return await _userManager
-                .FindByNameAsync(username)
-                .ConfigureAwait(false);
-        }
 
         public async Task<DragonflyUser> GetUserByUserNameAsync(string username)
         {
@@ -127,5 +121,6 @@ namespace DragonflyTracker.Services
             var result = await _userManager.ChangeEmailAsync(userToUpdate, newEmail, token).ConfigureAwait(false);
             return result.Succeeded;
         }
+
     }
 }

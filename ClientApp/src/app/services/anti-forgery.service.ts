@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { apiRoot } from 'src/environments/environment';
 import { CookieService } from '../helpers/services/cookie.service';
 import { Observable } from 'rxjs';
-import { mergeMap, switchMap } from 'rxjs/operators';
+import { mergeMap, switchMap, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -16,20 +16,38 @@ export class AntiForgeryService {
   }
 
   getAntiForgeryToken$() {
-    return this.http.get(`${apiRoot}/antiforgery`, { withCredentials: true });
+    return this.http.get(`${apiRoot}/antiforgery`, { withCredentials: true }).pipe(
+      map(() => {
+        console.log('getAntiForgeryToken$()');
+      }),
+    );
   }
 
   getAntiForgeryTokenBeforeAndAfter$(obs$: Observable<any>) {
     return this.getAntiForgeryToken$()
       .pipe(
-        switchMap(() => {
+        switchMap((obj) => {
+          // console.log('getAntiForgeryTokenBeforeAndAfter$1');
+          // console.log(obj);
           return obs$;
         }),
       )
       .pipe(
-        switchMap(() => {
+        switchMap((obj) => {
+          // console.log('getAntiForgeryTokenBeforeAndAfter$2');
+          // console.log(obj);
           return this.getAntiForgeryToken$();
         }),
       );
+  }
+
+  getAntiForgeryTokenBefore$(obs$: Observable<any>) {
+    return this.getAntiForgeryToken$().pipe(
+      switchMap((obj) => {
+        // console.log('getAntiForgeryTokenBefore$');
+        // console.log(obj);
+        return obs$;
+      }),
+    );
   }
 }

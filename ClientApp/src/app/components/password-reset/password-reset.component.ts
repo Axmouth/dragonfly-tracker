@@ -4,7 +4,8 @@ import { AuthResult } from 'src/app/auth/internal/auth-result';
 import { AuthService } from 'src/app/auth';
 import { IsBrowserService } from 'src/app/helpers/services/is-browser.service';
 import { RouteStateService } from 'src/app/services/route-state.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Component({
   selector: 'app-password-reset',
@@ -25,11 +26,10 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private isBrowserService: IsBrowserService,
-    private routeStateService: RouteStateService,
+    private antiForgeryService: AntiForgeryService,
   ) {}
 
   ngOnInit() {
-    this.previousUrl = this.routeStateService.getPreviousUrl();
     if (!this.isBrowserService.isInBrowser()) {
       return;
     }
@@ -37,10 +37,8 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
 
   onPasswordChangeSubmit() {
     this.loading = true;
-    this.authService
-      .passwordReset({ newPassword: this.newPassword })
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
+    const result$ = this.authService.passwordReset({ newPassword: this.newPassword }).pipe(
+      map(
         (result) => {
           this.result = result;
           if (result.isSuccess()) {
@@ -57,7 +55,9 @@ export class PasswordResetComponent implements OnInit, OnDestroy {
         (err) => {
           console.log(err);
         },
-      );
+      ),
+    );
+    this.antiForgeryService.getAntiForgeryTokenBefore$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

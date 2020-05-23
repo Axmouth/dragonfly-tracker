@@ -1,5 +1,3 @@
-<a class="btn btn-text btn-primary" href="{{ previousUrl }}" routerLink="{{ previousUrl }}" *ngIf="!loading"
-  >Go Home <clr-icon shape="undo"></clr-icon
-></a>
+<app-back-button></app-back-button>
 
 <app-message-area [errors]="errors" [success]="successMessages" [loading]="loading"></app-message-area>

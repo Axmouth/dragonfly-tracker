@@ -23,6 +23,8 @@ export class ViewUserProjectIssueComponent implements OnInit {
   targetIssueNumber: number;
   loading = true;
   notFound = false;
+  replyToIssue = false;
+  showDeleteIssueDialog = false;
 
   constructor(
     private projectsService: ProjectsService,
@@ -39,7 +41,25 @@ export class ViewUserProjectIssueComponent implements OnInit {
       .getUsersProjectIssue(this.targetUsername, this.targetProjectName, this.targetIssueNumber)
       .subscribe((result) => {
         this.issue = result.data;
+        this.loading = false;
         console.log(this.issue);
       });
+  }
+
+  onReplyClick() {
+    this.replyToIssue = !this.replyToIssue;
+  }
+
+  onIssueReplySubmit(issuePost: IssuePost) {
+    console.log(issuePost);
+  }
+
+  onIssueDeleteClick() {
+    this.showDeleteIssueDialog = true;
+  }
+
+  deleteIssue() {
+    console.log('deleto');
+    this.showDeleteIssueDialog = false;
   }
 }

@@ -3,10 +3,11 @@ import { Subscription, Subject } from 'rxjs';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { AuthService } from '../../auth/services/auth.service';
 import { TokenService } from '../../auth/services/token.service';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map, share } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 import { RouteStateService } from 'src/app/services/route-state.service';
 import { AntiForgeryService } from '../../services/anti-forgery.service';
+import { IsBrowserService } from '../../auth/helpers/services/is-browser.service';
 
 export enum AuthenticatedState {
   Loading = 1,
@@ -29,74 +30,96 @@ export class NavComponent implements OnInit, OnDestroy {
   constructor(
     protected authService: AuthService,
     private router: Router,
-    private tokenService: TokenService,
-    @Inject(PLATFORM_ID) private platform: Object,
+    private isBrowserService: IsBrowserService,
     private routeStateService: RouteStateService,
     private antiForgeryService: AntiForgeryService,
   ) {}
 
   async ngOnInit() {
-    if (isPlatformBrowser(this.platform)) {
-      await this.antiForgeryService.getAntiForgeryToken();
+    if (this.isBrowserService.isInBrowser()) {
+      // await this.antiForgeryService.getAntiForgeryToken();
       this.authService
         .onAuthenticationChange()
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(
-          async (loggedIn) => {
-            if (!loggedIn) {
-              this.isLoggedIn = AuthenticatedState.False;
-            } else {
-              this.isLoggedIn = AuthenticatedState.True;
-            }
-
-            this.authService
-              .getUsername()
-              .pipe(takeUntil(this.ngUnsubscribe))
-              .subscribe(
-                (newUsername) => {
-                  this.username = newUsername;
-                },
-                (err) => {
-                  console.log(err);
-                },
-              );
-          },
-          (err) => {
-            console.log(err);
-          },
-        );
-      this.authService
-        .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
-        .pipe(takeUntil(this.ngUnsubscribe))
-        .subscribe(
-          async (loggedIn) => {
-            if (!loggedIn) {
-              this.isLoggedIn = AuthenticatedState.False;
-            } else {
-              this.isLoggedIn = AuthenticatedState.True;
-            }
-          },
-          (err) => {
-            console.log(err);
-          },
-        );
-      this.router.events.subscribe(async (val) => {
-        if (val instanceof NavigationStart) {
-          if (val?.url?.includes && val.url.includes('logout')) {
-            return;
-          }
-          const refresh$ = this.authService
-            .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe(async (loggedIn) => {
+        .pipe(
+          map(
+            async (loggedIn) => {
+              // console.log('dfdff');
+              console.log(loggedIn);
               if (!loggedIn) {
                 this.isLoggedIn = AuthenticatedState.False;
               } else {
                 this.isLoggedIn = AuthenticatedState.True;
               }
-            });
-        }
-      });
+
+              this.authService
+                .getUsername()
+                .pipe(takeUntil(this.ngUnsubscribe))
+                .subscribe(
+                  (newUsername) => {
+                    this.username = newUsername;
+                  },
+                  (err) => {
+                    console.log(err);
+                  },
+                );
+            },
+            (err) => {
+              console.log(err);
+            },
+          ),
+        )
+        .subscribe(() => {});
+      this.authService
+        .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .pipe(
+          map(
+            async (loggedIn) => {
+              if (!loggedIn) {
+                this.isLoggedIn = AuthenticatedState.False;
+              } else {
+                this.isLoggedIn = AuthenticatedState.True;
+              }
+            },
+            (err) => {
+              console.log(err);
+            },
+          ),
+        )
+        .pipe(takeUntil(this.ngUnsubscribe))
+        .subscribe(() => {});
+      // this.antiForgeryService.getAntiForgeryTokenBefore$(refresh$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
+      this.router.events
+        .pipe(
+          map(async (val) => {
+            if (val instanceof NavigationStart) {
+              // console.log('dddd');
+              if (val?.url?.includes && val.url.includes('logout')) {
+                return;
+              }
+              this.authService
+                .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
+                .pipe(takeUntil(this.ngUnsubscribe))
+                .pipe(
+                  map(
+                    async (loggedIn) => {
+                      if (!loggedIn) {
+                        this.isLoggedIn = AuthenticatedState.False;
+                      } else {
+                        this.isLoggedIn = AuthenticatedState.True;
+                      }
+                    },
+                    (err) => {
+                      console.log(err);
+                    },
+                  ),
+                )
+                .pipe(takeUntil(this.ngUnsubscribe))
+                .subscribe(() => {});
+            }
+          }),
+        )
+        .subscribe(() => {});
     }
   }
 

@@ -128,7 +128,7 @@ namespace DragonflyTracker
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            /*
             app.Use(next => context =>
             {
                 return next(context);
@@ -151,7 +151,7 @@ namespace DragonflyTracker
                     });
                 }
                 return next(context);
-            });
+            });*/
 
             app.UseEndpoints(endpoints =>
             {

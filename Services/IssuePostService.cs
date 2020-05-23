@@ -14,7 +14,7 @@ namespace DragonflyTracker.Services
         private readonly IIssuePostRepository _issuePostRepository;
         private readonly IIssuePostReactionRepository _issuePostReactionRepository;
 
-        public IssuePostService(PgMainDataContext pgMainDataContext, IIssuePostRepository issuePostRepository, IIssuePostReactionRepository issuePostReactionRepository)
+        public IssuePostService(IIssuePostRepository issuePostRepository, IIssuePostReactionRepository issuePostReactionRepository)
         {
             _issuePostRepository = issuePostRepository;
             _issuePostReactionRepository = issuePostReactionRepository;
@@ -22,9 +22,11 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> CreateIssuePostAsync(IssuePost issuePost)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
+            if (issuePost == null) {
+                return false;
+            }
 
-            // await AddNewTags(post).ConfigureAwait(false);
+            issuePost.Number = _issuePostRepository.FindByCondition(i => i.IssueId == issuePost.IssueId).Count();
             await _issuePostRepository.CreateAsync(issuePost).ConfigureAwait(false);
 
             var created = await _issuePostRepository.SaveAsync().ConfigureAwait(false);
@@ -33,9 +35,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> CreateIssuePostReactionAsync(IssuePostReaction issuePostReaction)
         {
-            // post.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            // await AddNewTags(post).ConfigureAwait(false);
             await _issuePostReactionRepository.CreateAsync(issuePostReaction).ConfigureAwait(false);
 
             var created = await _issuePostReactionRepository.SaveAsync().ConfigureAwait(false);
@@ -44,8 +43,6 @@ namespace DragonflyTracker.Services
 
         public async Task<bool> UpdateIssuePostAsync(IssuePost issuePostToUpdate)
         {
-            // postToUpdate.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-            // await AddNewTags(postToUpdate).ConfigureAwait(false);
             _issuePostRepository.Update(issuePostToUpdate);
             var updated = await _issuePostRepository.SaveAsync().ConfigureAwait(false);
             return updated > 0;
@@ -163,6 +160,17 @@ namespace DragonflyTracker.Services
                         .ConfigureAwait(false);
             }
             return (list: issuePosts, count);
+        }
+
+        public async Task<IssuePost> GetIssuePostByIssueIdAsync(Guid issueId,int issuePostNumber)
+        {
+            return await _issuePostRepository
+                .FindByCondition(ip => ip.IssueId == issueId && ip.Number == issuePostNumber)
+                .Include(ip => ip.Author)
+                .Include(ip => ip.ParentIssue)
+                .ThenInclude(ip => ip.ParentProject)
+                .SingleOrDefaultAsync()
+                .ConfigureAwait(false);
         }
     }
 }

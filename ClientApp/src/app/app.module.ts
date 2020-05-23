@@ -40,6 +40,11 @@ import { AuthModule } from './auth/auth.module';
 import { apiRoot } from 'src/environments/environment';
 import { MessageAreaComponent } from './components/message-area/message-area.component';
 import { AddCsrfHeaderInterceptor } from './helpers/interceptors/add-csrf-header-interceptor';
+import { BackButtonComponent } from './components/shared/back-button/back-button.component';
+import { IssuePostFormComponent } from './components/issue-post-form/issue-post-form.component';
+import { IssuePostComponent } from './components/issue-post/issue-post.component';
+import { IssueReactionAreaComponent } from './components/issue-reaction-area/issue-reaction-area.component';
+import { TosDialogComponent } from './components/tos-dialog/tos-dialog.component';
 
 @NgModule({
   declarations: [
@@ -74,6 +79,11 @@ import { AddCsrfHeaderInterceptor } from './helpers/interceptors/add-csrf-header
     BrowserOnlyComponent,
     ServerOnlyComponent,
     MessageAreaComponent,
+    BackButtonComponent,
+    IssuePostFormComponent,
+    IssuePostComponent,
+    IssueReactionAreaComponent,
+    TosDialogComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

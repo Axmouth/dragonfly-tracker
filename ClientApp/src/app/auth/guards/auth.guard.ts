@@ -4,6 +4,7 @@ import { Observable, Subject, of } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { takeUntil, map } from 'rxjs/operators';
 import { IsBrowserService } from '../../helpers/services/is-browser.service';
+import { AntiForgeryService } from '../../services/anti-forgery.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,12 @@ export class AuthGuard implements CanActivate, OnDestroy {
   /**
    *
    */
-  constructor(private router: Router, private authService: AuthService, private isBrowserService: IsBrowserService) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    private isBrowserService: IsBrowserService,
+    private antiForgeryService: AntiForgeryService,
+  ) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -23,7 +29,7 @@ export class AuthGuard implements CanActivate, OnDestroy {
       return of(true);
     }
     return this.authService
-      .isAuthenticatedOrRefresh()
+      .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
       .pipe(
         map((auth) => {
           if (!auth) {

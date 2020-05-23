@@ -30,6 +30,8 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   myMaintainedProjectsActive = false;
   tab = DEFAULT_TAB;
   firstLoad = true;
+  showDeleteProjectDialog = false;
+  targetProject: Project;
 
   constructor(
     private projectService: ProjectsService,
@@ -109,12 +111,18 @@ export class ViewMyProjectsComponent implements OnInit, OnDestroy {
   }
 
   onProjectDeleteClick(project: Project) {
+    this.targetProject = project;
+    this.showDeleteProjectDialog = true;
+  }
+
+  deleteProject() {
     this.projectService
-      .deleteUsersProject(project.creator.userName, project.name)
+      .deleteUsersProject(this.targetProject.creator.userName, this.targetProject.name)
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((result) => {
         this.refresh(this.state);
       });
+    this.showDeleteProjectDialog = false;
   }
 
   async refresh(state: ClrDatagridStateInterface) {

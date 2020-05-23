@@ -3,8 +3,9 @@ import { AuthService } from '../../auth/services/auth.service';
 import { AuthResult } from '../../auth/internal/auth-result';
 import { IsBrowserService } from '../../helpers/services/is-browser.service';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { RouteStateService } from 'src/app/services/route-state.service';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Component({
   selector: 'app-verify-email',
@@ -12,7 +13,6 @@ import { RouteStateService } from 'src/app/services/route-state.service';
   styleUrls: ['./verify-email.component.scss'],
 })
 export class VerifyEmailComponent implements OnInit, OnDestroy {
-  previousUrl: string;
   ngUnsubscribe = new Subject<void>();
   result: AuthResult;
   errors: string[] = [];
@@ -23,18 +23,15 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private isBrowserService: IsBrowserService,
-    private routeStateService: RouteStateService,
+    private antiForgeryService: AntiForgeryService,
   ) {}
 
   ngOnInit() {
-    this.previousUrl = this.routeStateService.getPreviousUrl();
     if (!this.isBrowserService.isInBrowser()) {
       return;
     }
-    this.authService
-      .verifyEmail()
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
+    const result$ = this.authService.verifyEmail().pipe(
+      map(
         (result) => {
           this.result = result;
           if (result.isSuccess()) {
@@ -51,7 +48,9 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
         (err) => {
           console.log(err);
         },
-      );
+      ),
+    );
+    this.antiForgeryService.getAntiForgeryTokenBefore$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

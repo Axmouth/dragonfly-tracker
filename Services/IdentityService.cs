@@ -165,6 +165,16 @@ namespace DragonflyTracker.Services
         {
             var validatedToken = GetPrincipalFromToken(token);
 
+            if(string.IsNullOrEmpty(token))
+            {
+                return new AuthenticationResult { Errors = new[] { "Empty Token" } };
+            }
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return new AuthenticationResult { Errors = new[] { "Empty Refresh Token" } };
+            }
+
             if (validatedToken == null)
             {
                 return new AuthenticationResult { Errors = new[] { "Invalid Token" } };

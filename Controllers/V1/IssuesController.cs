@@ -47,7 +47,7 @@ namespace DragonflyTracker.Controllers.V1
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetAllByUserProject)]
         // [Cached(600)]
-        public async Task<ActionResult> GetAllProjectIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
+        public async Task<IActionResult> GetAllProjectIssuesByUser([FromRoute]string username, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -92,7 +92,7 @@ namespace DragonflyTracker.Controllers.V1
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetAllByOrgProject)]
         // [Cached(600)]
-        public async Task<ActionResult> GetAllIssuesByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
+        public async Task<IActionResult> GetAllIssuesByOrg([FromRoute]string organizationName, [FromRoute]string projectName, [FromQuery] GetAllIssuesQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
             var pagination = _mapper.Map<PaginationFilter>(paginationQuery);
             var filter = _mapper.Map<GetAllIssuesFilter>(query);
@@ -114,7 +114,7 @@ namespace DragonflyTracker.Controllers.V1
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetByUserProject)]
         // [Cached(600)]
-        public async Task<ActionResult<Issue>> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
+        public async Task<IActionResult> GetIssueByUser([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
 
@@ -130,7 +130,7 @@ namespace DragonflyTracker.Controllers.V1
         [AllowAnonymous]
         [HttpGet(ApiRoutes.Issues.GetByOrgProject)]
         // [Cached(600)]
-        public async Task<ActionResult<Issue>> GetIssueByOrgr([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber)
+        public async Task<IActionResult> GetIssueByOrgr([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByOrgAsync(organizationName, projectName, issueNumber).ConfigureAwait(false);
 
@@ -187,17 +187,22 @@ namespace DragonflyTracker.Controllers.V1
                 Content = issueRequest.Content,
             };
 
-            await _issueService.CreateIssueByOrgAsync(issue, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
+            var created = await _issueService.CreateIssueByOrgAsync(issue, issueRequest.Types, organizationName, projectName).ConfigureAwait(false);
+
+            if (!created)
+            {
+                return NotFound();
+            }
 
             var locationUri = _uriService.GetUri(issue.Number.ToString());
-            return Created(locationUri, new Response<PostResponse>(_mapper.Map<PostResponse>(issue)));
+            return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
         // PUT: api/Issues/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Issues.UpdateByUserProject)]
-        public async Task<ActionResult<Issue>> PostIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
+        public async Task<IActionResult> PostIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
             if (issue == null)
@@ -215,14 +220,20 @@ namespace DragonflyTracker.Controllers.V1
             issue.UpdatedAt = DateTime.UtcNow;
             issue.Content = issueRequest.Content;
 
-            await _issueService.UpdateIssueAsync(issue, issueRequest.Types).ConfigureAwait(false);
+            var updated = await _issueService.UpdateIssueAsync(issue, issueRequest.Types).ConfigureAwait(false);
 
-            return CreatedAtAction("GetIssue", new { id = issue.Id }, issue);
+            if (!updated)
+            {
+                return NotFound();
+            }
+
+            var locationUri = _uriService.GetUri(issue.Number.ToString());
+            return Created(locationUri, new Response<IssueResponse>(_mapper.Map<IssueResponse>(issue)));
         }
 
         // DELETE: api/Issues/5
         [HttpDelete(ApiRoutes.Issues.DeleteByUserProject)]
-        public async Task<ActionResult<Issue>> DeleteIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
+        public async Task<IActionResult> DeleteIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
             if (issue == null)

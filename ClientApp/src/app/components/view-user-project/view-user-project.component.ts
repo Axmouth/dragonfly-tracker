@@ -34,6 +34,9 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
   searchText: string;
   openStatus = 'open';
   state: ClrDatagridStateInterface;
+  showDeleteProjectDialog = false;
+  showDeleteIssueDialog = false;
+  targetIssue: Issue;
 
   constructor(
     private projectsService: ProjectsService,
@@ -63,20 +66,47 @@ export class ViewUserProjectComponent implements OnInit, OnDestroy {
     console.log(project);
   }
 
+  onIssueCloseClick(issue: Issue) {
+    // this.showDeleteIssueDialog = true;
+    // this.targetIssue = issue;
+    console.log('close');
+    console.log(issue);
+  }
+
+  onIssueReopenClick(issue: Issue) {
+    // this.showDeleteIssueDialog = true;
+    // this.targetIssue = issue;
+    console.log('reopen');
+    console.log(issue);
+  }
+
   onIssueDeleteClick(issue: Issue) {
+    this.showDeleteIssueDialog = true;
+    this.targetIssue = issue;
+  }
+
+  deleteIssue() {
+    this.showDeleteIssueDialog = false;
     this.issuesService
-      .deleteUsersProjectIssue(this.targetUsername, this.targetProjectName, issue.number)
+      .deleteUsersProjectIssue(this.targetUsername, this.targetProjectName, this.targetIssue.number)
       .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe((result) => {});
-    const index = this.issuesList.indexOf(issue);
-    this.issuesList = this.issuesList.slice(index, 1);
+      .subscribe((result) => {
+        this.refresh(this.state);
+      });
+    // const index = this.issuesList.indexOf(this.targetIssue);
+    // this.issuesList = this.issuesList.slice(index, 1);
     // console.log(this.projectsList.filter((x: Project) => x.creator.username !== project.creator.username || x.name !== project.name));
   }
 
   onProjectDeleteClick() {
+    this.showDeleteProjectDialog = true;
+  }
+
+  deleteProject() {
     this.projectsService.deleteUsersProject(this.targetUsername, this.targetProjectName).subscribe((result) => {
       this.router.navigate(['my-projects']);
     });
+    this.showDeleteProjectDialog = false;
   }
 
   async onSearchClick() {

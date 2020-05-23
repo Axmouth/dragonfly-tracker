@@ -7,11 +7,7 @@ import { RouteStateService } from 'src/app/services/route-state.service';
   styleUrls: ['./not-found-page.component.scss'],
 })
 export class NotFoundPageComponent implements OnInit {
-  previousUrl: string;
+  constructor() {}
 
-  constructor(private routeStateService: RouteStateService) {}
-
-  ngOnInit() {
-    this.previousUrl = this.routeStateService.getPreviousUrl();
-  }
+  ngOnInit() {}
 }

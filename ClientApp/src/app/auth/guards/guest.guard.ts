@@ -4,13 +4,19 @@ import { Observable, Subject, of } from 'rxjs';
 import { AuthService } from '..';
 import { map, takeUntil } from 'rxjs/operators';
 import { IsBrowserService } from 'src/app/helpers/services/is-browser.service';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GuestGuard implements CanActivate, OnDestroy {
   ngUnsubscribe = new Subject<void>();
-  constructor(private isBrowserService: IsBrowserService, private router: Router, private authService: AuthService) {}
+  constructor(
+    private isBrowserService: IsBrowserService,
+    private router: Router,
+    private authService: AuthService,
+    private antiForgeryService: AntiForgeryService,
+  ) {}
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
@@ -19,7 +25,7 @@ export class GuestGuard implements CanActivate, OnDestroy {
       return of(true);
     }
     return this.authService
-      .isAuthenticatedOrRefresh()
+      .isAuthenticatedOrRefresh(this.antiForgeryService.getAntiForgeryToken$())
       .pipe(
         map((auth) => {
           if (auth) {

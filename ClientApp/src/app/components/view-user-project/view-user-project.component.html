@@ -31,6 +31,7 @@
       <clr-datagrid #issuelist (clrDgRefresh)="refresh($event)" [clrDgLoading]="loadingIssues">
         <clr-dg-column>Issue Title</clr-dg-column>
         <clr-dg-column>Issue Number</clr-dg-column>
+        <clr-dg-column>Issue Status</clr-dg-column>
         <clr-dg-column></clr-dg-column>
 
         <clr-dg-placeholder>We couldn't find any Issues!</clr-dg-placeholder>
@@ -40,6 +41,13 @@
             <button class="action-item" (click)="onIssueEditClick(issue)">
               Edit <clr-icon shape="trash"></clr-icon>
             </button>
+            <button class="action-item" (click)="onIssueCloseClick(issue)" *ngIf="issue.open; else reopenIssueItem">
+              Close Issue <clr-icon shape="times"></clr-icon>
+            </button>
+            <ng-template #reopenIssueItem>
+              <button class="action-item" (click)="onIssueReopenClick(issue)">
+                Reopen Issue <clr-icon shape="check"></clr-icon></button
+            ></ng-template>
             <button class="action-item" (click)="onIssueDeleteClick(issue)">
               Delete <clr-icon shape="pencil"></clr-icon>
             </button>
@@ -58,13 +66,14 @@
               >#{{ issue.number }}</a
             ></clr-dg-cell
           >
+          <clr-dg-cell>{{ issue.open }} {{ issue.stage }}</clr-dg-cell>
           <clr-dg-cell></clr-dg-cell>
         </clr-dg-row>
 
         <clr-dg-footer>
           <clr-dg-pagination #pagination [clrDgTotalItems]="total" [clrDgPageSize]="10">
-            <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Projects per page</clr-dg-page-size>
-            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ total }} projects
+            <clr-dg-page-size [clrPageSizeOptions]="[10, 20, 50, 100]">Issues per page</clr-dg-page-size>
+            {{ pagination.firstItem + 1 }} - {{ pagination.lastItem + 1 }} of {{ total }} issues
           </clr-dg-pagination>
         </clr-dg-footer>
       </clr-datagrid>
@@ -176,3 +185,25 @@
     <clr-tab-content id="content2" *clrIfActive> </clr-tab-content>
   </clr-tab>
 </clr-tabs>
+
+<clr-modal [(clrModalOpen)]="showDeleteProjectDialog" [clrModalStaticBackdrop]="false">
+  <h3 class="modal-title">Are you sure you want to delete this Project?</h3>
+  <div class="modal-body">
+    <p>Confirm your action</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="showDeleteProjectDialog = false">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="deleteProject()">Delete Project</button>
+  </div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="showDeleteIssueDialog" [clrModalStaticBackdrop]="false">
+  <h3 class="modal-title">Are you sure you want to delete this issue?</h3>
+  <div class="modal-body">
+    <p>Confirm your action</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline" (click)="showDeleteIssueDialog = false">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="deleteIssue()">Delete Issue</button>
+  </div>
+</clr-modal>

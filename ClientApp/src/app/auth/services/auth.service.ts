@@ -171,6 +171,10 @@ export class AuthService {
       switchMap((authResult: AuthResult) => {
         if (authResult.isSuccess()) {
         }
+        console.log(authResult.getResponse().status);
+        if (authResult.getResponse().status === 404 || authResult.getResponse().status === '404') {
+          return of(authResult);
+        }
         return this.tokenService.clear().pipe(map(() => authResult));
       }),
     );
@@ -228,23 +232,26 @@ export class AuthService {
    * If not, calls refreshToken, and returns isAuthenticated() if success, false otherwise
    * @returns {Observable<boolean>}
    */
-  isAuthenticatedOrRefresh(callback?: Observable<any>): Observable<boolean> {
+  isAuthenticatedOrRefresh(callback$?: Observable<any>): Observable<boolean> {
     if (!this.isBrowserService.isInBrowser()) {
       return of(false);
     }
     return this.getToken().pipe(
       switchMap((token) => {
         if (token.getValue() && !token.isValid()) {
-          return this.refreshToken(token, callback).pipe(
+          return this.refreshToken(token, callback$).pipe(
             switchMap((res) => {
               if (res === null) {
-                // For the case where there is an auth request in progress. Keep the status Quo
+                // For the case where there is an auth request in progress. Keep the status quo
                 return of(true);
               }
               if (res.isSuccess()) {
                 return this.isAuthenticated();
               } else {
-                // this.tokenService.clear();
+                console.log(res.getResponse());
+                if (res.getResponse().status !== 400 && res.getResponse().status !== '400') {
+                  return this.isAuthenticated();
+                }
                 return this.logout().pipe(
                   map((result) => {
                     return !result.isSuccess();
@@ -318,10 +325,13 @@ export class AuthService {
         }),
       );
     if (callback$ === undefined) {
+      console.log('refreshToken$ - null');
       callback$ = of(null);
     }
     return callback$.pipe(
-      mergeMap(() => {
+      switchMap((obj) => {
+        // console.log('refreshToken$1');
+        // console.log(obj);
         return refresh$;
       }),
     );

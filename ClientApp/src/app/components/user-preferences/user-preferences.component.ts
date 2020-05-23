@@ -5,9 +5,10 @@ import { AuthService } from 'src/app/auth/services/auth.service';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { User } from '../../models/api/user';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, map } from 'rxjs/operators';
 import { IsBrowserService } from '../../helpers/services/is-browser.service';
 import { AuthResult } from '../../auth/internal/auth-result';
+import { AntiForgeryService } from 'src/app/services/anti-forgery.service';
 
 @Component({
   selector: 'app-user-preferences',
@@ -31,6 +32,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private isBrowserService: IsBrowserService,
+    private antiForgeryService: AntiForgeryService,
   ) {}
 
   async ngOnInit() {
@@ -52,10 +54,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   onResendEmailVerificationClick() {
     this.emailVerificationRequestLoading = true;
-    this.authService
-      .requestVerificationEmail({ email: this.email })
-      .pipe(takeUntil(this.ngUnsubscribe))
-      .subscribe(
+    const result$ = this.authService.requestVerificationEmail({ email: this.email }).pipe(
+      map(
         (result) => {
           this.emailVerificationRequestResult = result;
           if (result.isSuccess()) {
@@ -64,14 +64,16 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
             this.emailVerificationRequestMessages = result.getMessages();
           } else {
             this.emailVerificationRequestSuccess = false;
-            this.emailVerificationRequestErrors = result.getResponse().error.errors;
+            this.emailVerificationRequestErrors = result.getResponse().errors;
           }
           this.emailVerificationRequestLoading = false;
         },
         (err) => {
           console.log(err);
         },
-      );
+      ),
+    );
+    this.antiForgeryService.getAntiForgeryTokenBefore$(result$).pipe(takeUntil(this.ngUnsubscribe)).subscribe();
   }
 
   ngOnDestroy(): void {

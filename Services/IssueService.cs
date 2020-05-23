@@ -52,7 +52,11 @@ namespace DragonflyTracker.Services
                 .Include(i => i.Author)
                 .Include(i => i.Types)
                 .ThenInclude(t => t.IssueType)
+                .Include(i => i.CurrentStage)
                 .Include(x => x.ParentProject)
+                .ThenInclude(p => p.Owner)
+                .Include(x => x.ParentProject)
+                .ThenInclude(p => p.Creator)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -64,7 +68,11 @@ namespace DragonflyTracker.Services
                 .Include(i => i.Author)
                 .Include(i => i.Types)
                 .ThenInclude(t => t.IssueType)
+                .Include(i => i.CurrentStage)
                 .Include(x => x.ParentProject)
+                .ThenInclude(p => p.Owner)
+                .Include(x => x.ParentProject)
+                .ThenInclude(p => p.Creator)
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
@@ -233,13 +241,20 @@ namespace DragonflyTracker.Services
                 .FindByCondition(x => x.ProjectId == projectId)
                 .Include(i => i.Author)
                 .Include(i => i.Types)
-                .ThenInclude(t => t.IssueType);
+                .ThenInclude(t => t.IssueType)
+                .Include(i => i.CurrentStage)
+                .Include(i => i.ParentProject)
+                .ThenInclude(p => p.Owner)
+                .Include(x => x.ParentProject)
+                .ThenInclude(p => p.Creator);
             List<Issue> issues;
+
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
             if (paginationFilter == null)
             {
                 issues = await queryable
+                    .OrderByDescending(i => i.Number)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -249,6 +264,7 @@ namespace DragonflyTracker.Services
                 issues = await queryable
                     .Skip(skip)
                     .Take(paginationFilter.PageSize)
+                    .OrderByDescending(i => i.Number)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -314,21 +330,25 @@ namespace DragonflyTracker.Services
 
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
-            if (paginationFilter == null)
+            if (string.IsNullOrEmpty( filter.SearchText))
             {
-                issues = await queryable
-                    .ToListAsync()
-                    .ConfigureAwait(false);
+                queryable = queryable
+                    .OrderByDescending(i => i.Number);
             }
             else
             {
-                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
-                issues = await queryable
-                        .Skip(skip)
-                        .Take(paginationFilter.PageSize)
-                        .ToListAsync()
-                        .ConfigureAwait(false);
+                queryable = queryable
+                    .OrderByDescending(i => i.Number);
             }
+
+            if (paginationFilter != null)
+            {
+                var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+                queryable = queryable
+                        .Skip(skip)
+                        .Take(paginationFilter.PageSize);
+            }
+            issues = await queryable.ToListAsync().ConfigureAwait(false);
             return (list: issues, count);
         }
 
@@ -343,6 +363,7 @@ namespace DragonflyTracker.Services
             if (paginationFilter == null)
             {
                 issues = await queryable
+                    .OrderByDescending(i => i.Number)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -352,6 +373,7 @@ namespace DragonflyTracker.Services
                 issues = await queryable
                         .Skip(skip)
                         .Take(paginationFilter.PageSize)
+                        .OrderByDescending(i => i.Number)
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
@@ -374,6 +396,7 @@ namespace DragonflyTracker.Services
             if (paginationFilter == null)
             {
                 issues = await queryable
+                    .OrderByDescending(i => i.Number)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -383,6 +406,7 @@ namespace DragonflyTracker.Services
                 issues = await queryable
                         .Skip(skip)
                         .Take(paginationFilter.PageSize)
+                        .OrderByDescending(i => i.Number)
                         .ToListAsync()
                         .ConfigureAwait(false);
             }
@@ -404,6 +428,7 @@ namespace DragonflyTracker.Services
             if (paginationFilter == null)
             {
                 issues = await queryable
+                    .OrderByDescending(i => i.Number)
                     .ToListAsync()
                     .ConfigureAwait(false);
             }
@@ -413,6 +438,7 @@ namespace DragonflyTracker.Services
                 issues = await queryable
                         .Skip(skip)
                         .Take(paginationFilter.PageSize)
+                    .OrderByDescending(i => i.Number)
                         .ToListAsync()
                         .ConfigureAwait(false);
             }

@@ -28,19 +28,6 @@ namespace DragonflyTracker.Installers
             services.AddSingleton(jwtSettings);
 
             services.AddScoped<IIdentityService, IdentityService>();
-            /*
-            services
-                .AddMvc(options =>
-                {
-                    // options.EnableEndpointRouting = false;
-                    // options.Filters.Add<ValidationFilter>();
-                })
-                 .AddJsonOptions(options => {
-                     options.JsonSerializerOptions.IgnoreNullValues = true;
-                 })
-                .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);*/
-            // services.AddMvc();
             // services.AddDbContextPool<>
 
             services.AddAntiforgery(options =>

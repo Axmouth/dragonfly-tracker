@@ -1,0 +1,17 @@
+<form clrForm clrLayout="horizontal">
+  <clr-textarea-container>
+    <textarea
+      clrTextarea
+      placeholder="Write something"
+      [(ngModel)]="content"
+      name="content"
+      required
+      cols="120"
+      class="clr-col-12 clr-col-md-12"
+    ></textarea>
+    <clr-control-error>You must provide some text!</clr-control-error>
+  </clr-textarea-container>
+  <button class="btn btn-text btn-primary" type="submit" (click)="onSubmitClick()">
+    Submit <clr-icon shape="backup"></clr-icon>
+  </button>
+</form>
