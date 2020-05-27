@@ -45,6 +45,8 @@ import { IssuePostFormComponent } from './components/issue-post-form/issue-post-
 import { IssuePostComponent } from './components/issue-post/issue-post.component';
 import { IssueReactionAreaComponent } from './components/issue-reaction-area/issue-reaction-area.component';
 import { TosDialogComponent } from './components/tos-dialog/tos-dialog.component';
+import { ButtonWithLoadingStateComponent } from './components/shared/button-with-loading-state/button-with-loading-state.component';
+import { ViewWithLoadingStateComponent } from './components/shared/view-with-loading-state/view-with-loading-state.component';
 
 @NgModule({
   declarations: [
@@ -84,6 +86,8 @@ import { TosDialogComponent } from './components/tos-dialog/tos-dialog.component
     IssuePostComponent,
     IssueReactionAreaComponent,
     TosDialogComponent,
+    ButtonWithLoadingStateComponent,
+    ViewWithLoadingStateComponent,
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),

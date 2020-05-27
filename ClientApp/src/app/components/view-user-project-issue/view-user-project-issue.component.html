@@ -1,100 +1,143 @@
-<a
-  *ngIf="!loading"
-  class="btn btn-outline btn-primary"
-  href="/user/{{ issue.parentProject.owner.userName }}/{{ issue.parentProject.name }}"
-  [routerLink]="['/user', issue.parentProject.owner.userName, issue.parentProject?.name]"
-  >{{ issue?.parentProject?.name }} <clr-icon shape="undo"></clr-icon
-></a>
+<app-view-with-loading-state [loading]="loading" [found]="found" [loadingText]="'Loading Issue'">
+  <a
+    class="btn btn-outline btn-primary"
+    href="/user/{{ issue?.parentProject?.owner?.userName }}/{{ issue?.parentProject?.name }}"
+    [routerLink]="['/user', issue.parentProject?.owner?.userName || '', issue?.parentProject?.name || '']"
+    >{{ issue?.parentProject?.name }} <clr-icon shape="undo"></clr-icon
+  ></a>
 
-<div class="clr-row">
-  <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
-    <div class="card">
-      <div class="card-header">
-        <h4 *ngIf="!loading" class="card-title">{{ issue?.title }}</h4>
-        <p class="p3 card-text" *ngIf="!loading">
-          by
-          <a
-            href="/user/{{ issue.author.userName }}"
-            [routerLink]="['/user', issue.author.userName]"
-            routerLinkActive="router-link-active"
-            >{{ issue?.author?.userName }}</a
-          >, at {{ issue?.createdAt | date: 'short' }}
-        </p>
-      </div>
-      <div class="card-block">
-        <div class="card-text">
-          <p *ngIf="!loading">{{ issue?.content }}</p>
+  <h2>{{ issue?.title }} [#{{ issue.number }}]</h2>
+  <div class="clr-row">
+    <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
+      <div class="card">
+        <div class="card-header">
+          <p class="p3 card-text">
+            by
+            <a
+              href="/user/{{ issue?.author?.userName }}"
+              [routerLink]="['/user', issue?.author?.userName]"
+              routerLinkActive="router-link-active"
+              >{{ issue?.author?.userName }}</a
+            >, at {{ issue?.createdAt | date: 'short' }}
+          </p>
         </div>
-      </div>
-      <div class="card-block">
-        <div class="card-title"></div>
-        <div class="card-text">
-          <p>other info here</p>
+        <div class="card-block">
+          <div class="card-text">
+            <p>{{ issue?.content }}</p>
+          </div>
         </div>
-      </div>
-      <div class="card-footer">
-        <button class="btn btn-primary btn-icon" aria-label="reply" (click)="onReplyClick()">
-          <clr-icon shape="chat-bubble"></clr-icon>
-          Reply
-        </button>
-        <button class="btn btn-sm btn-link">
-          Action 2
-        </button>
-        <clr-dropdown>
-          <button class="btn-icon btn-outline-primary" clrDropdownTrigger>
-            <clr-icon shape="ellipsis-vertical"></clr-icon>
+        <div class="card-block">
+          <div class="card-title"></div>
+          <div class="card-text">
+            <p>other info here</p>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-sm btn-link">
+            Action 2
           </button>
-          <clr-dropdown-menu clrPosition="top-left" *clrIfOpen>
-            <label class="dropdown-header" aria-hidden="true">Actions</label>
-            <div aria-label="Dropdown Edit" clrDropdownItem>Edit</div>
-            <div aria-label="Dropdown Delete" (click)="onIssueDeleteClick()" clrDropdownItem>Delete</div>
-            <div aria-label="Dropdown header Disabled Action" [clrDisabled]="true" clrDropdownItem>Disabled Action</div>
-            <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
-            <clr-dropdown>
-              <button clrDropdownTrigger>Link 1</button>
-              <clr-dropdown-menu>
-                <button clrDropdownItem>Foo</button>
-                <clr-dropdown>
-                  <button clrDropdownTrigger>Bar</button>
-                  <clr-dropdown-menu clrPosition="left-top">
-                    <button clrDropdownItem>Baz</button>
-                  </clr-dropdown-menu>
-                </clr-dropdown>
-              </clr-dropdown-menu>
-            </clr-dropdown>
-            <clr-dropdown>
-              <button clrDropdownTrigger>Change Stage</button>
-              <clr-dropdown-menu>
-                <button clrDropdownItem>Foo1</button>
-                <button clrDropdownItem>Foo2</button>
-                <button clrDropdownItem>Foo3</button>
-              </clr-dropdown-menu>
-            </clr-dropdown>
-            <clr-dropdown>
-              <button clrDropdownTrigger>Change Types</button>
-              <clr-dropdown-menu>
-                <button clrDropdownItem>Foo1</button>
-                <button clrDropdownItem>Foo2</button>
-                <button clrDropdownItem>Foo3</button>
-              </clr-dropdown-menu>
-            </clr-dropdown>
-            <div clrDropdownItem>Link 2</div>
-          </clr-dropdown-menu>
-        </clr-dropdown>
+          <clr-dropdown>
+            <button class="btn-icon" clrDropdownTrigger>
+              <clr-icon shape="ellipsis-vertical"></clr-icon>
+            </button>
+            <clr-dropdown-menu clrPosition="top-left" *clrIfOpen>
+              <label class="dropdown-header" aria-hidden="true">Actions</label>
+              <div aria-label="Dropdown Reply" clrDropdownItem>Reply</div>
+              <div aria-label="Dropdown Edit" clrDropdownItem>Edit</div>
+              <div aria-label="Dropdown Close" clrDropdownItem *ngIf="issue.open; else reopenDropItem">Close Issue</div>
+              <ng-template #reopenDropItem>
+                <div aria-label="Dropdown Reopen" clrDropdownItem>Reopen Issue</div>
+              </ng-template>
+              <div aria-label="Dropdown Delete" (click)="onIssueDeleteClick()" clrDropdownItem>Delete</div>
+              <div aria-label="Dropdown header Disabled Action" [clrDisabled]="true" clrDropdownItem>
+                Disabled Action
+              </div>
+              <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+              <clr-dropdown>
+                <button clrDropdownTrigger>Link 1</button>
+                <clr-dropdown-menu>
+                  <button clrDropdownItem>Foo</button>
+                  <clr-dropdown>
+                    <button clrDropdownTrigger>Bar</button>
+                    <clr-dropdown-menu clrPosition="left-top">
+                      <button clrDropdownItem>Baz</button>
+                    </clr-dropdown-menu>
+                  </clr-dropdown>
+                </clr-dropdown-menu>
+              </clr-dropdown>
+              <clr-dropdown>
+                <button clrDropdownTrigger>Change Stage</button>
+                <clr-dropdown-menu>
+                  <button clrDropdownItem>Foo1</button>
+                  <button clrDropdownItem>Foo2</button>
+                  <button clrDropdownItem>Foo3</button>
+                </clr-dropdown-menu>
+              </clr-dropdown>
+              <clr-dropdown>
+                <button clrDropdownTrigger>Change Types</button>
+                <clr-dropdown-menu>
+                  <button clrDropdownItem>Foo1</button>
+                  <button clrDropdownItem>Foo2</button>
+                  <button clrDropdownItem>Foo3</button>
+                </clr-dropdown-menu>
+              </clr-dropdown>
+              <div clrDropdownItem>Link 2</div>
+            </clr-dropdown-menu>
+          </clr-dropdown>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<clr-modal [(clrModalOpen)]="showDeleteIssueDialog" [clrModalStaticBackdrop]="false">
-  <h3 class="modal-title">Are you sure you want to delete this issue?</h3>
-  <div class="modal-body">
-    <p>Confirm your action</p>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline" (click)="showDeleteIssueDialog = false">Cancel</button>
-    <button type="button" class="btn btn-danger" (click)="deleteIssue()">Delete Issue</button>
-  </div>
-</clr-modal>
+  <clr-modal [(clrModalOpen)]="showDeleteIssueDialog" [clrModalStaticBackdrop]="false">
+    <h3 class="modal-title">Are you sure you want to delete this issue?</h3>
+    <div class="modal-body">
+      <p>Confirm your action</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showDeleteIssueDialog = false">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="deleteIssue()">Delete Issue</button>
+    </div>
+  </clr-modal>
 
-<app-issue-post-form (issuePostSubmit)="onIssueReplySubmit($event)" *ngIf="replyToIssue"></app-issue-post-form>
+  <clr-modal [(clrModalOpen)]="showDeleteIssuePostDialog" [clrModalStaticBackdrop]="false">
+    <h3 class="modal-title">Are you sure you want to delete this post?</h3>
+    <div class="modal-body">
+      <p>Confirm your action</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" (click)="showDeleteIssuePostDialog = false">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="deleteIssuePost()">Delete Issue Post</button>
+    </div>
+  </clr-modal>
+
+  <!--div class="clr-row">
+  <div class="clr-col-lg-4 clr-col-12">
+    <div class="card">
+      <div class="card-block" *ngFor="let issuePost of issuePostList">
+        <div class="card-title">
+          <p class="p3 card-text">
+            <a
+              href="/user/{{ issuePost.author.userName }}"
+              [routerLink]="['/user', issuePost.author.userName]"
+              routerLinkActive="router-link-active"
+              >{{ issuePost?.author?.userName }}</a
+            >, at {{ issuePost?.createdAt | date: 'short' }}
+          </p>
+        </div>
+        <div class="card-text">
+          <p>{{ issuePost?.content }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div-->
+
+  <app-issue-post
+    *ngFor="let issuePost of issuePostList"
+    [issuePost]="issuePost"
+    (issuePostDelete)="onIssuePostDelete($event)"
+  ></app-issue-post>
+
+  <app-issue-post-form (issuePostSubmit)="onIssueReplySubmit($event)"></app-issue-post-form
+></app-view-with-loading-state>

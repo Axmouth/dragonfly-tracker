@@ -1,0 +1,15 @@
+<ng-template #template>
+  <button type="submit" class="btn btn-primary" [disabled]="true" *ngIf="loading; else notLoading">
+    <clr-spinner clrInline>
+      {{ loadingText }}
+    </clr-spinner>
+    <span>
+      {{ loadingText }}
+    </span>
+  </button>
+  <ng-template #notLoading
+    ><button type="submit" class="btn btn-primary" (click)="onClick()">
+      <span><ng-content></ng-content></span>
+    </button>
+  </ng-template>
+</ng-template>

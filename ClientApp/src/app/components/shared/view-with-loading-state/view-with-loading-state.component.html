@@ -1,0 +1,14 @@
+<div *ngIf="found; else notFound">
+  <div *ngIf="loading; else loaded">
+    <clr-spinner>{{ loadingText }}</clr-spinner>
+    <br />
+    <h3>{{ loadingText }}</h3>
+  </div>
+</div>
+<ng-template #loaded>
+  <ng-content></ng-content>
+</ng-template>
+
+<ng-template #notFound>
+  <app-not-found-page></app-not-found-page>
+</ng-template>

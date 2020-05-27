@@ -121,7 +121,7 @@ export class IssuesService {
   ): Observable<Response<IssuePost>> {
     const headers = new HttpHeaders();
     headers.append('Content-Type', 'application/json');
-    const url = `${apiRoot}/users/${username}/${projectName}/issues/${issueNumber}/issue-posts`;
+    const url = `${apiRoot}/users/${username}/projects/${projectName}/issues/${issueNumber}/issue-posts`;
     const result$ = this.http.post<Response<IssuePost>>(url, newIssuePost, { headers, withCredentials: true });
     return this.prepareTokensService.applyTokenChain$(result$);
   }

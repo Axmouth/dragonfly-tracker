@@ -1,1 +1,47 @@
-<p>issue-post works!</p>
+<div class="clr-row">
+  <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
+    <div class="card">
+      <div class="card-header">
+        <p class="p3 card-text">
+          <a
+            href="/user/{{ issuePost.author.userName }}"
+            [routerLink]="['/user', issuePost.author.userName]"
+            routerLinkActive="router-link-active"
+            >{{ issuePost?.author?.userName }}</a
+          >, at {{ issuePost?.createdAt | date: 'short' }}
+        </p>
+      </div>
+      <div class="card-block">
+        <div class="card-text">
+          <p>{{ issuePost?.content }}</p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn btn-sm btn-link">
+          Action 2
+        </button>
+        <clr-dropdown>
+          <button class="btn-icon" clrDropdownTrigger>
+            <clr-icon shape="ellipsis-vertical"></clr-icon>
+          </button>
+          <clr-dropdown-menu clrPosition="top-left" *clrIfOpen>
+            <label class="dropdown-header" aria-hidden="true">Actions</label>
+            <div aria-label="Dropdown Reply" clrDropdownItem>Reply</div>
+            <div aria-label="Dropdown Edit" clrDropdownItem>Edit</div>
+            <div aria-label="Dropdown Delete" (click)="onIssuePostDeleteClick()" clrDropdownItem>Delete</div>
+            <div clrDropdownItem>Link 2</div>
+          </clr-dropdown-menu>
+        </clr-dropdown>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--button class="btn btn-icon btn-primary" [disabled]="true">
+  <clr-spinner clrInline>
+    Downloading
+  </clr-spinner>
+  <span>
+    Downloading
+  </span>
+</button-->

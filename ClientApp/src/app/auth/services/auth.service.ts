@@ -252,12 +252,13 @@ export class AuthService {
                 if (res.getResponse().status !== 400 && res.getResponse().status !== '400') {
                   return this.isAuthenticated();
                 }
+                /*
                 return this.logout().pipe(
                   map((result) => {
                     return !result.isSuccess();
                   }),
-                );
-                // return of(false);
+                );*/
+                return of(false);
               }
             }),
           );

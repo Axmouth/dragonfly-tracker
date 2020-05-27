@@ -110,46 +110,71 @@
         {
             public const string GetAllByOrg = Projects.GetByOrg + "/issue-stages";
 
-            public const string UpdateByOrg = Projects.GetByOrg + "/issue-stages/{Id}";
+            public const string UpdateByOrg = Projects.GetByOrg + "/issue-stages/{issueStageName}";
 
-            public const string GetByOrg = Projects.GetByOrg + "/issue-stages/{Id}";
+            public const string GetByOrg = Projects.GetByOrg + "/issue-stages/{issueStageName}";
 
             public const string CreateByOrg = Projects.GetByOrg + "/issue-stages";
 
-            public const string DeleteByOrg = Projects.GetByOrg + "/issue-stages/{Id}";
+            public const string DeleteByOrg = Projects.GetByOrg + "/issue-stages/{issueStageName}";
 
             public const string GetAllByUser = Projects.GetByUser + "/issue-stages";
 
-            public const string UpdateByUser = Projects.GetByUser + "/issue-stages/{Id}";
+            public const string UpdateByUser = Projects.GetByUser + "/issue-stages/{issueStageName}";
 
-            public const string GetByUser = Projects.GetByUser + "/issue-stages/{Id}";
+            public const string GetByUser = Projects.GetByUser + "/issue-stages/{issueStageName}";
 
             public const string CreateByUser = Projects.GetByUser + "/issue-stages";
 
-            public const string DeleteByUser = Projects.GetByUser + "/issue-stages/{Id}";
+            public const string DeleteByUser = Projects.GetByUser + "/issue-stages/{issueStageName}";
+
+
+            public const string CreateByOrgProjectIssue = Issues.GetByOrgProject + "/issue-stage";
+
+            public const string CreateByUserProjectIssue = Issues.GetByUserProject + "/issue-stage";
         }
 
         public static class IssueTypes
         {
             public const string GetAllByOrg = Projects.GetByOrg + "/issue-types";
 
-            public const string UpdateByOrg = Projects.GetByOrg + "/issue-types/{Id}";
+            public const string UpdateByOrg = Projects.GetByOrg + "/issue-types/{issueTypeName}";
 
-            public const string GetByOrg = Projects.GetByOrg + "/issue-types/{Id}";
+            public const string GetByOrg = Projects.GetByOrg + "/issue-types/{issueTypeName}";
 
             public const string CreateByOrg = Projects.GetByOrg + "/issue-types";
 
-            public const string DeleteByOrg = Projects.GetByOrg + "/issue-types/{Id}";
+            public const string DeleteByOrg = Projects.GetByOrg + "/issue-types/{issueTypeName}";
 
             public const string GetAllByUser = Projects.GetByUser + "/issue-types";
 
-            public const string UpdateByUser = Projects.GetByUser + "/issue-types/{Id}";
+            public const string UpdateByUser = Projects.GetByUser + "/issue-types/{issueTypeName}";
 
-            public const string GetByUser = Projects.GetByUser + "/issue-types/{Id}";
+            public const string GetByUser = Projects.GetByUser + "/issue-types/{issueTypeName}";
 
             public const string CreateByUser = Projects.GetByUser + "/issue-types";
 
-            public const string DeleteByUser = Projects.GetByUser + "/issue-types/{Id}";
+            public const string DeleteByUser = Projects.GetByUser + "/issue-types/{issueTypeName}";
+
+            public const string GetAllByOrgProjectIssue = Issues.GetByOrgProject + "/issue-types";
+
+            public const string UpdateByOrgProjectIssue = Issues.GetByOrgProject + "/issue-types/{issueTypeName}";
+
+            public const string GetByOrgProjectIssue = Issues.GetByOrgProject + "/issue-types/{issueTypeName}";
+
+            public const string CreateByOrgProjectIssue = Issues.GetByOrgProject + "/issue-types";
+
+            public const string DeleteByOrgProjectIssue = Issues.GetByOrgProject + "/issue-types/{issueTypeName}";
+
+            public const string GetAllByUserProjectIssue = Issues.GetByUserProject + "/issue-types";
+
+            public const string UpdateByUserProjectIssue = Issues.GetByUserProject + "/issue-types/{issueTypeName}";
+
+            public const string GetByUserProjectIssue = Issues.GetByUserProject + "/issue-types/{issueTypeName}";
+
+            public const string CreateByUserProjectIssue = Issues.GetByUserProject + "/issue-types";
+
+            public const string DeleteByUserProjectIssue = Issues.GetByUserProject + "/issue-types/{issueTypeName}";
         }
 
         public static class IssuePosts

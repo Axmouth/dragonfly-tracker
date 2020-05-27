@@ -33,7 +33,13 @@
       <div class="error active" *ngFor="let error of errors">
         {{ error }}
       </div>
-      <button type="submit" class="btn btn-primary" (click)="onLoginClick()">NEXT</button>
+      <app-button-with-loading-state
+        [loading]="loginInProgress"
+        [loadingText]="'Authenticating'"
+        (click)="onLoginClick()"
+      >
+        Next
+      </app-button-with-loading-state>
       <a href="/register" [routerLink]="['/register']" routerLinkActive="router-link-active" class="signup"
         >New here? Sign up for a Dragonfly Account</a
       >

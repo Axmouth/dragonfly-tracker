@@ -24,6 +24,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   };
   errors: String[] = [];
   loginFailed = false;
+  loginInProgress = false;
 
   constructor(
     private authService: AuthService,
@@ -37,6 +38,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   ngOnInit() {}
 
   async onLoginClick() {
+    this.loginInProgress = true;
     const result$ = this.authService.authenticate(this.form).pipe(
       map(
         async (result: AuthResult) => {
@@ -46,10 +48,12 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             await this.router.navigateByUrl(this.routeStateService.getPreviousUrl());
           } else {
             this.loginFailed = true;
-            this.errors = result.getResponse().errors;
+            this.errors = result.getResponse().error.errors;
           }
+          this.loginInProgress = false;
         },
         (err) => {
+          this.loginInProgress = false;
           console.log(err);
         },
       ),

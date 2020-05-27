@@ -1,42 +1,40 @@
 <br />
-<span class="spinner spinner-inline1" *ngIf="loading; else loaded">
+<span class="spinner spinner-inline1" *ngIf="false">
   Loading...
 </span>
-<ng-template #loaded>
-  <div class="alert alert-danger" *ngFor="let error of errors">
-    <div class="alert-items">
-      <div class="alert-item static" role="alert">
-        <div class="alert-icon-wrapper">
-          <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
-        </div>
-        <span class="alert-text">
-          {{ error }}
-        </span>
+<div class="alert alert-danger" *ngFor="let error of errors">
+  <div class="alert-items">
+    <div class="alert-item static" role="alert">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="exclamation-circle"></clr-icon>
       </div>
+      <span class="alert-text">
+        {{ error }}
+      </span>
     </div>
   </div>
-  <div class="alert alert-success" *ngFor="let infoMessage of info">
-    <div class="alert-items">
-      <div class="alert-item static" role="alert">
-        <div class="alert-icon-wrapper">
-          <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
-        </div>
-        <span class="alert-text">
-          {{ infoMessage }}
-        </span>
+</div>
+<div class="alert alert-success" *ngFor="let infoMessage of info">
+  <div class="alert-items">
+    <div class="alert-item static" role="alert">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
       </div>
+      <span class="alert-text">
+        {{ infoMessage }}
+      </span>
     </div>
   </div>
-  <div class="alert alert-success" *ngFor="let successMessage of success">
-    <div class="alert-items">
-      <div class="alert-item static" role="alert">
-        <div class="alert-icon-wrapper">
-          <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
-        </div>
-        <span class="alert-text">
-          {{ successMessage }}
-        </span>
+</div>
+<div class="alert alert-success" *ngFor="let successMessage of success">
+  <div class="alert-items">
+    <div class="alert-item static" role="alert">
+      <div class="alert-icon-wrapper">
+        <clr-icon class="alert-icon" shape="check-circle"></clr-icon>
       </div>
+      <span class="alert-text">
+        {{ successMessage }}
+      </span>
     </div>
   </div>
-</ng-template>
+</div>
