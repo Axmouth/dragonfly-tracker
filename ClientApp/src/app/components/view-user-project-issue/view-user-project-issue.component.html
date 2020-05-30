@@ -6,9 +6,10 @@
     >{{ issue?.parentProject?.name }} <clr-icon shape="undo"></clr-icon
   ></a>
 
-  <h2>{{ issue?.title }} [#{{ issue.number }}]</h2>
   <div class="clr-row">
+    <div class="clr-col-lg-1 clr-col-md-2 clr-col-0"></div>
     <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
+      <h2>{{ issue?.title }} [#{{ issue.number }}]</h2>
       <div class="card">
         <div class="card-header">
           <p class="p3 card-text">
@@ -132,12 +133,16 @@
     </div>
   </div>
 </div-->
+  <div class="clr-row">
+    <div class="clr-col-lg-1 clr-col-md-2 clr-col-0"></div>
+    <div class="clr-col-lg-4 clr-col-md-7 clr-col-12">
+      <app-issue-post
+        *ngFor="let issuePost of issuePostList"
+        [issuePost]="issuePost"
+        (issuePostDelete)="onIssuePostDelete($event)"
+      ></app-issue-post>
 
-  <app-issue-post
-    *ngFor="let issuePost of issuePostList"
-    [issuePost]="issuePost"
-    (issuePostDelete)="onIssuePostDelete($event)"
-  ></app-issue-post>
-
-  <app-issue-post-form (issuePostSubmit)="onIssueReplySubmit($event)"></app-issue-post-form
-></app-view-with-loading-state>
+      <app-issue-post-form (issuePostSubmit)="onIssueReplySubmit($event)"></app-issue-post-form>
+    </div>
+  </div>
+</app-view-with-loading-state>

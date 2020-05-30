@@ -36,6 +36,8 @@ namespace DragonflyTracker.Installers
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<IIssueService, IssueService>();
             services.AddScoped<IIssuePostService, IssuePostService>();
+            services.AddScoped<IIssueStageService, IssueStageService>();
+            services.AddScoped<IIssueTypeService, IssueTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationService, OrganizationService>();

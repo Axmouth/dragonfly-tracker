@@ -44,6 +44,13 @@ namespace DragonflyTracker.Controllers.V1
         public async Task<IActionResult> GetAllIssuePostsByUserProject([FromRoute] string username, [FromRoute] string projectName, [FromRoute] int issueNumber, [FromQuery] GetAllIssuePostsQuery query, [FromQuery] PaginationQuery paginationQuery)
         {
 
+            var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
 
             if (issue == null)
@@ -74,6 +81,13 @@ namespace DragonflyTracker.Controllers.V1
         // [Cached(600)]
         public async Task<IActionResult> GetAllIssuePostsByOrgProject([FromRoute]string organizationName, [FromRoute]string projectName, [FromRoute]int issueNumber, [FromQuery] GetAllIssuePostsQuery query, [FromQuery]PaginationQuery paginationQuery)
         {
+
+            var project = await _projectService.GetProjectByOrgAsync(organizationName, projectName).ConfigureAwait(false);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
 
             var issue = await _issueService.GetIssueByOrgAsync(organizationName, projectName, issueNumber).ConfigureAwait(false);
 

@@ -24,7 +24,8 @@ namespace DragonflyTracker.Installers
                     Description = "JWT Authorization header using the bearer scheme",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey
+                    Type = SecuritySchemeType.ApiKey,
+                    BearerFormat = "Bearer",
                 });
                 x.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
