@@ -16,6 +16,7 @@ namespace DragonflyTracker.Contracts.V1.Responses
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool Private { get; set; }
         public List<IssueTypeResponse> Types { get; set; }
         public List<IssueStageResponse> Stages { get; set; }
         public List<ProjectAdminResponse> Admins { get; set; }

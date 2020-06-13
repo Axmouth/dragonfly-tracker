@@ -458,6 +458,11 @@ namespace DragonflyTracker.Services
         }
 
         private IQueryable<Project> AddPrivateCheck(IQueryable<Project> queryable) {
+
+            if (!_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated) {
+                return queryable.Where(p => p.Private == false);
+            }
+            
             var userId = _httpContextAccessor.HttpContext.GetUserId();
 
             queryable = queryable.Where(p => p.Private == false ||

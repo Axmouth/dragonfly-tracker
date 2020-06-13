@@ -13,7 +13,7 @@ namespace DragonflyTracker.Contracts.V1.Requests
 
         public string Description { get; set; }
 
-        public bool Public { get; set; }
+        public bool Private { get; set; }
 
         public virtual List<IssueType> Types { get; set; }
 

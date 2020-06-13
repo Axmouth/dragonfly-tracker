@@ -158,7 +158,7 @@ namespace DragonflyTracker.Controllers.V1
                 OwnerId = user.Id,
                 CreatedAt = DateTime.UtcNow,
                 ParentOrganization = null,
-                Private = projectRequest.Public,
+                Private = projectRequest.Private,
             };
 
             await _projectService.CreateProjectAsync(project, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
@@ -218,6 +218,8 @@ namespace DragonflyTracker.Controllers.V1
 
             var updatedProject = await _projectService.GetProjectByIdAsync(project.Id).ConfigureAwait(false);
             updatedProject.Name = projectRequest.Name;
+            updatedProject.Description = projectRequest.Description;
+            updatedProject.Private = projectRequest.Private;
 
             var updated = await _projectService.UpdateProjectAsync(updatedProject, projectRequest.Types, projectRequest.Stages, projectRequest.Admins, projectRequest.Maintainers).ConfigureAwait(false);
 
