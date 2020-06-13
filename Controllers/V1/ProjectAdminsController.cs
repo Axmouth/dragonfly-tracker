@@ -8,6 +8,7 @@ using DragonflyTracker.Contracts.V1.Requests;
 using DragonflyTracker.Contracts.V1.Requests.Queries;
 using DragonflyTracker.Contracts.V1.Responses;
 using DragonflyTracker.Domain;
+using DragonflyTracker.Extensions;
 using DragonflyTracker.Helpers;
 using DragonflyTracker.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -96,7 +97,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         [HttpPost(ApiRoutes.Users.Projects.ProjectAdmins.Create)]
-        public async Task<IActionResult> CreateIssueTypeByUserProjectIssue([FromRoute] string username, [FromRoute] string projectName, [FromBody] CreateProjectAdminRequest projectAdminRequest)
+        public async Task<IActionResult> CreateProjectAdminByUserProjectIssue([FromRoute] string username, [FromRoute] string projectName, [FromBody] CreateProjectAdminRequest projectAdminRequest)
         {
             if (projectAdminRequest == null)
             {
@@ -109,6 +110,11 @@ namespace DragonflyTracker.Controllers.V1
             {
                 return new NotFoundResult();
             }
+
+            if (HttpContext.GetUserId() != project.OwnerId) {
+                return Unauthorized();
+            }
+
             var user = await _userService.GetUserByUserNameAsync(username).ConfigureAwait(false);
 
             if (user == null)
@@ -146,7 +152,7 @@ namespace DragonflyTracker.Controllers.V1
         }
 
         [HttpDelete(ApiRoutes.Users.Projects.ProjectAdmins.Delete)]
-        public async Task<IActionResult> DeleteIssueTypeByUserProjectIssue([FromRoute] string username, [FromRoute] string projectName, [FromRoute] string adminUserName)
+        public async Task<IActionResult> DeleteProjectAdminByUserProjectIssue([FromRoute] string username, [FromRoute] string projectName, [FromRoute] string adminUserName)
         {
             var project = await _projectService.GetProjectByUserAsync(username, projectName).ConfigureAwait(false);
 
@@ -154,6 +160,12 @@ namespace DragonflyTracker.Controllers.V1
             {
                 return new NotFoundResult();
             }
+
+            if (HttpContext.GetUserId() != project.OwnerId)
+            {
+                return Unauthorized();
+            }
+
             var user = await _userService.GetUserByUserNameAsync(username).ConfigureAwait(false);
 
             if (user == null)
