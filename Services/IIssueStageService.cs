@@ -13,5 +13,6 @@ namespace DragonflyTracker.Services
         Task<bool> DeleteIssueStageAsync(Guid issueStageId);
         Task<IssueStage> GetIssueStageByIssueAsync(Guid issueId);
         Task<(List<IssueStage> list, int count)> GetIssueStagesByProjectAsync(Guid projectId, PaginationFilter paginationFilter = null);
+        Task<IssueStage> GetIssueStageByProjectAsync(Guid projectId, string name);
     }
 }

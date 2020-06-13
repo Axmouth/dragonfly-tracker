@@ -42,6 +42,9 @@ namespace DragonflyTracker.Installers
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IProjectAdminService, ProjectAdminService>();
+            services.AddScoped<IProjectMaintainerService, ProjectMaintainerService>();
+            services.AddScoped<IProjectOwnerService, ProjectOwnerService>();
 
             services.AddScoped<IProjectRepository, ProjectPgRepository>();
             services.AddScoped<IIssueRepository, IssuePgRepository>();

@@ -34,6 +34,19 @@ namespace DragonflyTracker.Services
             return created > 0;
         }
 
+        public async Task<bool> CreateIssueIssueTypeAsync(IssueIssueType issueIssueType)
+        {
+            if (issueIssueType == null)
+            {
+                return false;
+            }
+
+            await _issueIssueTypeRepository.CreateAsync(issueIssueType).ConfigureAwait(false);
+
+            var created = await _issueIssueTypeRepository.SaveAsync().ConfigureAwait(false);
+            return created > 0;
+        }
+
         public async Task<bool> UpdateIssueTypeAsync(IssueType issueTypeToUpdate)
         {
             _issueTypeRepository.Update(issueTypeToUpdate);
@@ -49,7 +62,15 @@ namespace DragonflyTracker.Services
             return deleted > 0;
         }
 
-        public async Task<(List<IssueType> list, int count)> GetIssueTypesByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null)
+        public async Task<bool> DeleteIssueIssueTypeAsync(Guid issueId, Guid issueTypeId )
+        {
+            var issueIssueType = new IssueIssueType { IssueTypeId = issueTypeId, IssueId = issueId };
+            _issueIssueTypeRepository.Delete(issueIssueType);
+            var deleted = await _issueIssueTypeRepository.SaveAsync().ConfigureAwait(false);
+            return deleted > 0;
+        }
+
+        public async Task<(List<IssueType> list, int count)> GetAllIssueTypesByIssueAsync(Guid issueId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueIssueTypeRepository
                 .FindByCondition(x => x.IssueId == issueId)
@@ -77,7 +98,7 @@ namespace DragonflyTracker.Services
             return (list: issueTypes, count);
         }
 
-        public async Task<(List<IssueType> list, int count)> GetIssueTypesByProjectAsync(Guid projectId, PaginationFilter paginationFilter = null)
+        public async Task<(List<IssueType> list, int count)> GetAllIssueTypesByProjectAsync(Guid projectId, PaginationFilter paginationFilter = null)
         {
             var queryable = _issueTypeRepository
                 .FindByCondition(x => x.ProjectId == projectId);
@@ -100,6 +121,15 @@ namespace DragonflyTracker.Services
                         .ConfigureAwait(false);
             }
             return (list: issueTypes, count);
+        }
+
+        public async Task<IssueType> GetIssueTypeByProjectAsync(Guid projectId, string name)
+        {
+            var queryable = _issueTypeRepository
+                .FindByCondition(x => x.ProjectId == projectId && x.Name == name);
+            IssueType issueType;
+            issueType = await queryable.SingleOrDefaultAsync().ConfigureAwait(false);
+            return issueType;
         }
     }
 }

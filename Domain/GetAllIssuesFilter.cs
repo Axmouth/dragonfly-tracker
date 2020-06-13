@@ -13,27 +13,19 @@ namespace DragonflyTracker.Domain
     {
         [Ignore]
         public Guid? AuthorId { get; set; }
-
         [Ignore]
         public string AuthorUsername { get; set; }
-
         [Ignore]
         public string AuthorEmail { get; set; }
-
         [Ignore]
         public Guid? ProjectId { get; set; }
-
         [Ignore]
         public string ProjectName { get; set; }
-
         [Ignore]
         public Guid? OrganizationId { get; set; }
-
         [Ignore]
         public string OrganizationName { get; set; }
-
         public string SearchText { get; set; }
-
         public bool? Open { get; set; }
     }
 }

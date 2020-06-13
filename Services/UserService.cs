@@ -29,6 +29,7 @@ namespace DragonflyTracker.Services
         {
             return await _userManager.FindByNameAsync(username).ConfigureAwait(false);
         }
+
         public async Task<DragonflyUser> GetUserByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email).ConfigureAwait(false);

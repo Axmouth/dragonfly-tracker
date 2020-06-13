@@ -33,7 +33,7 @@ namespace DragonflyTracker.Controllers.V1
         private readonly IProjectService _projectService;
         private readonly IUserService _userService;
 
-        public IssuesController(PgMainDataContext pgMainDataContext, IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService, IUserService userService)
+        public IssuesController(IIssueService issueService, IProjectService projectService, IMapper mapper, IUriService uriService, IUserService userService)
         {
             //_pgMainDataContext = pgMainDataContext;
             _mapper = mapper;
@@ -202,7 +202,7 @@ namespace DragonflyTracker.Controllers.V1
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
         [HttpPut(ApiRoutes.Issues.UpdateByUserProject)]
-        public async Task<IActionResult> PostIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
+        public async Task<IActionResult> UpdateByUserProject([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber, UpdateIssueRequest issueRequest)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
             if (issue == null)
@@ -233,7 +233,7 @@ namespace DragonflyTracker.Controllers.V1
 
         // DELETE: api/Issues/5
         [HttpDelete(ApiRoutes.Issues.DeleteByUserProject)]
-        public async Task<IActionResult> DeleteIssue([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
+        public async Task<IActionResult> DeleteIssueByUserProject([FromRoute]string username, [FromRoute]string projectName, [FromRoute]int issueNumber)
         {
             var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
             if (issue == null)

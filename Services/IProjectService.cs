@@ -18,5 +18,13 @@ namespace DragonflyTracker.Services
         public Task<bool> UserOwnsProjectAsync(Guid projectId, Guid userId);
         public Task<(List<Project> list, int count)> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null);
         public Task<(List<Project> list, int count)> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null);
+        public Task<bool> UserCanAdminProject(Project project, Guid userId);
+        public Task<bool> UserCanAdminProject(Project project);
+        public Task<bool> UserCanAdminProject(Guid projectId);
+        public Task<bool> UserCanAdminProject(Guid projectId, Guid userId);
+        public Task<bool> UserCanMaintainProject(Project project, Guid userId);
+        public Task<bool> UserCanMaintainProject(Project project);
+        public Task<bool> UserCanMaintainProject(Guid projectId);
+        public Task<bool> UserCanMaintainProject(Guid projectId, Guid userId);
     }
 }

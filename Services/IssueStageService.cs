@@ -80,5 +80,12 @@ namespace DragonflyTracker.Services
             }
             return (list: issueStages, count);
         }
+
+        public async Task<IssueStage> GetIssueStageByProjectAsync(Guid projectId, string name)
+        {
+            var queryable = _issueStageRepository
+                .FindByCondition(x => x.ProjectId == projectId && x.Name == name);
+            return await queryable.SingleOrDefaultAsync().ConfigureAwait(false);
+        }
     }
 }

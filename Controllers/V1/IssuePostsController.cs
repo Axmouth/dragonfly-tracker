@@ -199,5 +199,33 @@ namespace DragonflyTracker.Controllers.V1
             }
             return NotFound();
         }
+
+        // DELETE: api/IssuePosts/5
+        [HttpDelete(ApiRoutes.Users.Projects.Issues.IssuePosts.Delete)]
+        public async Task<IActionResult> DeleteIssuePostByUserProject([FromRoute] string username, [FromRoute] string projectName, [FromRoute] int issueNumber, [FromRoute] int issuePostNumber)
+        {
+            var issue = await _issueService.GetIssueByUserAsync(username, projectName, issueNumber).ConfigureAwait(false);
+            if (issue == null)
+            {
+                return NotFound();
+            }
+
+            var issuePost = await _issuePostService.GetIssuePostByIssueIdAsync(issue.Id, issuePostNumber).ConfigureAwait(false);
+            if (issuePost == null)
+            {
+                return NotFound();
+            }
+
+            var userId = HttpContext.GetUserId();
+
+            if (userId != issuePost.AuthorId)
+            {
+                return Unauthorized();
+            }
+
+            await _issuePostService.DeleteIssuePostAsync(issuePost.Id).ConfigureAwait(false);
+
+            return NoContent();
+        }
     }
 }

@@ -9,7 +9,18 @@
   <div class="clr-row">
     <div class="clr-col-lg-1 clr-col-md-2 clr-col-0"></div>
     <div class="clr-col-lg-5 clr-col-md-8 clr-col-12">
-      <h2>{{ issue?.title }} [#{{ issue.number }}]</h2>
+      <h2>
+        {{ issue?.title }}
+        <a
+          href="/user/{{ issue?.parentProject?.owner?.userName }}/{{ issue?.parentProject?.name }}/issues/{{
+            issue?.number
+          }}"
+          routerLink="/user/{{ issue?.parentProject?.owner?.userName }}/{{ issue?.parentProject?.name }}/issues/{{
+            issue?.number
+          }}"
+          >[#{{ issue.number }}]</a
+        >
+      </h2>
       <div class="card">
         <div class="card-header">
           <p class="p3 card-text">

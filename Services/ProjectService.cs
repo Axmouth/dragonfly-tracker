@@ -5,6 +5,8 @@ using DragonflyTracker.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,51 +41,35 @@ namespace DragonflyTracker.Services
 
         public async Task<Project> GetProjectByIdAsync(Guid Id)
         {
-            return await _projectRepository
-                .FindByCondition(x => x.Id == Id)
-                .Include(p => p.ParentOrganization)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer)
+            var queryable = _projectRepository
+                    .FindByCondition(x => x.Id == Id);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
+            return await queryable
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByUserAsync(string username, string projectName)
         {
-            return await _projectRepository
-                .FindByCondition(x => x.Name == projectName && x.Creator.UserName == username)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer)
+            var queryable = _projectRepository
+                    .FindByCondition(x => x.Name == projectName && x.Creator.UserName == username);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
+            return await queryable
                 .SingleOrDefaultAsync()
                 .ConfigureAwait(false);
         }
 
         public async Task<Project> GetProjectByOrgAsync(string organizationName, string projectName)
         {
-            return await _projectRepository
-                .FindByCondition(x => x.Name == projectName && x.ParentOrganization.Name == organizationName)
-                .Include(p => p.ParentOrganization)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer)
-                .SingleOrDefaultAsync().ConfigureAwait(false);
+            var queryable = _projectRepository
+                .FindByCondition(x => x.Name == projectName && x.ParentOrganization.Name == organizationName);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
+            return await queryable
+                .SingleOrDefaultAsync()
+                .ConfigureAwait(false);
         }
 
         public async Task<(List<Project> list, int count)> GetProjectsAsync(GetAllProjectsFilter filter, PaginationFilter paginationFilter = null)
@@ -98,16 +84,8 @@ namespace DragonflyTracker.Services
                     .FindAllWithTextSearch(filter.SearchText);
             }
 
-            queryable = queryable
-                .Include(x => x.ParentOrganization)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
 
             if (!string.IsNullOrEmpty(filter?.CreatorUsername))
             {
@@ -228,7 +206,7 @@ namespace DragonflyTracker.Services
                 return false;
             }
 
-            if (project.CreatorId != userId)
+            if (project.OwnerId != userId)
             {
                 return false;
             }
@@ -239,15 +217,9 @@ namespace DragonflyTracker.Services
         public async Task<(List<Project> list, int count)> GetProjectsByOrganizationNameAsync(string organizationName, PaginationFilter paginationFilter = null)
         {
             var queryable = _projectRepository
-                .FindByCondition(x => x.ParentOrganization.Name == organizationName)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer);
+                .FindByCondition(x => x.ParentOrganization.Name == organizationName);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -272,16 +244,9 @@ namespace DragonflyTracker.Services
         public async Task<(List<Project> list, int count)> GetProjectsByOrganizationIdAsync(Guid organizationId, PaginationFilter paginationFilter = null)
         {
             var queryable = _projectRepository
-                .FindByCondition(x => x.OrganizationId == organizationId)
-                .Include(p => p.ParentOrganization)
-                .Include(p => p.Creator)
-                .Include(p => p.Owner)
-                .Include(p => p.Stages)
-                .Include(p => p.Types)
-                .Include(p => p.Admins)
-                .ThenInclude(a => a.Admin)
-                .Include(p => p.Maintainers)
-                .ThenInclude(m => m.Maintainer);
+                .FindByCondition(x => x.OrganizationId == organizationId);
+            queryable = AddPrivateCheck(queryable);
+            queryable = AddIncludes(queryable);
             List<Project> projects;
             var count = await queryable.CountAsync().ConfigureAwait(false);
 
@@ -419,6 +384,101 @@ namespace DragonflyTracker.Services
                 { MaintainerId = _maintainer.Id, ProjectId = project.Id }).ConfigureAwait(false);
             }
             await _projectMaintainerRepository.SaveAsync().ConfigureAwait(false);
+        }
+
+        public async Task<bool> UserCanAdminProject(Project project, Guid userId) {
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanAdminProject(Project project)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanAdminProject(Guid projectId)
+        {
+            var project = await GetProjectByIdAsync(projectId).ConfigureAwait(false);
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanAdminProject(Guid projectId, Guid userId)
+        {
+            var project = await GetProjectByIdAsync(projectId).ConfigureAwait(false);
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanMaintainProject(Project project, Guid userId)
+        {
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId) || project.Maintainers.Any(m => m.MaintainerId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanMaintainProject(Project project)
+        {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId) || project.Maintainers.Any(m => m.MaintainerId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanMaintainProject(Guid projectId)
+        {
+            var project = await GetProjectByIdAsync(projectId).ConfigureAwait(false);
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId) || project.Maintainers.Any(m => m.MaintainerId == userId);
+
+            return authorized;
+        }
+
+        public async Task<bool> UserCanMaintainProject(Guid projectId, Guid userId)
+        {
+            var project = await GetProjectByIdAsync(projectId).ConfigureAwait(false);
+
+            var authorized = project.OwnerId == userId || project.Admins.Any(a => a.AdminId == userId) || project.Maintainers.Any(m => m.MaintainerId == userId);
+
+            return authorized;
+        }
+
+        private IQueryable<Project> AddPrivateCheck(IQueryable<Project> queryable) {
+            var userId = _httpContextAccessor.HttpContext.GetUserId();
+
+            queryable = queryable.Where(p => p.Private == false ||
+            p.OwnerId == userId ||
+            p.Admins.Any(a => a.AdminId == userId) ||
+            p.Maintainers.Any(m => m.MaintainerId == userId));
+
+            return queryable;
+        }
+
+        private static IIncludableQueryable<Project, DragonflyUser> AddIncludes(IQueryable<Project> queryable) {
+            return  queryable
+                    .Include(p => p.ParentOrganization)
+                    .Include(p => p.Creator)
+                    .Include(p => p.Owner)
+                    .Include(p => p.Stages)
+                    .Include(p => p.Types)
+                    .Include(p => p.Admins)
+                    .ThenInclude(a => a.Admin)
+                    .Include(p => p.Maintainers)
+                    .ThenInclude(m => m.Maintainer);
         }
     }
 }
